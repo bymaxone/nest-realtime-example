@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 👀 Review · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-09
+> **Status**: ✅ Done · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
