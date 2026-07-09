@@ -1,0 +1,28 @@
+diff --git a/dist/server/index.cjs b/dist/server/index.cjs
+index 98d4419..89b070a 100644
+--- a/dist/server/index.cjs
++++ b/dist/server/index.cjs
+@@ -129,7 +129,8 @@ function createSseController(endpoint) {
+     __decorateParam(1, common.Res({ passthrough: true }))
+   ], DynamicSseController.prototype, "subscribe", 1);
+   DynamicSseController = __decorateClass([
+-    common.Controller()
++    common.Controller(),
++    __decorateParam(0, common.Inject(SseSubscriptionHandler))
+   ], DynamicSseController);
+   return DynamicSseController;
+ }
+diff --git a/dist/server/index.mjs b/dist/server/index.mjs
+index df783ae..4d8f376 100644
+--- a/dist/server/index.mjs
++++ b/dist/server/index.mjs
+@@ -127,7 +127,8 @@ function createSseController(endpoint) {
+     __decorateParam(1, Res({ passthrough: true }))
+   ], DynamicSseController.prototype, "subscribe", 1);
+   DynamicSseController = __decorateClass([
+-    Controller()
++    Controller(),
++    __decorateParam(0, Inject(SseSubscriptionHandler))
+   ], DynamicSseController);
+   return DynamicSseController;
+ }

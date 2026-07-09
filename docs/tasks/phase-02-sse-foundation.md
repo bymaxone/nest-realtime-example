@@ -1,6 +1,6 @@
 # Phase 02: sse-foundation
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 👀 Review · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 02)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §9.2, §10, §11, §12.1, §12.2
 
@@ -26,18 +26,18 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 
 | ID  | Task                                                                       | Status | Priority | Size | Depends on |
 | --- | -------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | 📋     | P0       | M    | Phase 01   |
-| 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | 📋     | P0       | M    | 2.1        |
-| 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | 📋     | P0       | L    | 2.2        |
-| 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | 📋     | P0       | M    | 2.3        |
-| 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | 📋     | P1       | M    | 2.3        |
-| 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 📋     | P0       | S    | 2.1-2.5    |
+| 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | ✅     | P0       | M    | Phase 01   |
+| 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | ✅     | P0       | M    | 2.1        |
+| 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | ✅     | P0       | L    | 2.2        |
+| 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | ✅     | P0       | M    | 2.3        |
+| 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | ✅     | P1       | M    | 2.3        |
+| 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 👀     | P0       | S    | 2.1-2.5    |
 
 ## Tasks
 
 ### Task 2.1: NestJS app skeleton with health and bootstrap
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 01
@@ -48,11 +48,11 @@ Replace the api stub with a real NestJS 11 application: `main.ts` (CORS from con
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-02-sse-foundation` created with `git switch -c`.
-- [ ] `nest start` boots on `PORT` with CORS allowing `WEB_ORIGIN` (credentials true).
-- [ ] `GET /health` returns `{ status: 'ok', instance, transport, version }` from config.
-- [ ] `main.ts` split into a testable `createApp()` seam; e2e boot spec covers it.
-- [ ] Coverage stays 100% on implemented files.
+- [x] Branch `feat/phase-02-sse-foundation` created with `git switch -c`.
+- [x] `nest start` boots on `PORT` with CORS allowing `WEB_ORIGIN` (credentials true).
+- [x] `GET /health` returns `{ status: 'ok', instance, transport, version }` from config.
+- [x] `main.ts` split into a testable `createApp()` seam; e2e boot spec covers it.
+- [x] Coverage stays 100% on implemented files.
 
 #### Files to create / modify
 
@@ -109,7 +109,7 @@ in docs/DEVELOPMENT_PLAN.md §1; Completion log line; Conventional commit, no at
 
 ### Task 2.2: Demo auth with HMAC cookie and the cookie authenticator
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 2.1
@@ -120,11 +120,11 @@ Seeded demo users across two tenants (acme, globex), login/logout issuing an Htt
 
 #### Acceptance criteria
 
-- [ ] `POST /auth/login { username }` sets HttpOnly `session` cookie (HMAC-SHA256 over payload with `SESSION_SECRET`, exp claim); `POST /auth/logout` clears it.
-- [ ] Seeded users: at least `ana@acme`, `bob@acme`, `gil@globex` with roles.
-- [ ] `CookieSessionAuthenticator.authenticate(ctx)` verifies signature + expiry from `ctx.cookies`, returns `{ userId, tenantId, roles }` or null; `revalidate` checks a Redis revocation set (used by phase 03 labs; implemented now, exercised later).
-- [ ] Tampered or expired cookies return null (unit-proven); values never logged.
-- [ ] 100% coverage on the auth module.
+- [x] `POST /auth/login { username }` sets HttpOnly `session` cookie (HMAC-SHA256 over payload with `SESSION_SECRET`, exp claim); `POST /auth/logout` clears it.
+- [x] Seeded users: at least `ana@acme`, `bob@acme`, `gil@globex` with roles.
+- [x] `CookieSessionAuthenticator.authenticate(ctx)` verifies signature + expiry from `ctx.cookies`, returns `{ userId, tenantId, roles }` or null; `revalidate` checks a Redis revocation set (used by phase 03 labs; implemented now, exercised later).
+- [x] Tampered or expired cookies return null (unit-proven); values never logged.
+- [x] 100% coverage on the auth module.
 
 #### Files to create / modify
 
@@ -182,7 +182,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.3: Canonical realtime wiring and boot-failure specs
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: 2.2
@@ -193,12 +193,12 @@ The centerpiece consumers will copy: `RealtimeWiringModule` with the options fac
 
 #### Acceptance criteria
 
-- [ ] `realtime/options.factory.ts` maps every §4.3 option from `APP_CONFIG`; fully typed, no casts.
-- [ ] `BymaxRealtimeModule.forRootAsync({ imports, inject: [APP_CONFIG, ...], useFactory, extraProviders: [CookieSessionAuthenticator] })` wired in `AppModule`.
-- [ ] SSE stream reachable at `/api/events` for a logged-in user (e2e with `eventsource` package: receives `connection:established` whose payload contains ONLY `{ connectionId, traits: { userId, tenantId, roles } }`, asserted no extra keys).
-- [ ] Boot-failure unit specs: missing authenticator and malformed options reject boot (`REALTIME_NO_AUTHENTICATOR`, `REALTIME_INVALID_OPTIONS` observable per library behavior).
-- [ ] A minimal sync `forRoot` unit proves the sync path compiles and boots in a testing module.
-- [ ] Matrix rows 1, 2, 4, 7, 9(placeholder resolver), 19, 21, 29, 37, 67, 68 satisfied.
+- [x] `realtime/options.factory.ts` maps every §4.3 option from `APP_CONFIG`; fully typed, no casts.
+- [x] `BymaxRealtimeModule.forRootAsync({ imports, inject: [APP_CONFIG, ...], useFactory, extraProviders: [CookieSessionAuthenticator] })` wired in `AppModule`.
+- [x] SSE stream reachable at `/api/events` for a logged-in user (e2e with `eventsource` package: receives `connection:established` whose payload contains ONLY `{ connectionId, traits: { userId, tenantId, roles } }`, asserted no extra keys).
+- [x] Boot-failure unit specs: missing authenticator and malformed options reject boot (`REALTIME_NO_AUTHENTICATOR`, `REALTIME_INVALID_OPTIONS` observable per library behavior).
+- [x] A minimal sync `forRoot` unit proves the sync path compiles and boots in a testing module.
+- [x] Matrix rows 1, 2, 4, 7, 9(placeholder resolver), 19, 21, 29, 37, 67, 68 satisfied.
 
 #### Files to create / modify
 
@@ -263,7 +263,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.4: Emit console, domain simulator and tenant isolation
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 2.3
@@ -274,10 +274,10 @@ The endpoints that make the example alive: emit console (`user`/`tenant`/`room`/
 
 #### Acceptance criteria
 
-- [ ] `POST /emit/user/:userId`, `/emit/tenant/:tenantId`, `/emit/room/:roomId`, `/emit/broadcast` with zod DTOs (`event`, `data`), delegating to `RealtimeService` (tenant guard arrives in phase 03; endpoint shape ready for it).
-- [ ] `POST /domain/orders/simulate` emits a small scripted burst (created, paid, shipped) to the caller's tenant.
-- [ ] E2E: two clients (acme, globex) connected; tenant emit reaches only acme; broadcast reaches both; user emit reaches only that user's connection.
-- [ ] Reserved event names are not used by the app (guard test compares emitted names against `RESERVED_EVENT_NAMES`).
+- [x] `POST /emit/user/:userId`, `/emit/tenant/:tenantId`, `/emit/room/:roomId`, `/emit/broadcast` with zod DTOs (`event`, `data`), delegating to `RealtimeService` (tenant guard arrives in phase 03; endpoint shape ready for it).
+- [x] `POST /domain/orders/simulate` emits a small scripted burst (created, paid, shipped) to the caller's tenant.
+- [x] E2E: two clients (acme, globex) connected; tenant emit reaches only acme; broadcast reaches both; user emit reaches only that user's connection.
+- [x] Reserved event names are not used by the app (guard test compares emitted names against `RESERVED_EVENT_NAMES`).
 
 #### Files to create / modify
 
@@ -332,7 +332,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.5: Audit feed and heartbeat raw-capture lab
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: M
 - **Depends on**: 2.3
@@ -343,10 +343,10 @@ Wire `IConnectionLifecycleHooks` into an in-memory ring-buffer audit feed (`GET 
 
 #### Acceptance criteria
 
-- [ ] `AuditService` implements the four hooks (connect, disconnect with duration, error, reauth-failed) appending typed entries (capped ring buffer, instance-tagged); wired into the options factory `hooks`.
-- [ ] `GET /audit/feed` returns entries newest-first with filtering by kind.
-- [ ] Heartbeat e2e: raw HTTP client (node:net or undici stream) captures bytes for > 2 heartbeat intervals with `REALTIME_HEARTBEAT_MS` lowered; asserts `: keepalive` lines present, no `id:` on them; an `eventsource` client in parallel receives zero events during the silent window.
-- [ ] Matrix rows 22 and 52 satisfied.
+- [x] `AuditService` implements the four hooks (connect, disconnect with duration, error, reauth-failed) appending typed entries (capped ring buffer, instance-tagged); wired into the options factory `hooks`.
+- [x] `GET /audit/feed` returns entries newest-first with filtering by kind.
+- [x] Heartbeat e2e: raw HTTP client (fetch stream) captures bytes for > 2 heartbeat intervals with `REALTIME_HEARTBEAT_MS` lowered; asserts `: keepalive` lines present, no `id:` on them; an `eventsource` client in parallel receives zero events during the silent window.
+- [x] Matrix rows 22 and 52 satisfied.
 
 #### Files to create / modify
 
@@ -398,7 +398,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 2.1-2.5
@@ -409,9 +409,9 @@ Standard phase close with one addition: record the matrix rows landed by this ph
 
 #### Acceptance criteria
 
-- [ ] Tasks 2.1-2.5 ✅, verifications re-run.
-- [ ] Dashboards synced; PR body lists matrix rows 1, 2, 4, 7, 10, 19, 21, 22, 29, 30, 37, 52, 67, 68.
-- [ ] Copilot review requested and findings addressed; merged on green; branch deleted.
+- [x] Tasks 2.1-2.5 ✅, verifications re-run (typecheck, lint, format, build, unit 100%, e2e all green).
+- [x] Dashboards synced; PR body lists matrix rows 1, 2, 4, 7, 10, 19, 21, 22, 29, 30, 37, 52, 67, 68.
+- [ ] Copilot review requested and findings addressed; merged on green; branch deleted. _(review requested; merge owned by the orchestrator)_
 
 #### Files to create / modify
 
@@ -455,3 +455,10 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 2.1 ✅ 2026-07-09 NestJS app skeleton: createApp seam, config-driven CORS, api prefix (health excluded), GET /health, e2e boot spec.
+- 2.2 ✅ 2026-07-09 Demo cookie auth: seeded users, HMAC-signed HttpOnly cookie (node:crypto, timingSafeEqual), login/logout/me, CookieSessionAuthenticator + Redis-revocation revalidate.
+- 2.3 ✅ 2026-07-09 Canonical forRootAsync wiring + options factory (sse, /api/events via global api prefix), SSE connect e2e (client-safe traits, no metadata leak), sync forRoot + negative-boot specs. Vendored library patched to inject the SSE controller handler (esbuild build shipped no decorator metadata).
+- 2.4 ✅ 2026-07-09 Emit console (user/tenant/room/broadcast, reserved-name-safe) + order/deployment domain simulators; two-tenant isolation e2e proves tenant/user/broadcast scoping with lexicographically increasing ids.
+- 2.5 ✅ 2026-07-09 Audit feed via IConnectionLifecycleHooks (capped ring, instance-tagged, service metadata, kind filter) + heartbeat honesty e2e (raw `: keepalive` comments, no id/event, zero listener fires).
+- 2.6 👀 2026-07-09 Phase close: acceptance audit (matrix rows 1,2,4,7,10,19,21,22,29,30,37,52,67,68), dashboards synced, all gates green, PR opened with Copilot review requested (merge owned by orchestrator).
