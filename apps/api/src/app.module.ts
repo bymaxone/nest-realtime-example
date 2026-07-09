@@ -12,9 +12,10 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from './config/config.module';
 import { HealthModule } from './health/health.module';
+import { RealtimeWiringModule } from './realtime/wiring.module';
 
-/** Wires configuration, the liveness endpoint and demo auth. */
+/** Wires configuration, the liveness endpoint, demo auth and realtime. */
 @Module({
-  imports: [ConfigModule, HealthModule, AuthModule],
+  imports: [ConfigModule, HealthModule, AuthModule, RealtimeWiringModule],
 })
 export class AppModule {}

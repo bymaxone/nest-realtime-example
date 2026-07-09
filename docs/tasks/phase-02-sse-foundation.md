@@ -1,6 +1,6 @@
 # Phase 02: sse-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 02)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §9.2, §10, §11, §12.1, §12.2
 
@@ -28,7 +28,7 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 | --- | -------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | ✅     | P0       | M    | Phase 01   |
 | 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | ✅     | P0       | M    | 2.1        |
-| 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | 📋     | P0       | L    | 2.2        |
+| 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | ✅     | P0       | L    | 2.2        |
 | 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | 📋     | P0       | M    | 2.3        |
 | 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | 📋     | P1       | M    | 2.3        |
 | 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 📋     | P0       | S    | 2.1-2.5    |
@@ -182,7 +182,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.3: Canonical realtime wiring and boot-failure specs
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: 2.2
@@ -193,12 +193,12 @@ The centerpiece consumers will copy: `RealtimeWiringModule` with the options fac
 
 #### Acceptance criteria
 
-- [ ] `realtime/options.factory.ts` maps every §4.3 option from `APP_CONFIG`; fully typed, no casts.
-- [ ] `BymaxRealtimeModule.forRootAsync({ imports, inject: [APP_CONFIG, ...], useFactory, extraProviders: [CookieSessionAuthenticator] })` wired in `AppModule`.
-- [ ] SSE stream reachable at `/api/events` for a logged-in user (e2e with `eventsource` package: receives `connection:established` whose payload contains ONLY `{ connectionId, traits: { userId, tenantId, roles } }`, asserted no extra keys).
-- [ ] Boot-failure unit specs: missing authenticator and malformed options reject boot (`REALTIME_NO_AUTHENTICATOR`, `REALTIME_INVALID_OPTIONS` observable per library behavior).
-- [ ] A minimal sync `forRoot` unit proves the sync path compiles and boots in a testing module.
-- [ ] Matrix rows 1, 2, 4, 7, 9(placeholder resolver), 19, 21, 29, 37, 67, 68 satisfied.
+- [x] `realtime/options.factory.ts` maps every §4.3 option from `APP_CONFIG`; fully typed, no casts.
+- [x] `BymaxRealtimeModule.forRootAsync({ imports, inject: [APP_CONFIG, ...], useFactory, extraProviders: [CookieSessionAuthenticator] })` wired in `AppModule`.
+- [x] SSE stream reachable at `/api/events` for a logged-in user (e2e with `eventsource` package: receives `connection:established` whose payload contains ONLY `{ connectionId, traits: { userId, tenantId, roles } }`, asserted no extra keys).
+- [x] Boot-failure unit specs: missing authenticator and malformed options reject boot (`REALTIME_NO_AUTHENTICATOR`, `REALTIME_INVALID_OPTIONS` observable per library behavior).
+- [x] A minimal sync `forRoot` unit proves the sync path compiles and boots in a testing module.
+- [x] Matrix rows 1, 2, 4, 7, 9(placeholder resolver), 19, 21, 29, 37, 67, 68 satisfied.
 
 #### Files to create / modify
 
@@ -458,3 +458,4 @@ Completion Protocol: standard steps + phase completion line.
 
 - 2.1 ✅ 2026-07-09 NestJS app skeleton: createApp seam, config-driven CORS, api prefix (health excluded), GET /health, e2e boot spec.
 - 2.2 ✅ 2026-07-09 Demo cookie auth: seeded users, HMAC-signed HttpOnly cookie (node:crypto, timingSafeEqual), login/logout/me, CookieSessionAuthenticator + Redis-revocation revalidate.
+- 2.3 ✅ 2026-07-09 Canonical forRootAsync wiring + options factory (sse, /api/events via global api prefix), SSE connect e2e (client-safe traits, no metadata leak), sync forRoot + negative-boot specs. Vendored library patched to inject the SSE controller handler (esbuild build shipped no decorator metadata).
