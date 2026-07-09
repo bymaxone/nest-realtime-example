@@ -23,13 +23,13 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 1.1 | Branch + docker-compose (redis:7) + api Dockerfile | 📋 | P0 | M | Phase 00 |
-| 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers | 📋 | P0 | S | 1.1 |
-| 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | 📋 | P0 | M | 1.2 |
-| 1.4 | Typed env config module + .env.example | 📋 | P0 | M | 1.1 |
-| 1.5 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 1.1-1.4 |
+| ID  | Task                                                                        | Status | Priority | Size | Depends on |
+| --- | --------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | 📋     | P0       | M    | Phase 00   |
+| 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | 📋     | P0       | S    | 1.1        |
+| 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | 📋     | P0       | M    | 1.2        |
+| 1.4 | Typed env config module + .env.example                                      | 📋     | P0       | M    | 1.1        |
+| 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 📋     | P0       | S    | 1.1-1.4    |
 
 ## Tasks
 
@@ -57,7 +57,7 @@ The local stack skeleton: `redis:7-alpine` with a healthcheck as the always-on s
 
 #### Agent prompt
 
-````
+```
 You are a senior infrastructure engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, reference app for @bymax-one/nest-realtime. pnpm workspace,
@@ -98,7 +98,7 @@ Verification:
 
 Completion Protocol: update this task's status/index/header progress, the Phase 01 row in
 docs/DEVELOPMENT_PLAN.md §1, append to Completion log, Conventional commit, no attribution.
-````
+```
 
 ### Task 1.2: Link the library and install optional peers
 
@@ -124,7 +124,7 @@ Wire `@bymax-one/nest-realtime` into both apps via `file:` protocol and install 
 
 #### Agent prompt
 
-````
+```
 You are a senior Node.js engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. The library under test lives as a sibling checkout at
@@ -161,7 +161,7 @@ Verification:
 - Commit `chore(deps): link nest-realtime + peer sets (1.2)`.
 
 Completion Protocol: standard steps (status, index, header, plan §1 row, log, commit).
-````
+```
 
 ### Task 1.3: Subpath probe spec and honest CI tests
 
@@ -189,7 +189,7 @@ The first real tests: Jest in the api proving `.` and `./shared` resolve (ESM + 
 
 #### Agent prompt
 
-````
+```
 You are a senior test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Library @bymax-one/nest-realtime linked via file: with three
@@ -232,7 +232,7 @@ Verification:
 - Commit `test(probe): subpath resolution + honest ci (1.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 1.4: Typed env config module
 
@@ -259,7 +259,7 @@ The single `process.env` reader of `apps/api`: parses the §9.1 registry into a 
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. apps/api needs a typed, frozen config sourced from process.env
@@ -300,7 +300,7 @@ Verification:
 - Commit `feat(api): typed frozen env config (1.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 1.5: Phase close: audit, dashboards, PR with Copilot review
 
@@ -325,7 +325,7 @@ Standard phase close: re-verify criteria, sync dashboards, PR, Copilot review, m
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-01-infra-and-library-link.
@@ -357,7 +357,7 @@ Verification:
 - `gh pr checks` green pre-merge; branch gone after merge.
 
 Completion Protocol: standard steps + phase completion line in the log.
-````
+```
 
 ## Completion log
 

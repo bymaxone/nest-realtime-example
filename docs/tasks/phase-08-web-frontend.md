@@ -22,14 +22,14 @@ The face of the example: a Next.js 16 dashboard built exclusively on `@bymax-one
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 8.1 | Branch + Next.js skeleton + design system + shell + provider | 📋 | P0 | L | Phase 02 |
-| 8.2 | Live feed, broadcast console, audit pages | 📋 | P0 | M | 8.1 |
-| 8.3 | Connections/eviction + replay lab pages | 📋 | P0 | M | 8.2, Phase 04 |
-| 8.4 | Ticket lab, connection lab, presence pages | 📋 | P0 | M | 8.2, Phase 05 |
-| 8.5 | Chat, cluster, both pages + bundle assertion | 📋 | P0 | M | Phase 07 |
-| 8.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 8.1-8.5 |
+| ID  | Task                                                         | Status | Priority | Size | Depends on    |
+| --- | ------------------------------------------------------------ | ------ | -------- | ---- | ------------- |
+| 8.1 | Branch + Next.js skeleton + design system + shell + provider | 📋     | P0       | L    | Phase 02      |
+| 8.2 | Live feed, broadcast console, audit pages                    | 📋     | P0       | M    | 8.1           |
+| 8.3 | Connections/eviction + replay lab pages                      | 📋     | P0       | M    | 8.2, Phase 04 |
+| 8.4 | Ticket lab, connection lab, presence pages                   | 📋     | P0       | M    | 8.2, Phase 05 |
+| 8.5 | Chat, cluster, both pages + bundle assertion                 | 📋     | P0       | M    | Phase 07      |
+| 8.6 | Phase close: audit, dashboards, PR + Copilot review          | 📋     | P0       | S    | 8.1-8.5       |
 
 ## Tasks
 
@@ -60,7 +60,7 @@ The web foundation: Next.js 16 App Router replacing the stub, the design-system 
 
 #### Agent prompt
 
-````
+```
 You are a senior React/Next.js engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Next.js 16 dashboard consuming ONLY
@@ -109,7 +109,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 08 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 8.2: Live feed, broadcast console and audit pages
 
@@ -135,7 +135,7 @@ The observe pages: the Live Operations Board (`/`) rendering order/deployment ev
 
 #### Agent prompt
 
-````
+```
 You are a senior React engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. The observe pages: live feed, broadcast console, audit.
@@ -168,7 +168,7 @@ Verification:
 - Web unit suite + build green; commit `feat(web): observe pages (8.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 8.3: Connections, eviction and replay lab pages
 
@@ -193,7 +193,7 @@ The resilience pages: `/connections` (registry, kill switch, eviction visualizer
 
 #### Agent prompt
 
-````
+```
 You are a senior React engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Resilience pages: connections/eviction + replay lab.
@@ -226,7 +226,7 @@ Verification:
 - Web suite + build green; commit `feat(web): connections + replay labs (8.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 8.4: Ticket lab, connection lab and presence pages
 
@@ -252,7 +252,7 @@ The hook-surface pages: `/labs/ticket` (`auth.fetchTicket` flow), `/labs/connect
 
 #### Agent prompt
 
-````
+```
 You are a senior React engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Hook-surface pages: ticket auth, manual connection control,
@@ -288,7 +288,7 @@ Verification:
 - Web suite + build green; commit `feat(web): ticket, connection and presence pages (8.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 8.5: Chat, cluster and both pages plus the bundle assertion
 
@@ -315,7 +315,7 @@ The WS-and-beyond pages: `/chat` (WS via `wss://` URL + `transport` override con
 
 #### Agent prompt
 
-````
+```
 You are a senior React performance-minded engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. WS pages + the bundle honesty check: socket.io-client must
@@ -355,7 +355,7 @@ Verification:
 - Web suite + build + assert:bundle green; commit `feat(web): ws pages + bundle honesty (8.5)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 8.6: Phase close: audit, dashboards, PR with Copilot review
 
@@ -379,7 +379,7 @@ Standard phase close; PR body lists matrix rows 56-66 and includes screenshots o
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-08-web-frontend.
@@ -408,7 +408,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

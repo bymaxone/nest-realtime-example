@@ -22,14 +22,14 @@ Single-instance SSE works. This phase makes it horizontal: `RedisRealtimePubSub`
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 5.1 | Branch + RedisRealtimePubSub implementation | 📋 | P0 | M | Phase 04 |
-| 5.2 | nginx SSE-safe config + cluster compose profile | 📋 | P0 | M | 5.1 |
-| 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | 📋 | P0 | L | 5.2 |
-| 5.4 | Cross-instance revocation + degradation lab | 📋 | P0 | M | 5.3 |
-| 5.5 | RedisPresenceStorage | 📋 | P1 | S | 5.1 |
-| 5.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 5.1-5.5 |
+| ID  | Task                                                           | Status | Priority | Size | Depends on |
+| --- | -------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 5.1 | Branch + RedisRealtimePubSub implementation                    | 📋     | P0       | M    | Phase 04   |
+| 5.2 | nginx SSE-safe config + cluster compose profile                | 📋     | P0       | M    | 5.1        |
+| 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | 📋     | P0       | L    | 5.2        |
+| 5.4 | Cross-instance revocation + degradation lab                    | 📋     | P0       | M    | 5.3        |
+| 5.5 | RedisPresenceStorage                                           | 📋     | P1       | S    | 5.1        |
+| 5.6 | Phase close: audit, dashboards, PR + Copilot review            | 📋     | P0       | S    | 5.1-5.5    |
 
 ## Tasks
 
@@ -58,7 +58,7 @@ The consumer-side bus: publish on the shared channel with an instance origin id;
 
 #### Agent prompt
 
-````
+```
 You are a senior Node.js engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Implement the library's IRealtimePubSub over ioredis pub/sub
@@ -97,7 +97,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 05 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 5.2: nginx SSE-safe proxy and the cluster compose profile
 
@@ -123,7 +123,7 @@ The honest infrastructure: `docker/nginx/nginx.conf` with the SSE location rules
 
 #### Agent prompt
 
-````
+```
 You are a senior infrastructure engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Two api instances behind nginx must serve SSE correctly:
@@ -161,7 +161,7 @@ Verification:
 - Commit `infra(cluster): nginx sse-safe proxy + two instances (5.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 5.3: Cluster lab with counters and loop-prevention proof
 
@@ -188,7 +188,7 @@ The phase's flagship: per-instance counters (`published`, `receivedRemote`, `del
 
 #### Agent prompt
 
-````
+```
 You are a senior distributed-systems test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Prove exactly-once cross-instance fan-out with counters, and
@@ -228,7 +228,7 @@ Verification:
 - Commit `feat(api): cluster fan-out counters + loop-prevention proof (5.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 5.4: Cross-instance revocation and degradation lab
 
@@ -239,7 +239,7 @@ Completion Protocol: standard steps.
 
 #### Description
 
-Two remaining scaling guarantees: revoking a connection owned by the *other* instance closes it (the `op:'disconnect'` path), and losing Redis degrades to single-instance with a warning instead of crashing.
+Two remaining scaling guarantees: revoking a connection owned by the _other_ instance closes it (the `op:'disconnect'` path), and losing Redis degrades to single-instance with a warning instead of crashing.
 
 #### Acceptance criteria
 
@@ -255,7 +255,7 @@ Two remaining scaling guarantees: revoking a connection owned by the *other* ins
 
 #### Agent prompt
 
-````
+```
 You are a senior reliability engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Cross-instance revocation must actually close remote streams;
@@ -291,7 +291,7 @@ Verification:
 - Commit `feat(api): cross-instance revocation + degradation lab (5.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 5.5: RedisPresenceStorage
 
@@ -316,7 +316,7 @@ The last storage interface: presence backed by Redis sets, powering `usePresence
 
 #### Agent prompt
 
-````
+```
 You are a senior Node.js engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Implement IPresenceStorage over Redis so presence is truthful
@@ -351,7 +351,7 @@ Verification:
 - Unit suite green; commit `feat(api): redis presence storage (5.5)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 5.6: Phase close: audit, dashboards, PR with Copilot review
 
@@ -375,7 +375,7 @@ Standard phase close; the PR body lists matrix rows 38-41, 73 and the completion
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-05-scaling-cluster.
@@ -405,7 +405,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

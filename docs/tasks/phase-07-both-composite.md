@@ -22,12 +22,12 @@ The migration story: `transport: 'both'` runs SSE and WebSocket simultaneously, 
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 7.1 | Branch + both profile boot + config surface | 📋 | P0 | S | Phase 06 |
-| 7.2 | Split-screen e2e: one emit, two transports | 📋 | P0 | M | 7.1 |
-| 7.3 | Migration journey walkthrough | 📋 | P1 | S | 7.2 |
-| 7.4 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 7.1-7.3 |
+| ID  | Task                                                | Status | Priority | Size | Depends on |
+| --- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 7.1 | Branch + both profile boot + config surface         | 📋     | P0       | S    | Phase 06   |
+| 7.2 | Split-screen e2e: one emit, two transports          | 📋     | P0       | M    | 7.1        |
+| 7.3 | Migration journey walkthrough                       | 📋     | P1       | S    | 7.2        |
+| 7.4 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 7.1-7.3    |
 
 ## Tasks
 
@@ -55,7 +55,7 @@ Boot with `REALTIME_TRANSPORT=both`: SSE endpoint and WS namespace both live, op
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Boot @bymax-one/nest-realtime in 'both' mode: SSE and
@@ -91,7 +91,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 07 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 7.2: Split-screen e2e
 
@@ -117,7 +117,7 @@ The composite proof: a single `emitToTenant` observed once by an SSE client and 
 
 #### Agent prompt
 
-````
+```
 You are a senior test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Prove 'both' mode fan-out: one emit, exactly one delivery per
@@ -147,7 +147,7 @@ Verification:
 - Suite green; commit `test(api): both-mode split-screen fanout (7.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 7.3: Migration journey walkthrough
 
@@ -172,7 +172,7 @@ The written journey: an SSE-only deployment adds chat by flipping to `both`, wir
 
 #### Agent prompt
 
-````
+```
 You are a senior technical writer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Document the SSE-to-both migration journey with real diffs
@@ -206,7 +206,7 @@ Verification:
 - Markdown links/paths valid; commit `docs(readme): sse-to-both migration journey (7.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 7.4: Phase close: audit, dashboards, PR with Copilot review
 
@@ -230,7 +230,7 @@ Standard phase close; PR body lists matrix rows 6, 50, 51.
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-07-both-composite.
@@ -259,7 +259,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

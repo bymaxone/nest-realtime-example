@@ -1,6 +1,6 @@
 # Phase 00: repo-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 00)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §5, §6, §19
 
@@ -23,14 +23,14 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 0.1 | Branch + pnpm workspace + root manifests | ✅ | P0 | S | none |
-| 0.2 | Strict TypeScript + ESLint flat config + Prettier | 📋 | P0 | M | 0.1 |
-| 0.3 | husky + commitlint + lint-staged + .gitmessage | 📋 | P1 | S | 0.1 |
-| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 📋 | P0 | M | 0.2 |
-| 0.5 | README skeleton + docs cross-links | 📋 | P1 | S | 0.1 |
-| 0.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 0.1-0.5 |
+| ID  | Task                                                        | Status | Priority | Size | Depends on |
+| --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 0.1 | Branch + pnpm workspace + root manifests                    | ✅     | P0       | S    | none       |
+| 0.2 | Strict TypeScript + ESLint flat config + Prettier           | ✅     | P0       | M    | 0.1        |
+| 0.3 | husky + commitlint + lint-staged + .gitmessage              | 📋     | P1       | S    | 0.1        |
+| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 📋     | P0       | M    | 0.2        |
+| 0.5 | README skeleton + docs cross-links                          | 📋     | P1       | S    | 0.1        |
+| 0.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 0.1-0.5    |
 
 ## Tasks
 
@@ -62,7 +62,7 @@ Bootstrap the workspace skeleton: root manifest, workspace file, and minimal `ap
 
 #### Agent prompt
 
-````
+```
 You are a senior TypeScript platform engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, the canonical reference app for @bymax-one/nest-realtime
@@ -112,11 +112,11 @@ Completion Protocol:
 3. Update the Phase 00 row in docs/DEVELOPMENT_PLAN.md §1 (canonical dashboard).
 4. Append `- 0.1 ✅ <date> workspace scaffold` to the Completion log.
 5. Commit with Conventional Commits; no attribution trailers.
-````
+```
 
 ### Task 0.2: Strict TypeScript, ESLint flat config and Prettier
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 0.1
@@ -127,11 +127,11 @@ Wire the strict compiler and lint floor the whole repo inherits: shared `tsconfi
 
 #### Acceptance criteria
 
-- [ ] `tsconfig.base.json`: `strict`, `noImplicitAny`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ES2022, NodeNext for the api.
-- [ ] ESLint flat config at root with per-app overrides; zero-warning policy (`--max-warnings 0`).
-- [ ] Banned imports enforced: `axios`, `bcrypt`, `jsonwebtoken`, `moment`, `lodash`, `uuid`, `passport`, `dotenv`.
-- [ ] Boundary rules: `apps/web` may not import `@bymax-one/nest-realtime` (server subpath); `apps/api` may not import `@bymax-one/nest-realtime/react`.
-- [ ] Prettier config + `pnpm lint` and `pnpm format:check` green.
+- [x] `tsconfig.base.json`: `strict`, `noImplicitAny`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ES2022, NodeNext for the api.
+- [x] ESLint flat config at root with per-app overrides; zero-warning policy (`--max-warnings 0`).
+- [x] Banned imports enforced: `axios`, `bcrypt`, `jsonwebtoken`, `moment`, `lodash`, `uuid`, `passport`, `dotenv`.
+- [x] Boundary rules: `apps/web` may not import `@bymax-one/nest-realtime` (server subpath); `apps/api` may not import `@bymax-one/nest-realtime/react`.
+- [x] Prettier config + `pnpm lint` and `pnpm format:check` green.
 
 #### Files to create / modify
 
@@ -140,7 +140,7 @@ Wire the strict compiler and lint floor the whole repo inherits: shared `tsconfi
 
 #### Agent prompt
 
-````
+```
 You are a senior TypeScript tooling engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example (reference app for @bymax-one/nest-realtime). pnpm workspace,
@@ -180,7 +180,7 @@ Verification:
 - A scratch file importing 'axios' fails lint (delete the scratch after proving; do not commit it).
 
 Completion Protocol: same 5 steps as Task 0.1 (status, index, header progress, plan §1 row, log, Conventional commit `chore(tooling): strict ts + eslint + prettier (0.2)`).
-````
+```
 
 ### Task 0.3: husky, commitlint, lint-staged and .gitmessage
 
@@ -207,7 +207,7 @@ Local governance: Conventional Commits enforced at commit time, staged files lin
 
 #### Agent prompt
 
-````
+```
 You are a senior developer-experience engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-00-repo-foundation.
@@ -241,7 +241,7 @@ Verification:
 - Commit `chore(repo): local commit governance (0.3)` passes the hooks.
 
 Completion Protocol: standard 5 steps (status, index, header, plan §1, log, commit).
-````
+```
 
 ### Task 0.4: CI from day one plus visibility-gated security workflows
 
@@ -268,7 +268,7 @@ The heart of the phase: `ci.yml` gates every PR from now on. CodeQL and Scorecar
 
 #### Agent prompt
 
-````
+```
 You are a senior CI engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, pnpm workspace (apps/api Jest, apps/web Vitest later).
@@ -307,7 +307,7 @@ Verification:
 - Commit `ci(repo): pipeline from day one + gated security workflows (0.4)`.
 
 Completion Protocol: standard 5 steps.
-````
+```
 
 ### Task 0.5: README skeleton and docs cross-links
 
@@ -332,7 +332,7 @@ A professional README shell: what the repo is, the lib it demonstrates, the docs
 
 #### Agent prompt
 
-````
+```
 You are a senior technical writer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, the canonical reference app for @bymax-one/nest-realtime.
@@ -365,7 +365,7 @@ Verification:
 - Commit `docs(repo): readme skeleton + license (0.5)`.
 
 Completion Protocol: standard 5 steps.
-````
+```
 
 ### Task 0.6: Phase close: audit, dashboards, PR with Copilot review
 
@@ -391,7 +391,7 @@ Close the phase: verify every acceptance criterion, sync dashboards, open the PR
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-00-repo-foundation.
@@ -427,9 +427,11 @@ Verification:
 - `gh pr checks` all green before merge; branch deleted locally and remotely after merge.
 
 Completion Protocol: standard steps + append the phase-completion line to the Completion log.
-````
+```
 
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
 - 0.1 ✅ 2026-07-09 workspace scaffold
+- 0.2 ✅ 2026-07-09 strict tsconfig base + eslint flat config + prettier, repo-wide format pass
