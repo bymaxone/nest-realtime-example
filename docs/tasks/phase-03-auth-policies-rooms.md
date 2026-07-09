@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 🔄 In Progress · **Progress**: 5 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 👀 Review · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 
@@ -379,7 +379,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 3.1-3.5
@@ -390,9 +390,9 @@ Standard phase close; PR body lists the matrix rows landed.
 
 #### Acceptance criteria
 
-- [ ] Tasks 3.1-3.5 ✅, verifications re-run sequentially.
-- [ ] Dashboards synced; PR body lists rows 3, 8, 9, 11, 13-18, 20, 31-35, 54, 55, 69-72.
-- [ ] Copilot findings addressed; merged on green; branch deleted.
+- [x] Tasks 3.1-3.5 ✅, verifications re-run sequentially (unit 175 tests @ 100% coverage; e2e 10 suites / 19 tests against Redis).
+- [x] Dashboards synced; PR body lists rows 3, 8, 9, 11, 13-18, 20, 31-35, 54, 55, 69-72.
+- [ ] Copilot findings addressed; merged on green; branch deleted. _(Orchestrator: PR opened and Copilot review requested; merge and branch deletion pending.)_
 
 #### Files to create / modify
 
@@ -440,3 +440,4 @@ Completion Protocol: standard steps + phase completion line.
 - 3.3 ✅ 2026-07-09 reauth policy (both modes) + Redis revocation set + ownership-guarded kill switch + `GET /connections` + reauth-cache stats
 - 3.4 ✅ 2026-07-09 FIFO eviction timeline (composite lifecycle hooks) proving oldest-evicted/newest-admitted (never 429) + `emitConnectionEvent=false` toggle e2e
 - 3.5 ✅ 2026-07-09 rooms module (composed resource rooms, ownership anti-IDOR) + emit tenant guard (403) + `@OnConnect`/`@OnDisconnect` decorators after config hooks
+- 3.6 👀 2026-07-09 phase close: acceptance-criteria audit, dashboards synced, gates + reviews to zero (2 security fixes, 2 review nits), PR opened + Copilot review requested
