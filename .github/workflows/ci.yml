@@ -46,10 +46,10 @@ jobs:
       # Unit suites run sequentially, one app at a time, per the workspace's
       # memory-safety rule: two Jest/Vitest processes must never share a runner.
       - name: Unit tests (api)
-        run: pnpm --filter @nest-realtime-example/api test -- --passWithNoTests
+        run: pnpm --filter @nest-realtime-example/api test
 
       - name: Unit tests (web)
-        run: pnpm --filter @nest-realtime-example/web test -- --passWithNoTests
+        run: pnpm --filter @nest-realtime-example/web test
 
       - name: Build
         run: pnpm build
