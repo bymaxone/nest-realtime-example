@@ -23,8 +23,9 @@ const DEFAULT_TIMEOUT_MS = 8000;
  */
 export async function login(app: INestApplication, username: string): Promise<string> {
   const response = await request(app.getHttpServer()).post('/api/auth/login').send({ username });
-  const setCookie = response.headers['set-cookie'] as unknown as string[];
-  return setCookie[0]!.split(';')[0]!;
+  const setCookie = response.headers['set-cookie'];
+  const first = Array.isArray(setCookie) ? setCookie[0] : setCookie;
+  return (first ?? '').split(';')[0] ?? '';
 }
 
 /**

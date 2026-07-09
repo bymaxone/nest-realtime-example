@@ -40,7 +40,7 @@ interface LogoutResponse {
 /** Serves the demo authentication endpoints under `/auth`. */
 @Controller('auth')
 export class AuthController {
-  private readonly cookieSecure: boolean;
+  private readonly isSecureCookie: boolean;
 
   /**
    * Build the auth controller.
@@ -52,7 +52,7 @@ export class AuthController {
     private readonly sessions: SessionService,
     @Inject(APP_CONFIG) config: AppConfig,
   ) {
-    this.cookieSecure = config.webOrigin.startsWith('https://');
+    this.isSecureCookie = config.webOrigin.startsWith('https://');
   }
 
   /**
@@ -104,7 +104,7 @@ export class AuthController {
     const base: CookieOptions = {
       httpOnly: true,
       sameSite: 'lax',
-      secure: this.cookieSecure,
+      secure: this.isSecureCookie,
       path: '/',
     };
     return maxAge === undefined ? base : { ...base, maxAge };

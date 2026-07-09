@@ -2,15 +2,16 @@
  * @fileoverview Test doubles for the library's RealtimeService.
  * @layer test-support
  *
- * Provides a spyable RealtimeService double and a global module that supplies it,
- * so feature modules that depend on the globally-registered service can be
- * compiled in isolation. The cast builds a partial double, not a laundered error.
+ * Provides a spyable RealtimeService and a global module that supplies it, so
+ * feature modules that depend on the globally-registered service can be compiled
+ * in isolation. The double is the real `RealtimeService` wrapping a spy
+ * `ITransport`, so no cast is needed and delegation is exercised for real.
  */
 
 import { Global, Module, type DynamicModule } from '@nestjs/common';
-import { RealtimeService } from '@bymax-one/nest-realtime';
+import { RealtimeService, type ITransport } from '@bymax-one/nest-realtime';
 
-/** A RealtimeService double and its per-method spies. */
+/** A RealtimeService double and its per-method transport spies. */
 export interface RealtimeMock {
   readonly service: RealtimeService;
   readonly emitToUser: jest.Mock;
@@ -20,17 +21,32 @@ export interface RealtimeMock {
 }
 
 /**
- * Build a RealtimeService double whose emit methods are jest spies.
+ * Build a real RealtimeService over a spy transport.
  *
- * @returns The double and its spies.
+ * @returns The service and the transport spies its emit methods delegate to.
  */
 export function mockRealtimeService(): RealtimeMock {
   const emitToUser = jest.fn().mockResolvedValue(undefined);
   const emitToTenant = jest.fn().mockResolvedValue(undefined);
   const emitToRoom = jest.fn().mockResolvedValue(undefined);
   const broadcast = jest.fn().mockResolvedValue(undefined);
-  const service = { emitToUser, emitToTenant, emitToRoom, broadcast } as unknown as RealtimeService;
-  return { service, emitToUser, emitToTenant, emitToRoom, broadcast };
+  const transport: ITransport = {
+    kind: 'sse',
+    emitToUser,
+    emitToTenant,
+    emitToRoom,
+    broadcast,
+    joinRoom: jest.fn().mockResolvedValue(undefined),
+    leaveRoom: jest.fn().mockResolvedValue(undefined),
+    disconnect: jest.fn().mockResolvedValue(undefined),
+  };
+  return {
+    service: new RealtimeService(transport),
+    emitToUser,
+    emitToTenant,
+    emitToRoom,
+    broadcast,
+  };
 }
 
 /**
