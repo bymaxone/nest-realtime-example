@@ -1,6 +1,6 @@
 # Phase 00: repo-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 00)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §5, §6, §19
 
@@ -29,7 +29,7 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 | 0.2 | Strict TypeScript + ESLint flat config + Prettier           | ✅     | P0       | M    | 0.1        |
 | 0.3 | husky + commitlint + lint-staged + .gitmessage              | ✅     | P1       | S    | 0.1        |
 | 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 🟡     | P0       | M    | 0.2        |
-| 0.5 | README skeleton + docs cross-links                          | 📋     | P1       | S    | 0.1        |
+| 0.5 | README skeleton + docs cross-links                          | ✅     | P1       | S    | 0.1        |
 | 0.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 0.1-0.5    |
 
 ## Tasks
@@ -311,7 +311,7 @@ Completion Protocol: standard 5 steps.
 
 ### Task 0.5: README skeleton and docs cross-links
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: S
 - **Depends on**: 0.1
@@ -322,9 +322,9 @@ A professional README shell: what the repo is, the lib it demonstrates, the docs
 
 #### Acceptance criteria
 
-- [ ] `README.md`: title, one-paragraph mission (canonical reference app exercising every library feature), docs table linking spec/plan/tasks/design system, quick-start section marked "lands in phase progression", license note (repo is an example app, MIT).
-- [ ] `LICENSE` (MIT) present.
-- [ ] All relative links resolve.
+- [x] `README.md`: title, one-paragraph mission (canonical reference app exercising every library feature), docs table linking spec/plan/tasks/design system, quick-start section marked "lands in phase progression", license note (repo is an example app, MIT).
+- [x] `LICENSE` (MIT) present.
+- [x] All relative links resolve.
 
 #### Files to create / modify
 
@@ -437,3 +437,4 @@ Completion Protocol: standard steps + append the phase-completion line to the Co
 - 0.2 ✅ 2026-07-09 strict tsconfig base + eslint flat config + prettier, repo-wide format pass
 - 0.3 ✅ 2026-07-09 husky pre-commit/commit-msg hooks + commitlint + lint-staged + .gitmessage
 - 0.4 🟡 2026-07-09 ci.yml + gated codeql/scorecard + dependabot committed; final PR-green check lands in 0.6
+- 0.5 ✅ 2026-07-09 README skeleton + MIT license
