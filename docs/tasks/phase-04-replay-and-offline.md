@@ -21,13 +21,13 @@ SSE's superpower is recovery: the browser reconnects with `Last-Event-ID` and th
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 4.1 | Branch + replay lab (drop, Last-Event-ID, buffer cap) | 📋 | P0 | M | Phase 03 |
-| 4.2 | RedisOfflineQueue (IOfflineQueueStorage) + retention units | 📋 | P0 | M | 4.1 |
-| 4.3 | Buffer-miss fallback + id-ordering spec | 📋 | P0 | M | 4.2 |
-| 4.4 | Offline drain lab + e2e | 📋 | P0 | M | 4.2 |
-| 4.5 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 4.1-4.4 |
+| ID  | Task                                                       | Status | Priority | Size | Depends on |
+| --- | ---------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 4.1 | Branch + replay lab (drop, Last-Event-ID, buffer cap)      | 📋     | P0       | M    | Phase 03   |
+| 4.2 | RedisOfflineQueue (IOfflineQueueStorage) + retention units | 📋     | P0       | M    | 4.1        |
+| 4.3 | Buffer-miss fallback + id-ordering spec                    | 📋     | P0       | M    | 4.2        |
+| 4.4 | Offline drain lab + e2e                                    | 📋     | P0       | M    | 4.2        |
+| 4.5 | Phase close: audit, dashboards, PR + Copilot review        | 📋     | P0       | S    | 4.1-4.4    |
 
 ## Tasks
 
@@ -57,7 +57,7 @@ SSE's superpower is recovery: the browser reconnects with `Last-Event-ID` and th
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. The Last-Event-ID replay story must be observable: in-order
@@ -94,7 +94,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 04 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 4.2: RedisOfflineQueue implementing IOfflineQueueStorage
 
@@ -120,7 +120,7 @@ The consumer-side storage the library defines: sorted-set backed queue with TTL 
 
 #### Agent prompt
 
-````
+```
 You are a senior Node.js engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Implement the library's IOfflineQueueStorage over Redis
@@ -156,7 +156,7 @@ Verification:
 - Unit suite green; commit `feat(api): redis offline queue (4.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 4.3: Buffer-miss fallback and id-ordering guard
 
@@ -182,7 +182,7 @@ The gap story: a `Last-Event-ID` older than the in-memory window falls back to t
 
 #### Agent prompt
 
-````
+```
 You are a senior test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Prove the replay gap fallback (buffer miss -> offline queue)
@@ -216,7 +216,7 @@ Verification:
 - Suites green; commit `test(api): buffer-miss fallback + id ordering (4.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 4.4: Offline drain lab
 
@@ -243,7 +243,7 @@ Events emitted while a user has zero connections are queued; the next connect dr
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Offline users must not lose events when the queue is enabled.
@@ -276,7 +276,7 @@ Verification:
 - Suites green; commit `feat(api): offline drain lab (4.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 4.5: Phase close: audit, dashboards, PR with Copilot review
 
@@ -300,7 +300,7 @@ Standard phase close; PR body lists matrix rows 23-28, 75.
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-04-replay-and-offline.
@@ -329,7 +329,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

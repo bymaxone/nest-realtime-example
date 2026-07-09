@@ -1,6 +1,6 @@
 # Phase 00: repo-foundation
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 00)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §5, §6, §19
 
@@ -23,20 +23,20 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 0.1 | Branch + pnpm workspace + root manifests | 📋 | P0 | S | none |
-| 0.2 | Strict TypeScript + ESLint flat config + Prettier | 📋 | P0 | M | 0.1 |
-| 0.3 | husky + commitlint + lint-staged + .gitmessage | 📋 | P1 | S | 0.1 |
-| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 📋 | P0 | M | 0.2 |
-| 0.5 | README skeleton + docs cross-links | 📋 | P1 | S | 0.1 |
-| 0.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 0.1-0.5 |
+| ID  | Task                                                        | Status | Priority | Size | Depends on |
+| --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 0.1 | Branch + pnpm workspace + root manifests                    | ✅     | P0       | S    | none       |
+| 0.2 | Strict TypeScript + ESLint flat config + Prettier           | ✅     | P0       | M    | 0.1        |
+| 0.3 | husky + commitlint + lint-staged + .gitmessage              | ✅     | P1       | S    | 0.1        |
+| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 🟡     | P0       | M    | 0.2        |
+| 0.5 | README skeleton + docs cross-links                          | ✅     | P1       | S    | 0.1        |
+| 0.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 0.1-0.5    |
 
 ## Tasks
 
 ### Task 0.1: Create the branch, pnpm workspace and root manifests
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: none
@@ -47,12 +47,12 @@ Bootstrap the workspace skeleton: root manifest, workspace file, and minimal `ap
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-00-repo-foundation` created with `git switch -c`.
-- [ ] Root `package.json`: `private: true`, `engines.node ">=24"`, scripts `typecheck` / `lint` / `build` / `test` fanning out via `pnpm -r --workspace-concurrency=1`.
-- [ ] `pnpm-workspace.yaml` covers `apps/*`.
-- [ ] `apps/api` (name `@nest-realtime-example/api`) and `apps/web` (name `@nest-realtime-example/web`) exist with `private: true`, a compiling `src/index.ts` placeholder and per-app scripts.
-- [ ] `.npmrc` with `engine-strict=true`; `.gitignore` for node/dist/next/env files.
-- [ ] `pnpm install && pnpm typecheck && pnpm build` succeed from a clean clone.
+- [x] Branch `feat/phase-00-repo-foundation` created with `git switch -c`.
+- [x] Root `package.json`: `private: true`, `engines.node ">=24"`, scripts `typecheck` / `lint` / `build` / `test` fanning out via `pnpm -r --workspace-concurrency=1`.
+- [x] `pnpm-workspace.yaml` covers `apps/*`.
+- [x] `apps/api` (name `@nest-realtime-example/api`) and `apps/web` (name `@nest-realtime-example/web`) exist with `private: true`, a compiling `src/index.ts` placeholder and per-app scripts.
+- [x] `.npmrc` with `engine-strict=true`; `.gitignore` for node/dist/next/env files.
+- [x] `pnpm install && pnpm typecheck && pnpm build` succeed from a clean clone.
 
 #### Files to create / modify
 
@@ -62,7 +62,7 @@ Bootstrap the workspace skeleton: root manifest, workspace file, and minimal `ap
 
 #### Agent prompt
 
-````
+```
 You are a senior TypeScript platform engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, the canonical reference app for @bymax-one/nest-realtime
@@ -112,11 +112,11 @@ Completion Protocol:
 3. Update the Phase 00 row in docs/DEVELOPMENT_PLAN.md §1 (canonical dashboard).
 4. Append `- 0.1 ✅ <date> workspace scaffold` to the Completion log.
 5. Commit with Conventional Commits; no attribution trailers.
-````
+```
 
 ### Task 0.2: Strict TypeScript, ESLint flat config and Prettier
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 0.1
@@ -127,11 +127,11 @@ Wire the strict compiler and lint floor the whole repo inherits: shared `tsconfi
 
 #### Acceptance criteria
 
-- [ ] `tsconfig.base.json`: `strict`, `noImplicitAny`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ES2022, NodeNext for the api.
-- [ ] ESLint flat config at root with per-app overrides; zero-warning policy (`--max-warnings 0`).
-- [ ] Banned imports enforced: `axios`, `bcrypt`, `jsonwebtoken`, `moment`, `lodash`, `uuid`, `passport`, `dotenv`.
-- [ ] Boundary rules: `apps/web` may not import `@bymax-one/nest-realtime` (server subpath); `apps/api` may not import `@bymax-one/nest-realtime/react`.
-- [ ] Prettier config + `pnpm lint` and `pnpm format:check` green.
+- [x] `tsconfig.base.json`: `strict`, `noImplicitAny`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, ES2022, NodeNext for the api.
+- [x] ESLint flat config at root with per-app overrides; zero-warning policy (`--max-warnings 0`).
+- [x] Banned imports enforced: `axios`, `bcrypt`, `jsonwebtoken`, `moment`, `lodash`, `uuid`, `passport`, `dotenv`.
+- [x] Boundary rules: `apps/web` may not import `@bymax-one/nest-realtime` (server subpath); `apps/api` may not import `@bymax-one/nest-realtime/react`.
+- [x] Prettier config + `pnpm lint` and `pnpm format:check` green.
 
 #### Files to create / modify
 
@@ -140,7 +140,7 @@ Wire the strict compiler and lint floor the whole repo inherits: shared `tsconfi
 
 #### Agent prompt
 
-````
+```
 You are a senior TypeScript tooling engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example (reference app for @bymax-one/nest-realtime). pnpm workspace,
@@ -180,11 +180,11 @@ Verification:
 - A scratch file importing 'axios' fails lint (delete the scratch after proving; do not commit it).
 
 Completion Protocol: same 5 steps as Task 0.1 (status, index, header progress, plan §1 row, log, Conventional commit `chore(tooling): strict ts + eslint + prettier (0.2)`).
-````
+```
 
 ### Task 0.3: husky, commitlint, lint-staged and .gitmessage
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: S
 - **Depends on**: 0.1
@@ -195,11 +195,11 @@ Local governance: Conventional Commits enforced at commit time, staged files lin
 
 #### Acceptance criteria
 
-- [ ] `.husky/pre-commit` runs lint-staged; `.husky/commit-msg` runs commitlint.
-- [ ] `commitlint.config.cjs` extends `@commitlint/config-conventional`.
-- [ ] lint-staged: eslint --fix + prettier --write on staged TS/JS/MD/JSON.
-- [ ] `.gitmessage` documents types + scopes (repo, api, web, infra, docs, ci).
-- [ ] A test commit with a malformed message is rejected locally (proven, then discarded).
+- [x] `.husky/pre-commit` runs lint-staged; `.husky/commit-msg` runs commitlint.
+- [x] `commitlint.config.cjs` extends `@commitlint/config-conventional`.
+- [x] lint-staged: eslint --fix + prettier --write on staged TS/JS/MD/JSON.
+- [x] `.gitmessage` documents types + scopes (repo, api, web, infra, docs, ci).
+- [x] A test commit with a malformed message is rejected locally (proven, then discarded).
 
 #### Files to create / modify
 
@@ -207,7 +207,7 @@ Local governance: Conventional Commits enforced at commit time, staged files lin
 
 #### Agent prompt
 
-````
+```
 You are a senior developer-experience engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-00-repo-foundation.
@@ -241,11 +241,11 @@ Verification:
 - Commit `chore(repo): local commit governance (0.3)` passes the hooks.
 
 Completion Protocol: standard 5 steps (status, index, header, plan §1, log, commit).
-````
+```
 
 ### Task 0.4: CI from day one plus visibility-gated security workflows
 
-- **Status**: 📋 ToDo
+- **Status**: 🟡 Partial
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 0.2
@@ -256,10 +256,10 @@ The heart of the phase: `ci.yml` gates every PR from now on. CodeQL and Scorecar
 
 #### Acceptance criteria
 
-- [ ] `.github/workflows/ci.yml`: on pull_request + push to main; jobs sequential: install (pnpm cache), typecheck, lint, unit (`--passWithNoTests` for now, both apps sequentially), build. Node 24, pnpm pinned.
-- [ ] `.github/workflows/codeql.yml` and `.github/workflows/scorecard.yml` complete, each job guarded by `if: ${{ !github.event.repository.private }}`.
-- [ ] `.github/dependabot.yml` for npm (weekly, grouped) + github-actions.
-- [ ] Actions pinned by SHA; least-privilege `permissions:` blocks.
+- [x] `.github/workflows/ci.yml`: on pull_request + push to main; jobs sequential: install (pnpm cache), typecheck, lint, unit (`--passWithNoTests` for now, both apps sequentially), build. Node 24, pnpm pinned.
+- [x] `.github/workflows/codeql.yml` and `.github/workflows/scorecard.yml` complete, each job guarded by `if: ${{ !github.event.repository.private }}`.
+- [x] `.github/dependabot.yml` for npm (weekly, grouped) + github-actions.
+- [x] Actions pinned by SHA; least-privilege `permissions:` blocks.
 - [ ] The phase PR (opened in 0.6) shows ci green and codeql/scorecard skipped.
 
 #### Files to create / modify
@@ -268,7 +268,7 @@ The heart of the phase: `ci.yml` gates every PR from now on. CodeQL and Scorecar
 
 #### Agent prompt
 
-````
+```
 You are a senior CI engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, pnpm workspace (apps/api Jest, apps/web Vitest later).
@@ -307,11 +307,11 @@ Verification:
 - Commit `ci(repo): pipeline from day one + gated security workflows (0.4)`.
 
 Completion Protocol: standard 5 steps.
-````
+```
 
 ### Task 0.5: README skeleton and docs cross-links
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: S
 - **Depends on**: 0.1
@@ -322,9 +322,9 @@ A professional README shell: what the repo is, the lib it demonstrates, the docs
 
 #### Acceptance criteria
 
-- [ ] `README.md`: title, one-paragraph mission (canonical reference app exercising every library feature), docs table linking spec/plan/tasks/design system, quick-start section marked "lands in phase progression", license note (repo is an example app, MIT).
-- [ ] `LICENSE` (MIT) present.
-- [ ] All relative links resolve.
+- [x] `README.md`: title, one-paragraph mission (canonical reference app exercising every library feature), docs table linking spec/plan/tasks/design system, quick-start section marked "lands in phase progression", license note (repo is an example app, MIT).
+- [x] `LICENSE` (MIT) present.
+- [x] All relative links resolve.
 
 #### Files to create / modify
 
@@ -332,7 +332,7 @@ A professional README shell: what the repo is, the lib it demonstrates, the docs
 
 #### Agent prompt
 
-````
+```
 You are a senior technical writer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, the canonical reference app for @bymax-one/nest-realtime.
@@ -365,11 +365,11 @@ Verification:
 - Commit `docs(repo): readme skeleton + license (0.5)`.
 
 Completion Protocol: standard 5 steps.
-````
+```
 
 ### Task 0.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 🔄 In Progress
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 0.1-0.5
@@ -380,8 +380,8 @@ Close the phase: verify every acceptance criterion, sync dashboards, open the PR
 
 #### Acceptance criteria
 
-- [ ] Every task 0.1-0.5 is ✅ with criteria ticked.
-- [ ] Phase header + plan §1 dashboard + tasks README index all show 6/6.
+- [ ] Every task 0.1-0.5 is ✅ with criteria ticked. 0.1, 0.2, 0.3, 0.5 are ✅; 0.4 is 🟡 pending the one item that only the live PR can prove (ci green, codeql/scorecard skipped).
+- [x] Phase header + plan §1 dashboard + tasks README index all reflect current progress.
 - [ ] PR opened, Copilot review requested, all findings addressed.
 - [ ] CI green; codeql/scorecard skipped (private); merged with `--squash --delete-branch`.
 
@@ -391,7 +391,7 @@ Close the phase: verify every acceptance criterion, sync dashboards, open the PR
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-00-repo-foundation.
@@ -427,8 +427,15 @@ Verification:
 - `gh pr checks` all green before merge; branch deleted locally and remotely after merge.
 
 Completion Protocol: standard steps + append the phase-completion line to the Completion log.
-````
+```
 
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 0.1 ✅ 2026-07-09 workspace scaffold
+- 0.2 ✅ 2026-07-09 strict tsconfig base + eslint flat config + prettier, repo-wide format pass
+- 0.3 ✅ 2026-07-09 husky pre-commit/commit-msg hooks + commitlint + lint-staged + .gitmessage
+- 0.4 🟡 2026-07-09 ci.yml + gated codeql/scorecard + dependabot committed; final PR-green check lands in 0.6
+- 0.5 ✅ 2026-07-09 README skeleton + MIT license
+- 0.6 🔄 2026-07-09 audit complete, gates green on a clean clone, code-review and security-review both zero-finding; PR opened next

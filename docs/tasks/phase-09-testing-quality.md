@@ -21,13 +21,13 @@ Every feature phase already carried its own proofs; this phase raises the whole 
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 9.1 | Branch + api unit coverage to 100% | 📋 | P0 | L | Phase 08 |
-| 9.2 | Web unit coverage to 100% | 📋 | P0 | M | 9.1 |
-| 9.3 | E2E completeness: every HTTP route + SSE flows | 📋 | P0 | M | 9.1 |
-| 9.4 | WS/cluster consolidation + Playwright journeys | 📋 | P0 | M | 9.3 |
-| 9.5 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 9.1-9.4 |
+| ID  | Task                                                | Status | Priority | Size | Depends on |
+| --- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 9.1 | Branch + api unit coverage to 100%                  | 📋     | P0       | L    | Phase 08   |
+| 9.2 | Web unit coverage to 100%                           | 📋     | P0       | M    | 9.1        |
+| 9.3 | E2E completeness: every HTTP route + SSE flows      | 📋     | P0       | M    | 9.1        |
+| 9.4 | WS/cluster consolidation + Playwright journeys      | 📋     | P0       | M    | 9.3        |
+| 9.5 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 9.1-9.4    |
 
 ## Tasks
 
@@ -55,7 +55,7 @@ Close every uncovered line/branch in `apps/api` with meaningful units; raise the
 
 #### Agent prompt
 
-````
+```
 You are a senior test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Drive apps/api unit coverage to a pinned global 100% with
@@ -93,7 +93,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 09 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 9.2: Web unit coverage to 100%
 
@@ -118,7 +118,7 @@ Same bar for `apps/web` under Vitest: components, lib modules and page logic at 
 
 #### Agent prompt
 
-````
+```
 You are a senior frontend test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. apps/web to pinned 100% coverage under Vitest + RTL.
@@ -150,7 +150,7 @@ Verification:
 - Coverage 100; suite green. Commit `test(web): unit coverage to pinned 100 (9.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 9.3: E2E completeness for HTTP routes and SSE flows
 
@@ -175,7 +175,7 @@ Prove nothing is untested: a route-inventory spec walks the Nest route map and a
 
 #### Agent prompt
 
-````
+```
 You are a senior API test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Route-complete E2E: no endpoint escapes testing.
@@ -209,7 +209,7 @@ Verification:
 - Commit `test(api): route-complete e2e inventory (9.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 9.4: WS/cluster consolidation and Playwright journeys
 
@@ -235,7 +235,7 @@ The heavy finale: the WS suite consolidated (connect, chat, limits, parity), the
 
 #### Agent prompt
 
-````
+```
 You are a senior E2E engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Consolidate the heavy suites and wire the strict sequential
@@ -272,7 +272,7 @@ Verification:
 - Commit `test(repo): ordered heavy suites + playwright journeys (9.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 9.5: Phase close: audit, dashboards, PR with Copilot review
 
@@ -296,7 +296,7 @@ Standard phase close; the PR body reports the coverage numbers and the suite inv
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-09-testing-quality.
@@ -326,7 +326,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

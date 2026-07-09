@@ -1,0 +1,22 @@
+{
+  "name": "@nest-realtime-example/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NestJS backend for the nest-realtime-example reference application.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11"
+  }
+}

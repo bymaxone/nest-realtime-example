@@ -24,14 +24,14 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap | 📋 | P0 | M | Phase 01 |
-| 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator | 📋 | P0 | M | 2.1 |
-| 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | 📋 | P0 | L | 2.2 |
-| 2.4 | Emit console + domain simulator + two-tenant isolation E2E | 📋 | P0 | M | 2.3 |
-| 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab | 📋 | P1 | M | 2.3 |
-| 2.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 2.1-2.5 |
+| ID  | Task                                                                       | Status | Priority | Size | Depends on |
+| --- | -------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | 📋     | P0       | M    | Phase 01   |
+| 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | 📋     | P0       | M    | 2.1        |
+| 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | 📋     | P0       | L    | 2.2        |
+| 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | 📋     | P0       | M    | 2.3        |
+| 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | 📋     | P1       | M    | 2.3        |
+| 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 📋     | P0       | S    | 2.1-2.5    |
 
 ## Tasks
 
@@ -61,7 +61,7 @@ Replace the api stub with a real NestJS 11 application: `main.ts` (CORS from con
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example, reference app for @bymax-one/nest-realtime. apps/api is a
@@ -105,7 +105,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index row; header Progress; Phase 02 row
 in docs/DEVELOPMENT_PLAN.md §1; Completion log line; Conventional commit, no attribution.
-````
+```
 
 ### Task 2.2: Demo auth with HMAC cookie and the cookie authenticator
 
@@ -132,7 +132,7 @@ Seeded demo users across two tenants (acme, globex), login/logout issuing an Htt
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS security-minded engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Demo auth for the realtime reference app: HttpOnly HMAC-signed
@@ -178,7 +178,7 @@ Verification:
 - Commit `feat(api): demo cookie auth + authenticator (2.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 2.3: Canonical realtime wiring and boot-failure specs
 
@@ -207,7 +207,7 @@ The centerpiece consumers will copy: `RealtimeWiringModule` with the options fac
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. This task writes THE canonical consumer wiring of
@@ -259,7 +259,7 @@ Verification:
 - Commit `feat(api): canonical realtime wiring (2.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 2.4: Emit console, domain simulator and tenant isolation
 
@@ -286,7 +286,7 @@ The endpoints that make the example alive: emit console (`user`/`tenant`/`room`/
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. RealtimeService (from @bymax-one/nest-realtime) is wired; this
@@ -328,7 +328,7 @@ Verification:
 - Commit `feat(api): emit console + domain simulator + isolation proof (2.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 2.5: Audit feed and heartbeat raw-capture lab
 
@@ -355,7 +355,7 @@ Wire `IConnectionLifecycleHooks` into an in-memory ring-buffer audit feed (`GET 
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Lifecycle hooks feed an audit trail; the SSE heartbeat must be
@@ -394,7 +394,7 @@ Verification:
 - Suites green; commit `feat(api): audit feed + heartbeat honesty lab (2.5)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 2.6: Phase close: audit, dashboards, PR with Copilot review
 
@@ -419,7 +419,7 @@ Standard phase close with one addition: record the matrix rows landed by this ph
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-02-sse-foundation.
@@ -450,7 +450,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch gone post-merge.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

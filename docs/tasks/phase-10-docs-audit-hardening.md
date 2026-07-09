@@ -21,13 +21,13 @@ The finish line: the repo must read as the canonical reference and prove its own
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 10.1 | Branch + full README with reproducible journeys | 📋 | P0 | M | Phase 09 |
-| 10.2 | Export-usage + coverage-matrix audit (75 rows) | 📋 | P0 | M | 10.1 |
-| 10.3 | Stryker mutation baseline + hardening (api) | 📋 | P0 | L | 10.2 |
-| 10.4 | CI finalization + npm-switch procedure | 📋 | P1 | S | 10.2 |
-| 10.5 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 10.1-10.4 |
+| ID   | Task                                                | Status | Priority | Size | Depends on |
+| ---- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 10.1 | Branch + full README with reproducible journeys     | 📋     | P0       | M    | Phase 09   |
+| 10.2 | Export-usage + coverage-matrix audit (75 rows)      | 📋     | P0       | M    | 10.1       |
+| 10.3 | Stryker mutation baseline + hardening (api)         | 📋     | P0       | L    | 10.2       |
+| 10.4 | CI finalization + npm-switch procedure              | 📋     | P1       | S    | 10.2       |
+| 10.5 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 10.1-10.4  |
 
 ## Tasks
 
@@ -55,7 +55,7 @@ Complete the README into the repo's front door: badges (CI now; CodeQL/Scorecard
 
 #### Agent prompt
 
-````
+```
 You are a senior technical writer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Finish the README as the public front door of the canonical
@@ -90,7 +90,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 10 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 10.2: Export-usage and coverage-matrix audit
 
@@ -115,7 +115,7 @@ The completeness proof: an audit table mapping all 75 matrix rows to evidence (r
 
 #### Agent prompt
 
-````
+```
 You are a senior auditor-engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Prove the repo exercises the whole library: matrix audit +
@@ -151,7 +151,7 @@ Verification:
 - Commit `docs(audit): matrix + export completeness proof (10.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 10.3: Stryker mutation baseline and hardening
 
@@ -176,7 +176,7 @@ The assertiveness gate: Stryker over `apps/api`, baseline recorded, survivors hu
 
 #### Agent prompt
 
-````
+```
 You are a senior mutation-testing engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Stryker over apps/api as the pre-release assertiveness gate.
@@ -211,7 +211,7 @@ Verification:
 - Commit `test(api): mutation hardening to >=95 (10.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 10.4: CI finalization and the npm-switch procedure
 
@@ -236,7 +236,7 @@ Freeze the pipeline (job names become contractual for branch protection), add th
 
 #### Agent prompt
 
-````
+```
 You are a senior release engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Freeze CI contracts and prepare (or execute) the switch to the
@@ -272,7 +272,7 @@ Verification:
 - Commit `ci(repo): contract freeze + npm switch procedure (10.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 10.5: Phase close: final audit, dashboards, PR with Copilot review
 
@@ -297,7 +297,7 @@ The repo-level close: besides the standard phase close, this PR declares the pla
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-10-docs-audit-hardening. This close also
@@ -329,7 +329,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after; plan reads complete.
 
 Completion Protocol: standard steps + the final phase-completion line.
-````
+```
 
 ## Completion log
 

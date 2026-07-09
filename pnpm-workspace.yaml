@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+
+# unrs-resolver is a native binary required by eslint-import-resolver-typescript
+# to resolve TypeScript path aliases; its postinstall script is trusted and required.
+onlyBuiltDependencies:
+  - unrs-resolver

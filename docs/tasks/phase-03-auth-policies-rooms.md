@@ -23,14 +23,14 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 3.1 | Branch + ticket pattern (issue, one-shot consume, specs) | 📋 | P0 | M | Phase 02 |
-| 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | 📋 | P0 | M | 3.1 |
-| 3.3 | Reauth policy lab + revocation set + kill switch | 📋 | P0 | L | 3.2 |
-| 3.4 | FIFO eviction lab + emitConnectionEvent toggle | 📋 | P0 | M | 3.2 |
-| 3.5 | Rooms module + anti-IDOR + decorators | 📋 | P0 | M | 3.2 |
-| 3.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 3.1-3.5 |
+| ID  | Task                                                          | Status | Priority | Size | Depends on |
+| --- | ------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | 📋     | P0       | M    | Phase 02   |
+| 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | 📋     | P0       | M    | 3.1        |
+| 3.3 | Reauth policy lab + revocation set + kill switch              | 📋     | P0       | L    | 3.2        |
+| 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | 📋     | P0       | M    | 3.2        |
+| 3.5 | Rooms module + anti-IDOR + decorators                         | 📋     | P0       | M    | 3.2        |
+| 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 📋     | P0       | S    | 3.1-3.5    |
 
 ## Tasks
 
@@ -58,7 +58,7 @@ Pattern B for clients that cannot send cookies cross-origin: an authenticated `P
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Adding the one-shot ticket auth pattern (Pattern B) for SSE
@@ -98,7 +98,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 03 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 3.2: Composing authenticator, bearer mint and auth-failure specs
 
@@ -126,7 +126,7 @@ One `IConnectionAuthenticator` to rule them all: dispatch by context (WS bearer 
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Three auth patterns must flow through ONE
@@ -165,7 +165,7 @@ Verification:
 - Commit `feat(api): composite authenticator + ws token mint (3.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 3.3: Reauthentication lab, revocation set and kill switch
 
@@ -195,7 +195,7 @@ Make long-session security observable: 15s reauth cycles against the Redis revoc
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Long-lived connections must react to credential revocation:
@@ -241,7 +241,7 @@ Verification:
 - Commit `feat(api): reauth lab + revocation + kill switch (3.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 3.4: FIFO eviction lab and emitConnectionEvent toggle
 
@@ -268,7 +268,7 @@ Prove the library's most counterintuitive policy: exceeding `maxConnectionsPerUs
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. FIFO eviction must be demonstrated exactly as the library
@@ -306,7 +306,7 @@ Verification:
 - Suites green; commit `feat(api): fifo eviction lab + connection-event toggle (3.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 3.5: Rooms, anti-IDOR guard and method decorators
 
@@ -334,7 +334,7 @@ Resource rooms (`composeRoomId`), join/leave endpoints (idempotent), the app-sid
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Rooms + the anti-IDOR guard the library deliberately leaves to
@@ -375,7 +375,7 @@ Verification:
 - Suites green; 100% coverage; commit `feat(api): rooms + anti-idor guard + decorators (3.5)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 3.6: Phase close: audit, dashboards, PR with Copilot review
 
@@ -400,7 +400,7 @@ Standard phase close; PR body lists the matrix rows landed.
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-03-auth-policies-rooms.
@@ -429,7 +429,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 

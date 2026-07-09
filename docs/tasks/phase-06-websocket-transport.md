@@ -22,14 +22,14 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 
 ## Task index
 
-| ID | Task | Status | Priority | Size | Depends on |
-|---|---|---|---|---|---|
-| 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | 📋 | P0 | L | Phase 05 |
-| 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof | 📋 | P0 | M | 6.1 |
-| 6.3 | Redis adapter + adapter-aware revocation + sticky sessions | 📋 | P0 | M | 6.1 |
-| 6.4 | Payload limits, WS CORS, error event, onError hook | 📋 | P1 | M | 6.1 |
-| 6.5 | WS e2e suite + transport parity proof | 📋 | P0 | M | 6.2-6.4 |
-| 6.6 | Phase close: audit, dashboards, PR + Copilot review | 📋 | P0 | S | 6.1-6.5 |
+| ID  | Task                                                        | Status | Priority | Size | Depends on |
+| --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
+| 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | 📋     | P0       | L    | Phase 05   |
+| 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | 📋     | P0       | M    | 6.1        |
+| 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | 📋     | P0       | M    | 6.1        |
+| 6.4 | Payload limits, WS CORS, error event, onError hook          | 📋     | P1       | M    | 6.1        |
+| 6.5 | WS e2e suite + transport parity proof                       | 📋     | P0       | M    | 6.2-6.4    |
+| 6.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 6.1-6.5    |
 
 ## Tasks
 
@@ -59,7 +59,7 @@ Boot the app with `REALTIME_TRANSPORT=websocket`: the library's adapter mechanis
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Boot the WebSocket profile of @bymax-one/nest-realtime with a
@@ -102,7 +102,7 @@ Verification:
 
 Completion Protocol: task status ✅ + checkboxes; Task index; header Progress; Phase 06 row in
 docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attribution.
-````
+```
 
 ### Task 6.2: Incident chat with @Subscribe and the SSE no-op proof
 
@@ -129,7 +129,7 @@ The bi-directional showcase: `chat.message` handled via the library's `@Subscrib
 
 #### Agent prompt
 
-````
+```
 You are a senior NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Client-to-server events via the library's @Subscribe decorator,
@@ -166,7 +166,7 @@ Verification:
 - Suites green; commit `feat(api): incident chat via @Subscribe (6.2)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 6.3: Redis adapter, adapter-aware revocation and sticky sessions
 
@@ -193,7 +193,7 @@ WS horizontal scaling: `websocket.redisAdapter.pubClient` wired from the shared 
 
 #### Agent prompt
 
-````
+```
 You are a senior infrastructure-minded NestJS engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Scale the WebSocket transport: redis adapter for message
@@ -232,7 +232,7 @@ Verification:
 - Commit `feat(api): ws redis adapter + sticky sessions + cross-node revocation (6.3)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 6.4: Payload limits, WS CORS, error event and onError hook
 
@@ -258,7 +258,7 @@ The rough edges that bite in production: an oversized client payload is dropped 
 
 #### Agent prompt
 
-````
+```
 You are a senior test engineer working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. Prove the WS guardrails: payload cap, WS-specific CORS, error
@@ -295,7 +295,7 @@ Verification:
 - Suite green; commit `test(api): ws payload, cors and error surfacing (6.4)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 6.5: Transport parity proof
 
@@ -320,7 +320,7 @@ The dual-transport thesis, executable: the emit/isolation e2e assertions from ph
 
 #### Agent prompt
 
-````
+```
 You are a senior test architect working on nest-realtime-example.
 
 PROJECT: nest-realtime-example. One suite, two transports, identical assertions: prove the
@@ -353,7 +353,7 @@ Verification:
 - Both parity specs green; commit `test(api): transport parity proof (6.5)`.
 
 Completion Protocol: standard steps.
-````
+```
 
 ### Task 6.6: Phase close: audit, dashboards, PR with Copilot review
 
@@ -377,7 +377,7 @@ Standard phase close; PR body lists matrix rows 5, 12, 36, 42-49, 53, 74.
 
 #### Agent prompt
 
-````
+```
 You are the phase-close engineer for nest-realtime-example.
 
 PROJECT: nest-realtime-example. Branch feat/phase-06-websocket-transport.
@@ -406,7 +406,7 @@ Constraints:
 Verification: `gh pr checks` green pre-merge; branch deleted after.
 
 Completion Protocol: standard steps + phase completion line.
-````
+```
 
 ## Completion log
 
