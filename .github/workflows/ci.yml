@@ -45,11 +45,17 @@ jobs:
 
       # Unit suites run sequentially, one app at a time, per the workspace's
       # memory-safety rule: two Jest/Vitest processes must never share a runner.
+      # Each config already pins maxWorkers to 50%; the heap cap is a further
+      # guard because the linked library is reloaded into every worker.
       - name: Unit tests (api)
         run: pnpm --filter @nest-realtime-example/api test
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Unit tests (web)
         run: pnpm --filter @nest-realtime-example/web test
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Build
         run: pnpm build

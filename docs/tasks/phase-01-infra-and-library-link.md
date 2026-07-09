@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 5 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 3 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
@@ -27,7 +27,7 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 | --- | --------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | ✅     | P0       | M    | Phase 00   |
 | 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | ✅     | P0       | S    | 1.1        |
-| 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | 📋     | P0       | M    | 1.2        |
+| 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | ✅     | P0       | M    | 1.2        |
 | 1.4 | Typed env config module + .env.example                                      | 📋     | P0       | M    | 1.1        |
 | 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 📋     | P0       | S    | 1.1-1.4    |
 
@@ -165,7 +165,7 @@ Completion Protocol: standard steps (status, index, header, plan §1 row, log, c
 
 ### Task 1.3: Subpath probe spec and honest CI tests
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 1.2
@@ -176,10 +176,10 @@ The first real tests: Jest in the api proving `.` and `./shared` resolve (ESM + 
 
 #### Acceptance criteria
 
-- [ ] `apps/api` Jest configured (`maxWorkers: '50%'`, coverage thresholds staged at 100 for implemented files) with `test/probe/subpaths.spec.ts` importing `BymaxRealtimeModule`, `RealtimeService` types from `.` and `RESERVED_EVENT_NAMES`, `ROOM_PREFIXES`, `composeRoomId` from `./shared`, via both `import` and `createRequire`.
-- [ ] `apps/web` Vitest configured (`maxWorkers` bounded) with a probe importing `useRealtime`, `RealtimeProvider` from `./react` and types from `./shared`.
-- [ ] `--passWithNoTests` removed from CI; unit steps run the real suites sequentially.
-- [ ] `pnpm test` green from clean clone (with the sibling library built).
+- [x] `apps/api` Jest configured (`maxWorkers: '50%'`, coverage collected with 100% thresholds; the bootstrap entry is excluded) with `test/probe/subpaths.spec.ts` importing `BymaxRealtimeModule`, `RealtimeService` from `.` (via both `import` and `createRequire`) and `RESERVED_EVENT_NAMES`, `ROOM_PREFIXES` from `./shared`. `composeRoomId` is imported from the root `.` subpath, not `./shared`: the shipped library exports the helper from the server subpath (spec drift, see the PR body).
+- [x] `apps/web` Vitest configured (jsdom, `maxWorkers: '50%'`) with a probe importing `useRealtime`, `useRealtimeConnection`, `usePresence`, `RealtimeProvider` from `./react` and types from `./shared`.
+- [x] `--passWithNoTests` removed from both app test scripts; the two CI unit steps run the real suites sequentially with a heap-cap guard.
+- [x] `pnpm test` green from a clean install (with the sibling library packed into `vendor/`).
 
 #### Files to create / modify
 
@@ -365,3 +365,4 @@ Completion Protocol: standard steps + phase completion line in the log.
 
 - 1.1 ✅ 2026-07-09 Branch, healthchecked redis:7-alpine compose service, and multi-stage non-root api Dockerfile (verified healthy + build exit 0).
 - 1.2 ✅ 2026-07-09 Linked the library into both apps via a committed pack tarball plus the Nest/WS/React peer sets; install and typecheck green.
+- 1.3 ✅ 2026-07-09 Subpath probes (api Jest CJS: `.` + `./shared`; web Vitest ESM: `./react` + `./shared`) with 100% coverage thresholds; removed passWithNoTests so CI runs real suites.
