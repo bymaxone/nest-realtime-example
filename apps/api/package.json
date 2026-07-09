@@ -29,17 +29,18 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0",
     "socket.io": "^4.0.0",
+    "tslib": "^2.6.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.0.0",
+    "@swc/core": "^1.7.0",
+    "@swc/jest": "^0.2.37",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.0",
     "eventsource": "^4.0.0",
     "jest": "^30.4.2",
-    "supertest": "^7.0.0",
-    "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2"
   }
 }

@@ -13,8 +13,19 @@ import type { Config } from 'jest';
 const config: Config = {
   rootDir: '.',
   testEnvironment: 'node',
+  setupFiles: ['reflect-metadata'],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
+    '^.+\\.tsx?$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: { syntax: 'typescript', decorators: true },
+          transform: { legacyDecorator: true, decoratorMetadata: true },
+          target: 'es2022',
+          keepClassNames: true,
+        },
+      },
+    ],
   },
   testMatch: ['<rootDir>/test/e2e/**/*.e2e-spec.ts'],
   maxWorkers: '50%',
