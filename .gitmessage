@@ -1,0 +1,30 @@
+# <type>(<scope>): <subject>
+#
+# <body, optional, explain WHY not WHAT>
+#
+# <footer, optional, e.g. "BREAKING CHANGE: ..." or issue references>
+#
+# --- Conventional Commits reference ---
+#
+# Types:
+#   feat      a new feature
+#   fix       a bug fix
+#   chore     tooling, dependencies, maintenance with no source behavior change
+#   docs      documentation only
+#   refactor  code change that neither fixes a bug nor adds a feature
+#   test      adding or correcting tests
+#   ci        CI/CD pipeline changes
+#   build     build system or external dependency changes
+#   perf      performance improvement
+#   style     formatting only, no logic change
+#
+# Scopes (this repository):
+#   repo      root manifests, workspace-wide tooling
+#   api       apps/api (NestJS backend)
+#   web       apps/web (Next.js frontend)
+#   infra     docker, compose, proxy configuration
+#   docs      docs/ content
+#   ci        .github/ workflows and automation
+#
+# Subject: imperative mood, no trailing period, keep the header under 100 chars.
+# Never add a Co-Authored-By or "Generated with" attribution line.

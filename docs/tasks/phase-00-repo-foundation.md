@@ -1,6 +1,6 @@
 # Phase 00: repo-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 00)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §5, §6, §19
 
@@ -27,7 +27,7 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 | --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 0.1 | Branch + pnpm workspace + root manifests                    | ✅     | P0       | S    | none       |
 | 0.2 | Strict TypeScript + ESLint flat config + Prettier           | ✅     | P0       | M    | 0.1        |
-| 0.3 | husky + commitlint + lint-staged + .gitmessage              | 📋     | P1       | S    | 0.1        |
+| 0.3 | husky + commitlint + lint-staged + .gitmessage              | ✅     | P1       | S    | 0.1        |
 | 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 📋     | P0       | M    | 0.2        |
 | 0.5 | README skeleton + docs cross-links                          | 📋     | P1       | S    | 0.1        |
 | 0.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 0.1-0.5    |
@@ -184,7 +184,7 @@ Completion Protocol: same 5 steps as Task 0.1 (status, index, header progress, p
 
 ### Task 0.3: husky, commitlint, lint-staged and .gitmessage
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: S
 - **Depends on**: 0.1
@@ -195,11 +195,11 @@ Local governance: Conventional Commits enforced at commit time, staged files lin
 
 #### Acceptance criteria
 
-- [ ] `.husky/pre-commit` runs lint-staged; `.husky/commit-msg` runs commitlint.
-- [ ] `commitlint.config.cjs` extends `@commitlint/config-conventional`.
-- [ ] lint-staged: eslint --fix + prettier --write on staged TS/JS/MD/JSON.
-- [ ] `.gitmessage` documents types + scopes (repo, api, web, infra, docs, ci).
-- [ ] A test commit with a malformed message is rejected locally (proven, then discarded).
+- [x] `.husky/pre-commit` runs lint-staged; `.husky/commit-msg` runs commitlint.
+- [x] `commitlint.config.cjs` extends `@commitlint/config-conventional`.
+- [x] lint-staged: eslint --fix + prettier --write on staged TS/JS/MD/JSON.
+- [x] `.gitmessage` documents types + scopes (repo, api, web, infra, docs, ci).
+- [x] A test commit with a malformed message is rejected locally (proven, then discarded).
 
 #### Files to create / modify
 
@@ -435,3 +435,4 @@ Completion Protocol: standard steps + append the phase-completion line to the Co
 
 - 0.1 ✅ 2026-07-09 workspace scaffold
 - 0.2 ✅ 2026-07-09 strict tsconfig base + eslint flat config + prettier, repo-wide format pass
+- 0.3 ✅ 2026-07-09 husky pre-commit/commit-msg hooks + commitlint + lint-staged + .gitmessage
