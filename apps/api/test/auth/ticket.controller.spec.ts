@@ -18,7 +18,7 @@ describe('TicketController', () => {
    * Issue contract.
    *
    * The controller must mint a ticket for exactly the caller's traits and expose
-   * only `{ ticket }` — never the traits — in the response body.
+   * only `{ ticket }` (never the traits) in the response body.
    */
   it('issues a ticket bound to the caller traits and returns only the id', async () => {
     const issue = jest.fn().mockResolvedValue('ticket-123');
