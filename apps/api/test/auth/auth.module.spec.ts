@@ -13,6 +13,9 @@ import { AuthModule } from '../../src/auth/auth.module';
 import { REVOCATION_STORE } from '../../src/auth/auth.tokens';
 import { SessionGuard } from '../../src/auth/session.guard';
 import { SessionService } from '../../src/auth/session.service';
+import { TicketAuthenticator } from '../../src/auth/ticket.authenticator';
+import { TicketController } from '../../src/auth/ticket.controller';
+import { TicketService } from '../../src/auth/ticket.service';
 import { APP_CONFIG } from '../../src/config/config.tokens';
 import { ConfigModule } from '../../src/config/config.module';
 import { buildTestConfig } from '../support/config.fixture';
@@ -31,8 +34,11 @@ describe('AuthModule', () => {
       .compile();
 
     expect(moduleRef.get(AuthController)).toBeInstanceOf(AuthController);
+    expect(moduleRef.get(TicketController)).toBeInstanceOf(TicketController);
     expect(moduleRef.get(SessionService)).toBeInstanceOf(SessionService);
     expect(moduleRef.get(SessionGuard)).toBeInstanceOf(SessionGuard);
+    expect(moduleRef.get(TicketService)).toBeInstanceOf(TicketService);
+    expect(moduleRef.get(TicketAuthenticator)).toBeInstanceOf(TicketAuthenticator);
     expect(moduleRef.get(REVOCATION_STORE)).toBeDefined();
 
     await moduleRef.close();

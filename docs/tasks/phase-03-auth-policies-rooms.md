@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 
@@ -25,7 +25,7 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 
 | ID  | Task                                                          | Status | Priority | Size | Depends on |
 | --- | ------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | 📋     | P0       | M    | Phase 02   |
+| 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | ✅     | P0       | M    | Phase 02   |
 | 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | 📋     | P0       | M    | 3.1        |
 | 3.3 | Reauth policy lab + revocation set + kill switch              | 📋     | P0       | L    | 3.2        |
 | 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | 📋     | P0       | M    | 3.2        |
@@ -36,7 +36,7 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 
 ### Task 3.1: Ticket pattern
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 02
@@ -47,10 +47,10 @@ Pattern B for clients that cannot send cookies cross-origin: an authenticated `P
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-03-auth-policies-rooms` created with `git switch -c`.
-- [ ] `POST /auth/ticket` (requires a valid session cookie) returns `{ ticket }`; Redis key `realtime:ticket:{id}` holds serialized traits, `EX 60`.
-- [ ] `TicketAuthenticator.authenticate` reads `ctx.query.ticket`, `GETDEL`s, returns traits or null.
-- [ ] Specs: happy path; second use fails; expired ticket fails; malformed ticket fails; traits never logged.
+- [x] Branch `feat/phase-03-auth-policies-rooms` created with `git switch -c`.
+- [x] `POST /auth/ticket` (requires a valid session cookie) returns `{ ticket }`; Redis key `realtime:ticket:{id}` holds serialized traits, `EX 60`.
+- [x] `TicketAuthenticator.authenticate` reads `ctx.query.ticket`, `GETDEL`s, returns traits or null.
+- [x] Specs: happy path; second use fails; expired ticket fails; malformed ticket fails; traits never logged.
 
 #### Files to create / modify
 
@@ -434,3 +434,5 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 3.1 ✅ 2026-07-09 one-shot ticket auth: `POST /auth/ticket`, Redis `GETDEL` consume (60s TTL), negative coverage

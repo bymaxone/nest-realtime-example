@@ -19,16 +19,21 @@ import { createRedisClient } from './redis.client';
 import { RedisRevocationStore } from './revocation.store';
 import { SessionGuard } from './session.guard';
 import { SessionService } from './session.service';
+import { TicketAuthenticator } from './ticket.authenticator';
+import { TicketController } from './ticket.controller';
+import { TicketService } from './ticket.service';
 
-/** Wires the demo auth endpoints, session signing and revocation store. */
+/** Wires the demo auth endpoints, session signing, tickets and revocation store. */
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, TicketController],
   providers: [
     SessionService,
     SessionGuard,
+    TicketService,
+    TicketAuthenticator,
     { provide: REDIS_CLIENT, useFactory: createRedisClient, inject: [APP_CONFIG] },
     { provide: REVOCATION_STORE, useClass: RedisRevocationStore },
   ],
-  exports: [SessionService, SessionGuard, REVOCATION_STORE],
+  exports: [SessionService, SessionGuard, TicketService, TicketAuthenticator, REVOCATION_STORE],
 })
 export class AuthModule {}
