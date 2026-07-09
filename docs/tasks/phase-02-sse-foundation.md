@@ -1,6 +1,6 @@
 # Phase 02: sse-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 5 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 👀 Review · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 02)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §9.2, §10, §11, §12.1, §12.2
 
@@ -31,7 +31,7 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 | 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | ✅     | P0       | L    | 2.2        |
 | 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | ✅     | P0       | M    | 2.3        |
 | 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | ✅     | P1       | M    | 2.3        |
-| 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 📋     | P0       | S    | 2.1-2.5    |
+| 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 👀     | P0       | S    | 2.1-2.5    |
 
 ## Tasks
 
@@ -398,7 +398,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 2.1-2.5
@@ -409,9 +409,9 @@ Standard phase close with one addition: record the matrix rows landed by this ph
 
 #### Acceptance criteria
 
-- [ ] Tasks 2.1-2.5 ✅, verifications re-run.
-- [ ] Dashboards synced; PR body lists matrix rows 1, 2, 4, 7, 10, 19, 21, 22, 29, 30, 37, 52, 67, 68.
-- [ ] Copilot review requested and findings addressed; merged on green; branch deleted.
+- [x] Tasks 2.1-2.5 ✅, verifications re-run (typecheck, lint, format, build, unit 100%, e2e all green).
+- [x] Dashboards synced; PR body lists matrix rows 1, 2, 4, 7, 10, 19, 21, 22, 29, 30, 37, 52, 67, 68.
+- [ ] Copilot review requested and findings addressed; merged on green; branch deleted. _(review requested; merge owned by the orchestrator)_
 
 #### Files to create / modify
 
@@ -461,3 +461,4 @@ Completion Protocol: standard steps + phase completion line.
 - 2.3 ✅ 2026-07-09 Canonical forRootAsync wiring + options factory (sse, /api/events via global api prefix), SSE connect e2e (client-safe traits, no metadata leak), sync forRoot + negative-boot specs. Vendored library patched to inject the SSE controller handler (esbuild build shipped no decorator metadata).
 - 2.4 ✅ 2026-07-09 Emit console (user/tenant/room/broadcast, reserved-name-safe) + order/deployment domain simulators; two-tenant isolation e2e proves tenant/user/broadcast scoping with lexicographically increasing ids.
 - 2.5 ✅ 2026-07-09 Audit feed via IConnectionLifecycleHooks (capped ring, instance-tagged, service metadata, kind filter) + heartbeat honesty e2e (raw `: keepalive` comments, no id/event, zero listener fires).
+- 2.6 👀 2026-07-09 Phase close: acceptance audit (matrix rows 1,2,4,7,10,19,21,22,29,30,37,52,67,68), dashboards synced, all gates green, PR opened with Copilot review requested (merge owned by orchestrator).
