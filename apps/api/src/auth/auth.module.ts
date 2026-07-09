@@ -1,12 +1,12 @@
 /**
- * @fileoverview Auth module: session signing, revocation store and the guard.
+ * @fileoverview Auth module: session signing, all three authenticators and the composite.
  * @layer module
  *
- * Provides the session service, the Redis client and revocation store, and the
- * REST session guard, exporting the pieces the realtime wiring needs to build the
- * `CookieSessionAuthenticator` (registered there as an extra provider). The
- * authenticator itself is not provided here so a single instance is owned by the
- * realtime module.
+ * Provides the session service, the Redis client and revocation store, the demo
+ * auth endpoints (login/logout, ticket issue, ws-token mint) and every
+ * `IConnectionAuthenticator` pattern. The `CompositeAuthenticator` is the single
+ * authenticator the realtime wiring injects; `RevalidationStatsService` is
+ * exported so the reauth lab can read the cache-reduction counters.
  */
 
 import { Module } from '@nestjs/common';
@@ -15,25 +15,44 @@ import { APP_CONFIG } from '../config/config.tokens';
 
 import { AuthController } from './auth.controller';
 import { REDIS_CLIENT, REVOCATION_STORE } from './auth.tokens';
+import { BearerAuthenticator } from './bearer.authenticator';
+import { CompositeAuthenticator } from './composite.authenticator';
+import { CookieSessionAuthenticator } from './cookie-session.authenticator';
 import { createRedisClient } from './redis.client';
+import { RevalidationStatsService } from './revalidation-stats.service';
 import { RedisRevocationStore } from './revocation.store';
 import { SessionGuard } from './session.guard';
 import { SessionService } from './session.service';
 import { TicketAuthenticator } from './ticket.authenticator';
 import { TicketController } from './ticket.controller';
 import { TicketService } from './ticket.service';
+import { WsTokenController } from './ws-token.controller';
+import { WsTokenService } from './ws-token.service';
 
-/** Wires the demo auth endpoints, session signing, tickets and revocation store. */
+/** Wires the demo auth endpoints, session signing, tickets, bearer and the composite. */
 @Module({
-  controllers: [AuthController, TicketController],
+  controllers: [AuthController, TicketController, WsTokenController],
   providers: [
     SessionService,
     SessionGuard,
     TicketService,
+    WsTokenService,
+    RevalidationStatsService,
+    CookieSessionAuthenticator,
     TicketAuthenticator,
+    BearerAuthenticator,
+    CompositeAuthenticator,
     { provide: REDIS_CLIENT, useFactory: createRedisClient, inject: [APP_CONFIG] },
     { provide: REVOCATION_STORE, useClass: RedisRevocationStore },
   ],
-  exports: [SessionService, SessionGuard, TicketService, TicketAuthenticator, REVOCATION_STORE],
+  exports: [
+    SessionService,
+    SessionGuard,
+    TicketService,
+    WsTokenService,
+    RevalidationStatsService,
+    CompositeAuthenticator,
+    REVOCATION_STORE,
+  ],
 })
 export class AuthModule {}

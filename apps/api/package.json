@@ -41,6 +41,7 @@
     "@types/supertest": "^6.0.0",
     "eventsource": "^4.0.0",
     "jest": "^30.4.2",
+    "supertest": "^7.1.4",
     "ts-node": "^10.9.2"
   }
 }

@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 
@@ -26,7 +26,7 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 | ID  | Task                                                          | Status | Priority | Size | Depends on |
 | --- | ------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | ✅     | P0       | M    | Phase 02   |
-| 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | 📋     | P0       | M    | 3.1        |
+| 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | ✅     | P0       | M    | 3.1        |
 | 3.3 | Reauth policy lab + revocation set + kill switch              | 📋     | P0       | L    | 3.2        |
 | 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | 📋     | P0       | M    | 3.2        |
 | 3.5 | Rooms module + anti-IDOR + decorators                         | 📋     | P0       | M    | 3.2        |
@@ -102,7 +102,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 3.2: Composing authenticator, bearer mint and auth-failure specs
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 3.1
@@ -113,11 +113,11 @@ One `IConnectionAuthenticator` to rule them all: dispatch by context (WS bearer 
 
 #### Acceptance criteria
 
-- [ ] `CompositeAuthenticator` routes: `ctx.transport === 'websocket'` + token present -> bearer; `ctx.query.ticket` -> ticket; else cookie. `revalidate` delegates to the cookie/bearer revocation check.
-- [ ] `POST /auth/ws-token` mints a 10 minute HMAC token (node:crypto), verified by `BearerAuthenticator` (structure ready; full WS use in phase 06).
-- [ ] Wiring factory now injects `CompositeAuthenticator` (single option unchanged in shape).
-- [ ] E2E: unauthenticated `/api/events` returns 401 (browser will not retry a fatal 401, documented in the spec assertion message).
-- [ ] Matrix rows 3 (extraProviders now carry the composite), 13, 69, 72 satisfied.
+- [x] `CompositeAuthenticator` routes: `ctx.transport === 'websocket'` + token present -> bearer; `ctx.query.ticket` -> ticket; else cookie. `revalidate` delegates to the cookie/bearer revocation check.
+- [x] `POST /auth/ws-token` mints a 10 minute HMAC token (node:crypto), verified by `BearerAuthenticator` (structure ready; full WS use in phase 06).
+- [x] Wiring factory now injects `CompositeAuthenticator` (single option unchanged in shape).
+- [x] E2E: unauthenticated `/api/events` returns 401 (browser will not retry a fatal 401, documented in the spec assertion message).
+- [x] Matrix rows 3 (extraProviders now carry the composite), 13, 69, 72 satisfied.
 
 #### Files to create / modify
 
@@ -436,3 +436,4 @@ Completion Protocol: standard steps + phase completion line.
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
 
 - 3.1 ✅ 2026-07-09 one-shot ticket auth: `POST /auth/ticket`, Redis `GETDEL` consume (60s TTL), negative coverage
+- 3.2 ✅ 2026-07-09 composite authenticator (cookie/ticket/bearer dispatch) + `POST /auth/ws-token` mint; SSE 401 + ticket-path e2e

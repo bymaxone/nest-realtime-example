@@ -11,7 +11,7 @@
 
 ## 1. Progress dashboard
 
-> **Progress:** 3 / 11 phases complete (27%) · 18 / 60 tasks
+> **Progress:** 3 / 11 phases complete (27%) · 19 / 60 tasks
 > **Active phase:** phase 03
 > **Blockers:** none
 
@@ -20,7 +20,7 @@
 | 00  | repo-foundation        | `tasks/phase-00-repo-foundation.md`        | ✅ Done        | 6/6      | M    | 2026-07-09   |
 | 01  | infra-and-library-link | `tasks/phase-01-infra-and-library-link.md` | ✅ Done        | 5/5      | M    | 2026-07-09   |
 | 02  | sse-foundation         | `tasks/phase-02-sse-foundation.md`         | ✅ Done        | 6/6      | L    | 2026-07-09   |
-| 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | 🔄 In Progress | 1/6      | L    | 2026-07-09   |
+| 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | 🔄 In Progress | 2/6      | L    | 2026-07-09   |
 | 04  | replay-and-offline     | `tasks/phase-04-replay-and-offline.md`     | 📋 ToDo        | 0/5      | M    | 2026-07-06   |
 | 05  | scaling-cluster        | `tasks/phase-05-scaling-cluster.md`        | 📋 ToDo        | 0/6      | L    | 2026-07-06   |
 | 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | 📋 ToDo        | 0/6      | L    | 2026-07-06   |
