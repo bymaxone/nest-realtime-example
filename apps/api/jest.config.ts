@@ -7,9 +7,9 @@
  * otherwise load its own copy of the compiled module graph.
  *
  * Coverage is collected on every run and pinned to 100% so any shipped source
- * file stays fully exercised. The bootstrap entry is excluded because a NestJS
- * composition root is proven by end-to-end runs against a live server, not by
- * unit coverage.
+ * file stays fully exercised. The package entry point is excluded because it is
+ * the process bootstrap, which is proven by end-to-end runs against a live
+ * server rather than by unit coverage.
  */
 
 import type { Config } from 'jest';
@@ -23,7 +23,7 @@ const config: Config = {
   testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/test/**/*.spec.ts'],
   maxWorkers: '50%',
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!src/main.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts'],
   coverageThreshold: {
     global: { branches: 100, functions: 100, lines: 100, statements: 100 },
   },

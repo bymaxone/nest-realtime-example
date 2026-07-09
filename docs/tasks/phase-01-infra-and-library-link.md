@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 🔄 In Progress · **Progress**: 4 / 5 tasks · **Last updated**: 2026-07-09
+> **Status**: 👀 Review · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
@@ -29,7 +29,7 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 | 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | ✅     | P0       | S    | 1.1        |
 | 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | ✅     | P0       | M    | 1.2        |
 | 1.4 | Typed env config module + .env.example                                      | ✅     | P0       | M    | 1.1        |
-| 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 📋     | P0       | S    | 1.1-1.4    |
+| 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 👀     | P0       | S    | 1.1-1.4    |
 
 ## Tasks
 
@@ -304,7 +304,7 @@ Completion Protocol: standard steps.
 
 ### Task 1.5: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 1.1-1.4
@@ -315,9 +315,9 @@ Standard phase close: re-verify criteria, sync dashboards, PR, Copilot review, m
 
 #### Acceptance criteria
 
-- [ ] Tasks 1.1-1.4 ✅ with verifications re-run.
-- [ ] Dashboards synced (this header, plan §1, tasks README).
-- [ ] PR merged with Copilot findings addressed and CI green; branch deleted.
+- [x] Tasks 1.1-1.4 ✅ with verifications re-run (typecheck, lint, format, build, tests at 100% coverage, redis healthy, Dockerfile builds non-root, aggregated boot error unit-proven, invariant greps clean).
+- [x] Dashboards synced (this header, plan §1, tasks README).
+- [x] PR opened with the GitHub Copilot code review requested; code review and security review at zero findings. Merge on green CI and branch deletion are owned by the orchestrator under this run's architecture override.
 
 #### Files to create / modify
 
@@ -367,3 +367,4 @@ Completion Protocol: standard steps + phase completion line in the log.
 - 1.2 ✅ 2026-07-09 Linked the library into both apps via a committed pack tarball plus the Nest/WS/React peer sets; install and typecheck green.
 - 1.3 ✅ 2026-07-09 Subpath probes (api Jest CJS: `.` + `./shared`; web Vitest ESM: `./react` + `./shared`) with 100% coverage thresholds; removed passWithNoTests so CI runs real suites.
 - 1.4 ✅ 2026-07-09 Typed, deep-frozen env config module (zod schema, aggregated value-safe boot error, APP_CONFIG Symbol, global Nest module) with .env.example and 100%-covered specs.
+- 1.5 👀 2026-07-09 Phase close: re-ran every gate green, synced all three dashboards, opened the PR and requested the Copilot review (merge owned by the orchestrator).
