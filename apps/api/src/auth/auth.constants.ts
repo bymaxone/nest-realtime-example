@@ -21,3 +21,6 @@ export const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
  * not a long-lived session.
  */
 export const WS_TOKEN_TTL_SECONDS = 10 * 60;
+
+/** Role a caller must hold to reach an admin-only endpoint (revoke, broadcast). */
+export const ADMIN_ROLE = 'admin';

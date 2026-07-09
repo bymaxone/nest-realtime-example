@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 
@@ -27,7 +27,7 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 | --- | ------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | ✅     | P0       | M    | Phase 02   |
 | 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | ✅     | P0       | M    | 3.1        |
-| 3.3 | Reauth policy lab + revocation set + kill switch              | 📋     | P0       | L    | 3.2        |
+| 3.3 | Reauth policy lab + revocation set + kill switch              | ✅     | P0       | L    | 3.2        |
 | 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | 📋     | P0       | M    | 3.2        |
 | 3.5 | Rooms module + anti-IDOR + decorators                         | 📋     | P0       | M    | 3.2        |
 | 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 📋     | P0       | S    | 3.1-3.5    |
@@ -169,7 +169,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.3: Reauthentication lab, revocation set and kill switch
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: 3.2
@@ -180,13 +180,13 @@ Make long-session security observable: 15s reauth cycles against the Redis revoc
 
 #### Acceptance criteria
 
-- [ ] `POST /auth/revoke/:userId` / `DELETE /auth/revoke/:userId` manage `realtime:revoked:{userId}`.
-- [ ] Reauth policy wired from config (`REAUTH_INTERVAL_SECONDS`, `REAUTH_ON_FAILURE`, `cacheTtlMs`); a revalidation counter (per user) is exposed at `GET /labs/reauth/stats` proving the cache reduces checks.
-- [ ] E2E (`'disconnect'` mode): connect, revoke, stream closes within ~2 intervals; audit feed shows `reauth-failed`.
-- [ ] E2E (`'event'` mode profile): client receives `connection:reauthentication-failed` `{ reason }` before the close.
-- [ ] `GET /connections` lists the instance's active connections (id, user, tenant, transport, connectedAt) via the library's documented introspection surface (or app-side tracking from hooks if the library exposes none; note which path was taken in the PR body).
-- [ ] `POST /connections/:id/disconnect` closes that connection (`USER_LOGGED_OUT` reason observable client-side).
-- [ ] Matrix rows 14, 15, 16, 17 (single instance half), 35, 54, 70 satisfied.
+- [x] `POST /auth/revoke/:userId` / `DELETE /auth/revoke/:userId` manage `realtime:revoked:{userId}`.
+- [x] Reauth policy wired from config (`REAUTH_INTERVAL_SECONDS`, `REAUTH_ON_FAILURE`, `cacheTtlMs`); a revalidation counter (per user) is exposed at `GET /labs/reauth/stats` proving the cache reduces checks.
+- [x] E2E (`'disconnect'` mode): connect, revoke, stream closes within ~2 intervals; audit feed shows `reauth-failed`.
+- [x] E2E (`'event'` mode profile): client receives `connection:reauthentication-failed` `{ reason }` before the close.
+- [x] `GET /connections` lists the instance's active connections (id, user, tenant, transport, connectedAt) via the library's documented introspection surface (the exported `ConnectionRegistry`; no app-side tracking needed).
+- [x] `POST /connections/:id/disconnect` closes that connection (`USER_LOGGED_OUT` reason observable client-side); ownership-guarded (anti-IDOR).
+- [x] Matrix rows 14, 15, 16, 17 (single instance half), 35, 54, 70 satisfied.
 
 #### Files to create / modify
 
@@ -437,3 +437,4 @@ Completion Protocol: standard steps + phase completion line.
 
 - 3.1 ✅ 2026-07-09 one-shot ticket auth: `POST /auth/ticket`, Redis `GETDEL` consume (60s TTL), negative coverage
 - 3.2 ✅ 2026-07-09 composite authenticator (cookie/ticket/bearer dispatch) + `POST /auth/ws-token` mint; SSE 401 + ticket-path e2e
+- 3.3 ✅ 2026-07-09 reauth policy (both modes) + Redis revocation set + ownership-guarded kill switch + `GET /connections` + reauth-cache stats

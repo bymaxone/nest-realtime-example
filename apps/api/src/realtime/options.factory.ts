@@ -44,6 +44,11 @@ export function buildRealtimeOptions(
       maxConnectionsPerUser: config.realtime.maxConnectionsPerUser,
       emitConnectionEvent: config.realtime.emitConnectionEvent,
     },
+    reauthenticationPolicy: {
+      intervalSeconds: config.reauth.intervalSeconds,
+      onFailure: config.reauth.onFailure,
+      cacheTtlMs: config.reauth.cacheTtlMs,
+    },
   };
   return hooks ? { ...options, hooks } : options;
 }

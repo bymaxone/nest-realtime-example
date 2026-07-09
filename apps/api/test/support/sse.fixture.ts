@@ -69,3 +69,29 @@ export function nextEvent(
     );
   });
 }
+
+/**
+ * Resolve once the server closes the stream (the EventSource errors), then close
+ * the client so it does not silently reconnect and reopen the connection.
+ *
+ * @param source - The EventSource to watch.
+ * @param timeoutMs - How long to wait before rejecting.
+ * @returns A promise that resolves when the stream is torn down server-side.
+ */
+export function waitForClose(
+  source: EventSource,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timed out waiting for close')), timeoutMs);
+    source.addEventListener(
+      'error',
+      () => {
+        clearTimeout(timer);
+        source.close();
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}

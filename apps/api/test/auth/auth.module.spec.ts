@@ -8,10 +8,13 @@
 
 import { Test } from '@nestjs/testing';
 
+import { AdminGuard } from '../../src/auth/admin.guard';
 import { AuthController } from '../../src/auth/auth.controller';
 import { AuthModule } from '../../src/auth/auth.module';
 import { REVOCATION_STORE } from '../../src/auth/auth.tokens';
 import { CompositeAuthenticator } from '../../src/auth/composite.authenticator';
+import { ReauthLabController } from '../../src/auth/reauth-lab.controller';
+import { RevocationController } from '../../src/auth/revocation.controller';
 import { RevalidationStatsService } from '../../src/auth/revalidation-stats.service';
 import { SessionGuard } from '../../src/auth/session.guard';
 import { SessionService } from '../../src/auth/session.service';
@@ -40,8 +43,11 @@ describe('AuthModule', () => {
     expect(moduleRef.get(AuthController)).toBeInstanceOf(AuthController);
     expect(moduleRef.get(TicketController)).toBeInstanceOf(TicketController);
     expect(moduleRef.get(WsTokenController)).toBeInstanceOf(WsTokenController);
+    expect(moduleRef.get(RevocationController)).toBeInstanceOf(RevocationController);
+    expect(moduleRef.get(ReauthLabController)).toBeInstanceOf(ReauthLabController);
     expect(moduleRef.get(SessionService)).toBeInstanceOf(SessionService);
     expect(moduleRef.get(SessionGuard)).toBeInstanceOf(SessionGuard);
+    expect(moduleRef.get(AdminGuard)).toBeInstanceOf(AdminGuard);
     expect(moduleRef.get(TicketService)).toBeInstanceOf(TicketService);
     expect(moduleRef.get(TicketAuthenticator)).toBeInstanceOf(TicketAuthenticator);
     expect(moduleRef.get(WsTokenService)).toBeInstanceOf(WsTokenService);

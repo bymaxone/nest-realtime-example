@@ -13,13 +13,16 @@ import { Module } from '@nestjs/common';
 
 import { APP_CONFIG } from '../config/config.tokens';
 
+import { AdminGuard } from './admin.guard';
 import { AuthController } from './auth.controller';
 import { REDIS_CLIENT, REVOCATION_STORE } from './auth.tokens';
 import { BearerAuthenticator } from './bearer.authenticator';
 import { CompositeAuthenticator } from './composite.authenticator';
 import { CookieSessionAuthenticator } from './cookie-session.authenticator';
+import { ReauthLabController } from './reauth-lab.controller';
 import { createRedisClient } from './redis.client';
 import { RevalidationStatsService } from './revalidation-stats.service';
+import { RevocationController } from './revocation.controller';
 import { RedisRevocationStore } from './revocation.store';
 import { SessionGuard } from './session.guard';
 import { SessionService } from './session.service';
@@ -31,10 +34,17 @@ import { WsTokenService } from './ws-token.service';
 
 /** Wires the demo auth endpoints, session signing, tickets, bearer and the composite. */
 @Module({
-  controllers: [AuthController, TicketController, WsTokenController],
+  controllers: [
+    AuthController,
+    TicketController,
+    WsTokenController,
+    RevocationController,
+    ReauthLabController,
+  ],
   providers: [
     SessionService,
     SessionGuard,
+    AdminGuard,
     TicketService,
     WsTokenService,
     RevalidationStatsService,
@@ -48,6 +58,7 @@ import { WsTokenService } from './ws-token.service';
   exports: [
     SessionService,
     SessionGuard,
+    AdminGuard,
     TicketService,
     WsTokenService,
     RevalidationStatsService,

@@ -50,6 +50,26 @@ describe('buildRealtimeOptions', () => {
   });
 
   /**
+   * Reauthentication policy.
+   *
+   * The reauth interval, failure mode and positive-cache TTL must all be sourced
+   * from the frozen config, so the reauth lab is driven by env, not literals.
+   */
+  it('wires the reauthentication policy from configuration', () => {
+    const config = buildTestConfig({
+      reauth: { intervalSeconds: 2, onFailure: 'event', cacheTtlMs: 0 },
+    });
+
+    const options = buildRealtimeOptions(config, authenticator);
+
+    expect(options.reauthenticationPolicy).toEqual({
+      intervalSeconds: 2,
+      onFailure: 'event',
+      cacheTtlMs: 0,
+    });
+  });
+
+  /**
    * Tenant resolution.
    *
    * The resolver must map an auth result to its tenant id, and pass through

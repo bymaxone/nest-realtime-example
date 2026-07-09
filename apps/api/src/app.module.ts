@@ -12,6 +12,7 @@ import { Module } from '@nestjs/common';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from './config/config.module';
+import { ConnectionsModule } from './connections/connections.module';
 import { DomainModule } from './domain/domain.module';
 import { EmitModule } from './emit/emit.module';
 import { HealthModule } from './health/health.module';
@@ -27,6 +28,7 @@ import { RealtimeWiringModule } from './realtime/wiring.module';
     EmitModule,
     DomainModule,
     AuditModule,
+    ConnectionsModule,
   ],
 })
 export class AppModule {}

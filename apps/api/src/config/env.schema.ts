@@ -22,6 +22,7 @@ const MAX_CONNECTIONS_PER_USER = 1000;
 const MIN_WS_BUFFER_BYTES = 1024;
 const MAX_WS_BUFFER_BYTES = 10485760;
 const MAX_REAUTH_INTERVAL_SECONDS = 86400;
+const MAX_REAUTH_CACHE_TTL_MS = 3600000;
 const MIN_SESSION_SECRET_LENGTH = 16;
 
 /** A URL that must use the `redis:` or `rediss:` scheme. */
@@ -76,6 +77,10 @@ export const envSchema = z.object({
     .max(MAX_REAUTH_INTERVAL_SECONDS)
     .default(15),
   REAUTH_ON_FAILURE: z.enum(['disconnect', 'event']).default('disconnect'),
+  // Kept at or below `REAUTH_INTERVAL_SECONDS * 1000` so revocation is caught on
+  // the next cycle; 0 disables the positive cache and re-checks every cycle. The
+  // library warns when this exceeds the interval (the cache would weaken reauth).
+  REAUTH_CACHE_TTL_MS: z.coerce.number().int().min(0).max(MAX_REAUTH_CACHE_TTL_MS).default(10000),
   REDIS_URL: z
     .string()
     .regex(REDIS_URL_PATTERN, 'must be a redis:// or rediss:// URL')
