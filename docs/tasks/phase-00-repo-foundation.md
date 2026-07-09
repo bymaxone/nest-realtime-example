@@ -369,7 +369,7 @@ Completion Protocol: standard 5 steps.
 
 ### Task 0.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 🔄 In Progress
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 0.1-0.5
@@ -380,8 +380,8 @@ Close the phase: verify every acceptance criterion, sync dashboards, open the PR
 
 #### Acceptance criteria
 
-- [ ] Every task 0.1-0.5 is ✅ with criteria ticked.
-- [ ] Phase header + plan §1 dashboard + tasks README index all show 6/6.
+- [ ] Every task 0.1-0.5 is ✅ with criteria ticked. 0.1, 0.2, 0.3, 0.5 are ✅; 0.4 is 🟡 pending the one item that only the live PR can prove (ci green, codeql/scorecard skipped).
+- [x] Phase header + plan §1 dashboard + tasks README index all reflect current progress.
 - [ ] PR opened, Copilot review requested, all findings addressed.
 - [ ] CI green; codeql/scorecard skipped (private); merged with `--squash --delete-branch`.
 
@@ -438,3 +438,4 @@ Completion Protocol: standard steps + append the phase-completion line to the Co
 - 0.3 ✅ 2026-07-09 husky pre-commit/commit-msg hooks + commitlint + lint-staged + .gitmessage
 - 0.4 🟡 2026-07-09 ci.yml + gated codeql/scorecard + dependabot committed; final PR-green check lands in 0.6
 - 0.5 ✅ 2026-07-09 README skeleton + MIT license
+- 0.6 🔄 2026-07-09 audit complete, gates green on a clean clone, code-review and security-review both zero-finding; PR opened next

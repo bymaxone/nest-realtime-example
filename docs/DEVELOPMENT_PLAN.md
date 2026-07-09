@@ -11,7 +11,7 @@
 
 ## 1. Progress dashboard
 
-> **Progress:** 0 / 11 phases complete (0%) · 0 / 60 tasks
+> **Progress:** 0 / 11 phases complete (0%) · 4 / 60 tasks
 > **Active phase:** phase 00
 > **Blockers:** none
 
