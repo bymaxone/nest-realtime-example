@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 👀 Review · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: ✅ Done · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 

@@ -11,7 +11,7 @@
 | 00    | `phase-00-repo-foundation.md`        | 6/6       | ✅     | pnpm workspace, strict tooling, husky/commitlint, CI from day one (public-only workflows visibility-gated)               |
 | 01    | `phase-01-infra-and-library-link.md` | 5/5       | ✅     | redis:7 compose, Dockerfile, `file:` library link, subpath probe, typed env                                              |
 | 02    | `phase-02-sse-foundation.md`         | 6/6       | ✅     | SSE profile end to end: cookie auth, canonical `forRootAsync`, emit console, tenant isolation, audit feed, heartbeat lab |
-| 03    | `phase-03-auth-policies-rooms.md`    | 6/6       | 👀     | ticket + bearer patterns, reauth policy, revocation, FIFO eviction, rooms, anti-IDOR, decorators                         |
+| 03    | `phase-03-auth-policies-rooms.md`    | 6/6       | ✅     | ticket + bearer patterns, reauth policy, revocation, FIFO eviction, rooms, anti-IDOR, decorators                         |
 | 04    | `phase-04-replay-and-offline.md`     | 0/5       | 📋     | Last-Event-ID replay lab, RedisOfflineQueue, buffer-miss fallback, id ordering                                           |
 | 05    | `phase-05-scaling-cluster.md`        | 0/6       | 📋     | RedisRealtimePubSub, nginx SSE-safe cluster, loop-prevention counters, cross-instance revocation, degradation, presence  |
 | 06    | `phase-06-websocket-transport.md`    | 0/6       | 📋     | WS profile, IoAdapter namespace, bearer auth, @Subscribe chat, redis-adapter, sticky sessions, payload lab               |
