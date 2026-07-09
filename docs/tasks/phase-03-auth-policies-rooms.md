@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 
@@ -28,7 +28,7 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 | 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | ✅     | P0       | M    | Phase 02   |
 | 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | ✅     | P0       | M    | 3.1        |
 | 3.3 | Reauth policy lab + revocation set + kill switch              | ✅     | P0       | L    | 3.2        |
-| 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | 📋     | P0       | M    | 3.2        |
+| 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | ✅     | P0       | M    | 3.2        |
 | 3.5 | Rooms module + anti-IDOR + decorators                         | 📋     | P0       | M    | 3.2        |
 | 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 📋     | P0       | S    | 3.1-3.5    |
 
@@ -245,7 +245,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.4: FIFO eviction lab and emitConnectionEvent toggle
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 3.2
@@ -256,10 +256,10 @@ Prove the library's most counterintuitive policy: exceeding `maxConnectionsPerUs
 
 #### Acceptance criteria
 
-- [ ] E2E: open connections A, B, C for the same user in order; A closes with the eviction reason observable client-side; B and C stay; a 4th evicts B; HTTP status for every connect is success (never 429).
-- [ ] `GET /labs/eviction/timeline` returns the eviction history (from hooks/disconnect reasons) for the frontend visualizer.
-- [ ] A test profile with `REALTIME_EMIT_CONNECTION_EVENT=false` boots in-process and the e2e asserts no `connection:established` arrives while emits still flow.
-- [ ] Matrix rows 18, 20, 71 satisfied.
+- [x] E2E: open connections A, B, C for the same user in order; A closes with the eviction reason observable client-side; B and C stay; a 4th evicts B; HTTP status for every connect is success (never 429).
+- [x] `GET /labs/eviction/timeline` returns the eviction history (from hooks/disconnect reasons) for the frontend visualizer.
+- [x] A test profile with `REALTIME_EMIT_CONNECTION_EVENT=false` boots in-process and the e2e asserts no `connection:established` arrives while emits still flow.
+- [x] Matrix rows 18, 20, 71 satisfied.
 
 #### Files to create / modify
 
@@ -438,3 +438,4 @@ Completion Protocol: standard steps + phase completion line.
 - 3.1 ✅ 2026-07-09 one-shot ticket auth: `POST /auth/ticket`, Redis `GETDEL` consume (60s TTL), negative coverage
 - 3.2 ✅ 2026-07-09 composite authenticator (cookie/ticket/bearer dispatch) + `POST /auth/ws-token` mint; SSE 401 + ticket-path e2e
 - 3.3 ✅ 2026-07-09 reauth policy (both modes) + Redis revocation set + ownership-guarded kill switch + `GET /connections` + reauth-cache stats
+- 3.4 ✅ 2026-07-09 FIFO eviction timeline (composite lifecycle hooks) proving oldest-evicted/newest-admitted (never 429) + `emitConnectionEvent=false` toggle e2e

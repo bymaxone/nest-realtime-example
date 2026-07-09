@@ -10,14 +10,16 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module';
+import { LifecycleModule } from '../lifecycle/lifecycle.module';
 
 import { ConnectionsController } from './connections.controller';
 import { ConnectionsService } from './connections.service';
+import { EvictionLabController } from './eviction-lab.controller';
 
-/** Wires the connection introspection and kill-switch endpoints. */
+/** Wires the connection introspection, kill-switch and eviction-timeline endpoints. */
 @Module({
-  imports: [AuthModule],
-  controllers: [ConnectionsController],
+  imports: [AuthModule, LifecycleModule],
+  controllers: [ConnectionsController, EvictionLabController],
   providers: [ConnectionsService],
 })
 export class ConnectionsModule {}

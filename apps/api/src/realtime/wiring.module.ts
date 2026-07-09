@@ -17,12 +17,12 @@
 import { BymaxRealtimeModule } from '@bymax-one/nest-realtime';
 import { Module } from '@nestjs/common';
 
-import { AuditModule } from '../audit/audit.module';
-import { AuditService } from '../audit/audit.service';
 import { AuthModule } from '../auth/auth.module';
 import { CompositeAuthenticator } from '../auth/composite.authenticator';
 import { APP_CONFIG } from '../config/config.tokens';
 import type { AppConfig } from '../config/env.loader';
+import { CompositeLifecycleHooks } from '../lifecycle/lifecycle-hooks';
+import { LifecycleModule } from '../lifecycle/lifecycle.module';
 
 import { buildRealtimeOptions } from './options.factory';
 
@@ -31,15 +31,15 @@ import { buildRealtimeOptions } from './options.factory';
   imports: [
     BymaxRealtimeModule.forRootAsync({
       transport: 'sse',
-      imports: [AuthModule, AuditModule],
-      inject: [APP_CONFIG, CompositeAuthenticator, AuditService],
+      imports: [AuthModule, LifecycleModule],
+      inject: [APP_CONFIG, CompositeAuthenticator, CompositeLifecycleHooks],
       // The library types useFactory as (...args: unknown[]); the injected values
       // are exactly the `inject` tuple, so narrow it to the concrete dependencies.
       useFactory: (...args: unknown[]) => {
         const [config, authenticator, hooks] = args as [
           AppConfig,
           CompositeAuthenticator,
-          AuditService,
+          CompositeLifecycleHooks,
         ];
         return buildRealtimeOptions(config, authenticator, hooks);
       },

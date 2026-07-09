@@ -12,6 +12,7 @@ import { APP_CONFIG } from '../../src/config/config.tokens';
 import { ConfigModule } from '../../src/config/config.module';
 import { ConnectionsController } from '../../src/connections/connections.controller';
 import { ConnectionsModule } from '../../src/connections/connections.module';
+import { EvictionLabController } from '../../src/connections/eviction-lab.controller';
 import { buildTestConfig } from '../support/config.fixture';
 import { mockRealtimeService, realtimeStubModule } from '../support/realtime.fixture';
 
@@ -31,6 +32,7 @@ describe('ConnectionsModule', () => {
       .compile();
 
     expect(moduleRef.get(ConnectionsController)).toBeInstanceOf(ConnectionsController);
+    expect(moduleRef.get(EvictionLabController)).toBeInstanceOf(EvictionLabController);
 
     await moduleRef.close();
   });

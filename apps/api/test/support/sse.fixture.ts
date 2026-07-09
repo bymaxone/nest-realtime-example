@@ -71,6 +71,33 @@ export function nextEvent(
 }
 
 /**
+ * Resolve once the SSE stream opens (the EventSource `open` event fires).
+ *
+ * Useful when the `connection:established` event is disabled but the test still
+ * needs to know the stream is live before emitting.
+ *
+ * @param source - The EventSource to watch.
+ * @param timeoutMs - How long to wait before rejecting.
+ * @returns A promise that resolves when the stream is open.
+ */
+export function waitForOpen(
+  source: EventSource,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timed out waiting for open')), timeoutMs);
+    source.addEventListener(
+      'open',
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}
+
+/**
  * Resolve once the server closes the stream (the EventSource errors), then close
  * the client so it does not silently reconnect and reopen the connection.
  *
