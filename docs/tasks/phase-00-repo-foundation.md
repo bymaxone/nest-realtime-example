@@ -1,6 +1,6 @@
 # Phase 00: repo-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: ✅ Done · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 00)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §5, §6, §19
 
@@ -28,9 +28,9 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 | 0.1 | Branch + pnpm workspace + root manifests                    | ✅     | P0       | S    | none       |
 | 0.2 | Strict TypeScript + ESLint flat config + Prettier           | ✅     | P0       | M    | 0.1        |
 | 0.3 | husky + commitlint + lint-staged + .gitmessage              | ✅     | P1       | S    | 0.1        |
-| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 🟡     | P0       | M    | 0.2        |
+| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | ✅     | P0       | M    | 0.2        |
 | 0.5 | README skeleton + docs cross-links                          | ✅     | P1       | S    | 0.1        |
-| 0.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 0.1-0.5    |
+| 0.6 | Phase close: audit, dashboards, PR + Copilot review         | ✅     | P0       | S    | 0.1-0.5    |
 
 ## Tasks
 
@@ -245,7 +245,7 @@ Completion Protocol: standard 5 steps (status, index, header, plan §1, log, com
 
 ### Task 0.4: CI from day one plus visibility-gated security workflows
 
-- **Status**: 🟡 Partial
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 0.2
@@ -260,7 +260,7 @@ The heart of the phase: `ci.yml` gates every PR from now on. CodeQL and Scorecar
 - [x] `.github/workflows/codeql.yml` and `.github/workflows/scorecard.yml` complete, each job guarded by `if: ${{ !github.event.repository.private }}`.
 - [x] `.github/dependabot.yml` for npm (weekly, grouped) + github-actions.
 - [x] Actions pinned by SHA; least-privilege `permissions:` blocks.
-- [ ] The phase PR (opened in 0.6) shows ci green and codeql/scorecard skipped.
+- [x] The phase PR (opened in 0.6) shows ci green and codeql/scorecard skipped.
 
 #### Files to create / modify
 
@@ -369,7 +369,7 @@ Completion Protocol: standard 5 steps.
 
 ### Task 0.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 🔄 In Progress
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 0.1-0.5
@@ -380,10 +380,10 @@ Close the phase: verify every acceptance criterion, sync dashboards, open the PR
 
 #### Acceptance criteria
 
-- [ ] Every task 0.1-0.5 is ✅ with criteria ticked. 0.1, 0.2, 0.3, 0.5 are ✅; 0.4 is 🟡 pending the one item that only the live PR can prove (ci green, codeql/scorecard skipped).
+- [x] Every task 0.1-0.6 is ✅ with criteria ticked (0.4 confirmed by the live PR: ci green, codeql/scorecard skipped).
 - [x] Phase header + plan §1 dashboard + tasks README index all reflect current progress.
-- [ ] PR opened, Copilot review requested, all findings addressed.
-- [ ] CI green; codeql/scorecard skipped (private); merged with `--squash --delete-branch`.
+- [x] PR opened, Copilot review requested, all findings addressed.
+- [x] CI green; codeql/scorecard skipped (private); merged with `--squash --delete-branch`.
 
 #### Files to create / modify
 
@@ -436,6 +436,6 @@ Completion Protocol: standard steps + append the phase-completion line to the Co
 - 0.1 ✅ 2026-07-09 workspace scaffold
 - 0.2 ✅ 2026-07-09 strict tsconfig base + eslint flat config + prettier, repo-wide format pass
 - 0.3 ✅ 2026-07-09 husky pre-commit/commit-msg hooks + commitlint + lint-staged + .gitmessage
-- 0.4 🟡 2026-07-09 ci.yml + gated codeql/scorecard + dependabot committed; final PR-green check lands in 0.6
+- 0.4 ✅ 2026-07-09 ci.yml + gated codeql/scorecard + dependabot; PR CI green (codeql/scorecard skipped while private)
 - 0.5 ✅ 2026-07-09 README skeleton + MIT license
-- 0.6 🔄 2026-07-09 audit complete, gates green on a clean clone, code-review and security-review both zero-finding; PR opened next
+- 0.6 ✅ 2026-07-09 phase close: PR #1 opened, Copilot review addressed (3 findings), merged squash (61726fd), branch deleted
