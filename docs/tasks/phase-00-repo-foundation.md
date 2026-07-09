@@ -1,6 +1,6 @@
 # Phase 00: repo-foundation
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 00)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §5, §6, §19
 
@@ -25,7 +25,7 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 
 | ID | Task | Status | Priority | Size | Depends on |
 |---|---|---|---|---|---|
-| 0.1 | Branch + pnpm workspace + root manifests | 📋 | P0 | S | none |
+| 0.1 | Branch + pnpm workspace + root manifests | ✅ | P0 | S | none |
 | 0.2 | Strict TypeScript + ESLint flat config + Prettier | 📋 | P0 | M | 0.1 |
 | 0.3 | husky + commitlint + lint-staged + .gitmessage | 📋 | P1 | S | 0.1 |
 | 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 📋 | P0 | M | 0.2 |
@@ -36,7 +36,7 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 
 ### Task 0.1: Create the branch, pnpm workspace and root manifests
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: none
@@ -47,12 +47,12 @@ Bootstrap the workspace skeleton: root manifest, workspace file, and minimal `ap
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-00-repo-foundation` created with `git switch -c`.
-- [ ] Root `package.json`: `private: true`, `engines.node ">=24"`, scripts `typecheck` / `lint` / `build` / `test` fanning out via `pnpm -r --workspace-concurrency=1`.
-- [ ] `pnpm-workspace.yaml` covers `apps/*`.
-- [ ] `apps/api` (name `@nest-realtime-example/api`) and `apps/web` (name `@nest-realtime-example/web`) exist with `private: true`, a compiling `src/index.ts` placeholder and per-app scripts.
-- [ ] `.npmrc` with `engine-strict=true`; `.gitignore` for node/dist/next/env files.
-- [ ] `pnpm install && pnpm typecheck && pnpm build` succeed from a clean clone.
+- [x] Branch `feat/phase-00-repo-foundation` created with `git switch -c`.
+- [x] Root `package.json`: `private: true`, `engines.node ">=24"`, scripts `typecheck` / `lint` / `build` / `test` fanning out via `pnpm -r --workspace-concurrency=1`.
+- [x] `pnpm-workspace.yaml` covers `apps/*`.
+- [x] `apps/api` (name `@nest-realtime-example/api`) and `apps/web` (name `@nest-realtime-example/web`) exist with `private: true`, a compiling `src/index.ts` placeholder and per-app scripts.
+- [x] `.npmrc` with `engine-strict=true`; `.gitignore` for node/dist/next/env files.
+- [x] `pnpm install && pnpm typecheck && pnpm build` succeed from a clean clone.
 
 #### Files to create / modify
 
@@ -432,3 +432,4 @@ Completion Protocol: standard steps + append the phase-completion line to the Co
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+- 0.1 ✅ 2026-07-09 workspace scaffold

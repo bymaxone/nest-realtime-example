@@ -12,12 +12,12 @@
 ## 1. Progress dashboard
 
 > **Progress:** 0 / 11 phases complete (0%) · 0 / 60 tasks
-> **Active phase:** none (awaiting kickoff)
+> **Active phase:** phase 00
 > **Blockers:** none
 
 | # | Phase | Tasks file | Status | Progress | Size | Last updated |
 |---|---|---|---|---|---|---|
-| 00 | repo-foundation | `tasks/phase-00-repo-foundation.md` | 📋 ToDo | 0/6 | M | 2026-07-06 |
+| 00 | repo-foundation | `tasks/phase-00-repo-foundation.md` | 🔄 In Progress | 1/6 | M | 2026-07-09 |
 | 01 | infra-and-library-link | `tasks/phase-01-infra-and-library-link.md` | 📋 ToDo | 0/5 | M | 2026-07-06 |
 | 02 | sse-foundation | `tasks/phase-02-sse-foundation.md` | 📋 ToDo | 0/6 | L | 2026-07-06 |
 | 03 | auth-policies-rooms | `tasks/phase-03-auth-policies-rooms.md` | 📋 ToDo | 0/6 | L | 2026-07-06 |
