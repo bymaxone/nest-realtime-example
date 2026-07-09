@@ -14,3 +14,13 @@ export const SESSION_TTL_SECONDS = 8 * 60 * 60;
 
 /** Session lifetime in milliseconds for the cookie `Max-Age` attribute. */
 export const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
+
+/**
+ * Lifetime of a minted WebSocket bearer token in seconds. Kept short (10 minutes)
+ * because a bearer is a hand-off credential presented once at the WS handshake,
+ * not a long-lived session.
+ */
+export const WS_TOKEN_TTL_SECONDS = 10 * 60;
+
+/** Role a caller must hold to reach an admin-only endpoint (revoke, broadcast). */
+export const ADMIN_ROLE = 'admin';

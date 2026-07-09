@@ -11,6 +11,7 @@ import { BadRequestException } from '@nestjs/common';
 import { APP_SERVICE_NAME, APP_VERSION } from '../../src/app.constants';
 import { AuditController } from '../../src/audit/audit.controller';
 import { AuditService } from '../../src/audit/audit.service';
+import { DecoratorHandlers } from '../../src/audit/decorator-handlers';
 import { buildTestConfig } from '../support/config.fixture';
 
 const META = {
@@ -23,11 +24,16 @@ const META = {
   connectedAt: new Date(),
 };
 
-function buildController(): { controller: AuditController; audit: AuditService } {
+function buildController(): {
+  controller: AuditController;
+  audit: AuditService;
+  decorators: DecoratorHandlers;
+} {
   const audit = new AuditService(buildTestConfig());
   audit.onConnect(META);
   audit.onError({ connectionId: 'c-2', error: new Error('x'), transport: 'sse' });
-  return { controller: new AuditController(audit), audit };
+  const decorators = new DecoratorHandlers();
+  return { controller: new AuditController(audit, decorators), audit, decorators };
 }
 
 describe('AuditController', () => {
@@ -66,5 +72,18 @@ describe('AuditController', () => {
     const { controller } = buildController();
 
     expect(() => controller.feed('nonsense')).toThrow(BadRequestException);
+  });
+
+  /**
+   * Decorator counters.
+   *
+   * The decorator-stats endpoint must surface the feature-local counts bumped by
+   * the `@OnConnect` / `@OnDisconnect` handlers.
+   */
+  it('returns the decorator counters', () => {
+    const { controller, decorators } = buildController();
+    decorators.whenConnected(META);
+
+    expect(controller.decoratorStats()).toEqual({ connects: 1, disconnects: 0 });
   });
 });

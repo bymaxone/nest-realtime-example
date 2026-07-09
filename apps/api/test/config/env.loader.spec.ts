@@ -25,6 +25,7 @@ describe('loadEnv', () => {
     expect(config.realtime.wsMaxBufferBytes).toBe(16384);
     expect(config.reauth.intervalSeconds).toBe(15);
     expect(config.reauth.onFailure).toBe('disconnect');
+    expect(config.reauth.cacheTtlMs).toBe(10000);
     expect(config.redisUrl).toBe('redis://localhost:6379');
     expect(config.pubsubDriver).toBe('memory');
     expect(config.webOrigin).toBe('http://localhost:3000');
@@ -40,6 +41,7 @@ describe('loadEnv', () => {
       REALTIME_EMIT_CONNECTION_EVENT: 'false',
       PUBSUB_DRIVER: 'redis',
       REAUTH_ON_FAILURE: 'event',
+      REAUTH_CACHE_TTL_MS: '0',
     });
     expect(config.port).toBe(3002);
     expect(config.instanceName).toBe('app-b');
@@ -47,6 +49,7 @@ describe('loadEnv', () => {
     expect(config.realtime.emitConnectionEvent).toBe(false);
     expect(config.pubsubDriver).toBe('redis');
     expect(config.reauth.onFailure).toBe('event');
+    expect(config.reauth.cacheTtlMs).toBe(0);
   });
 
   it('aggregates every violation into one error that never echoes values', () => {

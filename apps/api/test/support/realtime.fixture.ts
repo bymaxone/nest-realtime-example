@@ -9,7 +9,7 @@
  */
 
 import { Global, Module, type DynamicModule } from '@nestjs/common';
-import { RealtimeService, type ITransport } from '@bymax-one/nest-realtime';
+import { ConnectionRegistry, RealtimeService, type ITransport } from '@bymax-one/nest-realtime';
 
 /** A RealtimeService double and its per-method transport spies. */
 export interface RealtimeMock {
@@ -50,16 +50,24 @@ export function mockRealtimeService(): RealtimeMock {
 }
 
 /**
- * Build a global module providing the given RealtimeService double.
+ * Build a global module providing the given RealtimeService double and a real,
+ * empty ConnectionRegistry, mirroring the two providers the library exports.
  *
  * @param service - The RealtimeService double to expose globally.
- * @returns A dynamic module exporting the service.
+ * @param registry - The ConnectionRegistry to expose (defaults to an empty one).
+ * @returns A dynamic module exporting both providers.
  */
-export function realtimeStubModule(service: RealtimeService): DynamicModule {
+export function realtimeStubModule(
+  service: RealtimeService,
+  registry: ConnectionRegistry = new ConnectionRegistry(),
+): DynamicModule {
   @Global()
   @Module({
-    providers: [{ provide: RealtimeService, useValue: service }],
-    exports: [RealtimeService],
+    providers: [
+      { provide: RealtimeService, useValue: service },
+      { provide: ConnectionRegistry, useValue: registry },
+    ],
+    exports: [RealtimeService, ConnectionRegistry],
   })
   class RealtimeStubModule {}
 

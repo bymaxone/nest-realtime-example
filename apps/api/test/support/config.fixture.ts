@@ -41,6 +41,7 @@ export function buildTestConfig(overrides: ConfigOverrides = {}): AppConfig {
   const reauth: AppConfig['reauth'] = {
     intervalSeconds: 15,
     onFailure: 'disconnect',
+    cacheTtlMs: 10000,
     ...overrides.reauth,
   };
   return Object.freeze({

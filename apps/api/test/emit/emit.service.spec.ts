@@ -6,6 +6,8 @@
  * Mocks: a RealtimeService double with per-method spies.
  */
 
+import { ForbiddenException } from '@nestjs/common';
+
 import { EmitService } from '../../src/emit/emit.service';
 import { mockRealtimeService, type RealtimeMock } from '../support/realtime.fixture';
 
@@ -30,27 +32,59 @@ describe('EmitService', () => {
   });
 
   /**
-   * Tenant delegation.
+   * Same-tenant delegation.
    *
-   * emitToTenant must forward the tenant id, event and data unchanged.
+   * emitToTenant must forward to the library only when the target tenant is the
+   * caller's own tenant.
    */
-  it('delegates emitToTenant', async () => {
-    await service.emitToTenant('acme', 'order.paid', { id: 2 });
+  it('delegates emitToTenant within the caller tenant', async () => {
+    await service.emitToTenant('acme', 'acme', 'order.paid', { id: 2 });
 
     expect(realtime.emitToTenant).toHaveBeenCalledWith('acme', 'order.paid', { id: 2 });
   });
 
   /**
+   * Anti-IDOR rejection.
+   *
+   * Emitting to a tenant other than the caller's must throw before the library is
+   * touched, so no cross-tenant event is ever delivered.
+   */
+  it('rejects a cross-tenant emit before touching the library', async () => {
+    await expect(service.emitToTenant('acme', 'globex', 'order.paid', {})).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(realtime.emitToTenant).not.toHaveBeenCalled();
+  });
+
+  /**
    * Room delegation.
    *
-   * emitToRoom must forward the room id, event and data unchanged.
+   * emitToRoom must forward a resource (or custom) room id, event and data
+   * unchanged.
    */
-  it('delegates emitToRoom', async () => {
+  it('delegates emitToRoom for a resource room', async () => {
     await service.emitToRoom('resource:incident:1', 'order.shipped', { id: 3 });
 
     expect(realtime.emitToRoom).toHaveBeenCalledWith('resource:incident:1', 'order.shipped', {
       id: 3,
     });
+  });
+
+  /**
+   * Scope-room rejection.
+   *
+   * Emitting to a `user:` or `tenant:` scope room must be rejected before the
+   * library is touched, so the room console can never reach another user or tenant
+   * and bypass the tenant guard.
+   */
+  it('rejects emitting to a user or tenant scope room', async () => {
+    await expect(service.emitToRoom('tenant:globex', 'order.paid', {})).rejects.toThrow(
+      ForbiddenException,
+    );
+    await expect(service.emitToRoom('user:gil@globex', 'order.paid', {})).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(realtime.emitToRoom).not.toHaveBeenCalled();
   });
 
   /**

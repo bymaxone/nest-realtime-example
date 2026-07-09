@@ -1,6 +1,6 @@
 # Phase 03: auth-policies-rooms
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 👀 Review · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 03)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §10.3, §11, §12.3, §12.6
 
@@ -25,18 +25,18 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 
 | ID  | Task                                                          | Status | Priority | Size | Depends on |
 | --- | ------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | 📋     | P0       | M    | Phase 02   |
-| 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | 📋     | P0       | M    | 3.1        |
-| 3.3 | Reauth policy lab + revocation set + kill switch              | 📋     | P0       | L    | 3.2        |
-| 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | 📋     | P0       | M    | 3.2        |
-| 3.5 | Rooms module + anti-IDOR + decorators                         | 📋     | P0       | M    | 3.2        |
-| 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 📋     | P0       | S    | 3.1-3.5    |
+| 3.1 | Branch + ticket pattern (issue, one-shot consume, specs)      | ✅     | P0       | M    | Phase 02   |
+| 3.2 | Composing authenticator + WS bearer mint + auth-failure specs | ✅     | P0       | M    | 3.1        |
+| 3.3 | Reauth policy lab + revocation set + kill switch              | ✅     | P0       | L    | 3.2        |
+| 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | ✅     | P0       | M    | 3.2        |
+| 3.5 | Rooms module + anti-IDOR + decorators                         | ✅     | P0       | M    | 3.2        |
+| 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 👀     | P0       | S    | 3.1-3.5    |
 
 ## Tasks
 
 ### Task 3.1: Ticket pattern
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 02
@@ -47,10 +47,10 @@ Pattern B for clients that cannot send cookies cross-origin: an authenticated `P
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-03-auth-policies-rooms` created with `git switch -c`.
-- [ ] `POST /auth/ticket` (requires a valid session cookie) returns `{ ticket }`; Redis key `realtime:ticket:{id}` holds serialized traits, `EX 60`.
-- [ ] `TicketAuthenticator.authenticate` reads `ctx.query.ticket`, `GETDEL`s, returns traits or null.
-- [ ] Specs: happy path; second use fails; expired ticket fails; malformed ticket fails; traits never logged.
+- [x] Branch `feat/phase-03-auth-policies-rooms` created with `git switch -c`.
+- [x] `POST /auth/ticket` (requires a valid session cookie) returns `{ ticket }`; Redis key `realtime:ticket:{id}` holds serialized traits, `EX 60`.
+- [x] `TicketAuthenticator.authenticate` reads `ctx.query.ticket`, `GETDEL`s, returns traits or null.
+- [x] Specs: happy path; second use fails; expired ticket fails; malformed ticket fails; traits never logged.
 
 #### Files to create / modify
 
@@ -102,7 +102,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 3.2: Composing authenticator, bearer mint and auth-failure specs
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 3.1
@@ -113,11 +113,11 @@ One `IConnectionAuthenticator` to rule them all: dispatch by context (WS bearer 
 
 #### Acceptance criteria
 
-- [ ] `CompositeAuthenticator` routes: `ctx.transport === 'websocket'` + token present -> bearer; `ctx.query.ticket` -> ticket; else cookie. `revalidate` delegates to the cookie/bearer revocation check.
-- [ ] `POST /auth/ws-token` mints a 10 minute HMAC token (node:crypto), verified by `BearerAuthenticator` (structure ready; full WS use in phase 06).
-- [ ] Wiring factory now injects `CompositeAuthenticator` (single option unchanged in shape).
-- [ ] E2E: unauthenticated `/api/events` returns 401 (browser will not retry a fatal 401, documented in the spec assertion message).
-- [ ] Matrix rows 3 (extraProviders now carry the composite), 13, 69, 72 satisfied.
+- [x] `CompositeAuthenticator` routes: `ctx.transport === 'websocket'` + token present -> bearer; `ctx.query.ticket` -> ticket; else cookie. `revalidate` delegates to the cookie/bearer revocation check.
+- [x] `POST /auth/ws-token` mints a 10 minute HMAC token (node:crypto), verified by `BearerAuthenticator` (structure ready; full WS use in phase 06).
+- [x] Wiring factory now injects `CompositeAuthenticator` (single option unchanged in shape).
+- [x] E2E: unauthenticated `/api/events` returns 401 (browser will not retry a fatal 401, documented in the spec assertion message).
+- [x] Matrix rows 3 (extraProviders now carry the composite), 13, 69, 72 satisfied.
 
 #### Files to create / modify
 
@@ -169,7 +169,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.3: Reauthentication lab, revocation set and kill switch
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: 3.2
@@ -180,13 +180,13 @@ Make long-session security observable: 15s reauth cycles against the Redis revoc
 
 #### Acceptance criteria
 
-- [ ] `POST /auth/revoke/:userId` / `DELETE /auth/revoke/:userId` manage `realtime:revoked:{userId}`.
-- [ ] Reauth policy wired from config (`REAUTH_INTERVAL_SECONDS`, `REAUTH_ON_FAILURE`, `cacheTtlMs`); a revalidation counter (per user) is exposed at `GET /labs/reauth/stats` proving the cache reduces checks.
-- [ ] E2E (`'disconnect'` mode): connect, revoke, stream closes within ~2 intervals; audit feed shows `reauth-failed`.
-- [ ] E2E (`'event'` mode profile): client receives `connection:reauthentication-failed` `{ reason }` before the close.
-- [ ] `GET /connections` lists the instance's active connections (id, user, tenant, transport, connectedAt) via the library's documented introspection surface (or app-side tracking from hooks if the library exposes none; note which path was taken in the PR body).
-- [ ] `POST /connections/:id/disconnect` closes that connection (`USER_LOGGED_OUT` reason observable client-side).
-- [ ] Matrix rows 14, 15, 16, 17 (single instance half), 35, 54, 70 satisfied.
+- [x] `POST /auth/revoke/:userId` / `DELETE /auth/revoke/:userId` manage `realtime:revoked:{userId}`.
+- [x] Reauth policy wired from config (`REAUTH_INTERVAL_SECONDS`, `REAUTH_ON_FAILURE`, `cacheTtlMs`); a revalidation counter (per user) is exposed at `GET /labs/reauth/stats` proving the cache reduces checks.
+- [x] E2E (`'disconnect'` mode): connect, revoke, stream closes within ~2 intervals; audit feed shows `reauth-failed`.
+- [x] E2E (`'event'` mode profile): client receives `connection:reauthentication-failed` `{ reason }` before the close.
+- [x] `GET /connections` lists the instance's active connections (id, user, tenant, transport, connectedAt) via the library's documented introspection surface (the exported `ConnectionRegistry`; no app-side tracking needed).
+- [x] `POST /connections/:id/disconnect` closes that connection (`USER_LOGGED_OUT` reason observable client-side); ownership-guarded (anti-IDOR).
+- [x] Matrix rows 14, 15, 16, 17 (single instance half), 35, 54, 70 satisfied.
 
 #### Files to create / modify
 
@@ -245,7 +245,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.4: FIFO eviction lab and emitConnectionEvent toggle
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 3.2
@@ -256,10 +256,10 @@ Prove the library's most counterintuitive policy: exceeding `maxConnectionsPerUs
 
 #### Acceptance criteria
 
-- [ ] E2E: open connections A, B, C for the same user in order; A closes with the eviction reason observable client-side; B and C stay; a 4th evicts B; HTTP status for every connect is success (never 429).
-- [ ] `GET /labs/eviction/timeline` returns the eviction history (from hooks/disconnect reasons) for the frontend visualizer.
-- [ ] A test profile with `REALTIME_EMIT_CONNECTION_EVENT=false` boots in-process and the e2e asserts no `connection:established` arrives while emits still flow.
-- [ ] Matrix rows 18, 20, 71 satisfied.
+- [x] E2E: open connections A, B, C for the same user in order; A closes with the eviction reason observable client-side; B and C stay; a 4th evicts B; HTTP status for every connect is success (never 429).
+- [x] `GET /labs/eviction/timeline` returns the eviction history (from hooks/disconnect reasons) for the frontend visualizer.
+- [x] A test profile with `REALTIME_EMIT_CONNECTION_EVENT=false` boots in-process and the e2e asserts no `connection:established` arrives while emits still flow.
+- [x] Matrix rows 18, 20, 71 satisfied.
 
 #### Files to create / modify
 
@@ -310,7 +310,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.5: Rooms, anti-IDOR guard and method decorators
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 3.2
@@ -321,11 +321,11 @@ Resource rooms (`composeRoomId`), join/leave endpoints (idempotent), the app-sid
 
 #### Acceptance criteria
 
-- [ ] `POST /rooms/:roomId/join` + `/leave` operate on the caller's connection id (client sends its `connectionId` from `connection:established`); double join/leave are no-ops.
-- [ ] Room ids composed via `composeRoomId('RESOURCE', 'incident', id)`; raw prefixed strings rejected by the DTO (must use the documented convention).
-- [ ] Emit service now enforces tenant ownership: emitting to a tenant other than the caller's returns 403 before touching `RealtimeService` (unit + e2e proven).
-- [ ] `@OnConnect`/`@OnDisconnect` handlers in the audit module increment feature-local counters; a unit proves config hooks fire before decorator handlers.
-- [ ] Matrix rows 31, 32, 33, 55 satisfied (34 landed in phase 02's guard test; extend it to room event names).
+- [x] `POST /rooms/join` + `/leave` operate on the caller's connection id (client sends its `connectionId` from `connection:established`); double join/leave are no-ops. (Route reconciliation: type+id ride the body and the server composes the id, rather than a raw `:roomId` path segment, so a `user:`/`tenant:` room can never be supplied.)
+- [x] Room ids composed via `composeRoomId('RESOURCE', 'incident', id)`; raw prefixed strings rejected by the DTO (must use the documented convention).
+- [x] Emit service now enforces tenant ownership: emitting to a tenant other than the caller's returns 403 before touching `RealtimeService` (unit + e2e proven).
+- [x] `@OnConnect`/`@OnDisconnect` handlers in the audit module increment feature-local counters; a unit proves config hooks fire before decorator handlers.
+- [x] Matrix rows 31, 32, 33, 55 satisfied (34 landed in phase 02's guard test; extended to room event names).
 
 #### Files to create / modify
 
@@ -379,7 +379,7 @@ Completion Protocol: standard steps.
 
 ### Task 3.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 3.1-3.5
@@ -390,9 +390,9 @@ Standard phase close; PR body lists the matrix rows landed.
 
 #### Acceptance criteria
 
-- [ ] Tasks 3.1-3.5 ✅, verifications re-run sequentially.
-- [ ] Dashboards synced; PR body lists rows 3, 8, 9, 11, 13-18, 20, 31-35, 54, 55, 69-72.
-- [ ] Copilot findings addressed; merged on green; branch deleted.
+- [x] Tasks 3.1-3.5 ✅, verifications re-run sequentially (unit 175 tests @ 100% coverage; e2e 10 suites / 19 tests against Redis).
+- [x] Dashboards synced; PR body lists rows 3, 8, 9, 11, 13-18, 20, 31-35, 54, 55, 69-72.
+- [ ] Copilot findings addressed; merged on green; branch deleted. _(Orchestrator: PR opened and Copilot review requested; merge and branch deletion pending.)_
 
 #### Files to create / modify
 
@@ -434,3 +434,10 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 3.1 ✅ 2026-07-09 one-shot ticket auth: `POST /auth/ticket`, Redis `GETDEL` consume (60s TTL), negative coverage
+- 3.2 ✅ 2026-07-09 composite authenticator (cookie/ticket/bearer dispatch) + `POST /auth/ws-token` mint; SSE 401 + ticket-path e2e
+- 3.3 ✅ 2026-07-09 reauth policy (both modes) + Redis revocation set + ownership-guarded kill switch + `GET /connections` + reauth-cache stats
+- 3.4 ✅ 2026-07-09 FIFO eviction timeline (composite lifecycle hooks) proving oldest-evicted/newest-admitted (never 429) + `emitConnectionEvent=false` toggle e2e
+- 3.5 ✅ 2026-07-09 rooms module (composed resource rooms, ownership anti-IDOR) + emit tenant guard (403) + `@OnConnect`/`@OnDisconnect` decorators after config hooks
+- 3.6 👀 2026-07-09 phase close: acceptance-criteria audit, dashboards synced, gates + reviews to zero (2 security fixes, 2 review nits), PR opened + Copilot review requested

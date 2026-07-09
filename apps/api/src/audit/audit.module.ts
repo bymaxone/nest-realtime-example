@@ -12,12 +12,13 @@ import { AuthModule } from '../auth/auth.module';
 
 import { AuditController } from './audit.controller';
 import { AuditService } from './audit.service';
+import { DecoratorHandlers, LifecycleDecoratorDispatcher } from './decorator-handlers';
 
-/** Wires the audit sink and feed endpoint. */
+/** Wires the audit sink, feed endpoint and the decorator-driven lifecycle counters. */
 @Module({
   imports: [AuthModule],
   controllers: [AuditController],
-  providers: [AuditService],
-  exports: [AuditService],
+  providers: [AuditService, DecoratorHandlers, LifecycleDecoratorDispatcher],
+  exports: [AuditService, DecoratorHandlers, LifecycleDecoratorDispatcher],
 })
 export class AuditModule {}

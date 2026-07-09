@@ -11,6 +11,10 @@ import { Test } from '@nestjs/testing';
 import { AuditController } from '../../src/audit/audit.controller';
 import { AuditModule } from '../../src/audit/audit.module';
 import { AuditService } from '../../src/audit/audit.service';
+import {
+  DecoratorHandlers,
+  LifecycleDecoratorDispatcher,
+} from '../../src/audit/decorator-handlers';
 import { APP_CONFIG } from '../../src/config/config.tokens';
 import { ConfigModule } from '../../src/config/config.module';
 import { buildTestConfig } from '../support/config.fixture';
@@ -30,6 +34,10 @@ describe('AuditModule', () => {
 
     expect(moduleRef.get(AuditController)).toBeInstanceOf(AuditController);
     expect(moduleRef.get(AuditService)).toBeInstanceOf(AuditService);
+    expect(moduleRef.get(DecoratorHandlers)).toBeInstanceOf(DecoratorHandlers);
+    expect(moduleRef.get(LifecycleDecoratorDispatcher)).toBeInstanceOf(
+      LifecycleDecoratorDispatcher,
+    );
 
     await moduleRef.close();
   });

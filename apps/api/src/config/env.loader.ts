@@ -29,6 +29,7 @@ interface RealtimeConfig {
 interface ReauthConfig {
   readonly intervalSeconds: number;
   readonly onFailure: 'disconnect' | 'event';
+  readonly cacheTtlMs: number;
 }
 
 /** The immutable, typed configuration the rest of the api consumes. */
@@ -77,6 +78,7 @@ function mapEnv(env: RawEnv): AppConfig {
     reauth: {
       intervalSeconds: env.REAUTH_INTERVAL_SECONDS,
       onFailure: env.REAUTH_ON_FAILURE,
+      cacheTtlMs: env.REAUTH_CACHE_TTL_MS,
     },
     redisUrl: env.REDIS_URL,
     pubsubDriver: env.PUBSUB_DRIVER,

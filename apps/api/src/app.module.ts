@@ -12,10 +12,12 @@ import { Module } from '@nestjs/common';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from './config/config.module';
+import { ConnectionsModule } from './connections/connections.module';
 import { DomainModule } from './domain/domain.module';
 import { EmitModule } from './emit/emit.module';
 import { HealthModule } from './health/health.module';
 import { RealtimeWiringModule } from './realtime/wiring.module';
+import { RoomsModule } from './rooms/rooms.module';
 
 /** Wires configuration, liveness, demo auth, realtime and the demo features. */
 @Module({
@@ -27,6 +29,8 @@ import { RealtimeWiringModule } from './realtime/wiring.module';
     EmitModule,
     DomainModule,
     AuditModule,
+    ConnectionsModule,
+    RoomsModule,
   ],
 })
 export class AppModule {}
