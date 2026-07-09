@@ -1,0 +1,16 @@
+# Build context exclusions for the api image. The library tarball under vendor/
+# is intentionally NOT excluded: the file: dependency is resolved from it during
+# the in-image install.
+node_modules
+**/node_modules
+dist
+**/dist
+.next
+**/.next
+coverage
+**/coverage
+docs
+.git
+.github
+*.log
+.DS_Store

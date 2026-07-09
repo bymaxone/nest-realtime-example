@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 5 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
@@ -25,7 +25,7 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 
 | ID  | Task                                                                        | Status | Priority | Size | Depends on |
 | --- | --------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | 📋     | P0       | M    | Phase 00   |
+| 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | ✅     | P0       | M    | Phase 00   |
 | 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | 📋     | P0       | S    | 1.1        |
 | 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | 📋     | P0       | M    | 1.2        |
 | 1.4 | Typed env config module + .env.example                                      | 📋     | P0       | M    | 1.1        |
@@ -35,7 +35,7 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 
 ### Task 1.1: Branch, docker-compose with Redis, api Dockerfile
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 00
@@ -46,10 +46,10 @@ The local stack skeleton: `redis:7-alpine` with a healthcheck as the always-on s
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-01-infra-and-library-link` created with `git switch -c`.
-- [ ] `docker-compose.yml`: `redis` service (`redis:7-alpine`, healthcheck `redis-cli ping`, port 6379).
-- [ ] `docker/api.Dockerfile`: multi-stage (deps, build, runtime), Node 24 alpine, non-root user, `HEALTHCHECK`.
-- [ ] `docker compose up -d redis` reaches healthy; `docker build -f docker/api.Dockerfile .` succeeds.
+- [x] Branch `feat/phase-01-infra-and-library-link` created with `git switch -c`.
+- [x] `docker-compose.yml`: `redis` service (`redis:7-alpine`, healthcheck `redis-cli ping`, port 6379).
+- [x] `docker/api.Dockerfile`: multi-stage (deps, build, runtime), Node 24 alpine, non-root user, `HEALTHCHECK`.
+- [x] `docker compose up -d redis` reaches healthy; `docker build -f docker/api.Dockerfile .` succeeds.
 
 #### Files to create / modify
 
@@ -362,3 +362,5 @@ Completion Protocol: standard steps + phase completion line in the log.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 1.1 ✅ 2026-07-09 Branch, healthchecked redis:7-alpine compose service, and multi-stage non-root api Dockerfile (verified healthy + build exit 0).

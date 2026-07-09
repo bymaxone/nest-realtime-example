@@ -1,0 +1,26 @@
+# Local stack for nest-realtime-example.
+#
+# The always-on service is Redis, which backs the library's pub/sub bus, one-shot
+# tickets, the offline queue and presence storage in the scaled profiles. The
+# inner development loop is `docker compose up -d redis` plus `pnpm dev`, running
+# the api and web directly on the host against this Redis.
+#
+# The `cluster` profile (two api instances behind nginx) is added when the
+# multi-instance scaling scenarios are demonstrated; it is intentionally absent
+# here so the default `up` only starts the dependency every profile needs.
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    # A service is only considered ready once `redis-cli ping` answers PONG, so
+    # dependents can gate on `condition: service_healthy` rather than on mere
+    # container start.
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    restart: unless-stopped
