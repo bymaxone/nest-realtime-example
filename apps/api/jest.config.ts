@@ -7,9 +7,9 @@
  * otherwise load its own copy of the compiled module graph.
  *
  * Coverage is collected on every run and pinned to 100% so any shipped source
- * file stays fully exercised. The package entry point is excluded because it is
- * the process bootstrap, which is proven by end-to-end runs against a live
- * server rather than by unit coverage.
+ * file stays fully exercised. The package entry point and the process bootstrap
+ * are excluded because they wire the live server, which end-to-end runs prove
+ * rather than unit coverage; spec files are excluded from their own report.
  */
 
 import type { Config } from 'jest';
@@ -23,7 +23,7 @@ const config: Config = {
   testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/test/**/*.spec.ts'],
   maxWorkers: '50%',
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!src/main.ts', '!src/**/*.spec.ts'],
   coverageThreshold: {
     global: { branches: 100, functions: 100, lines: 100, statements: 100 },
   },

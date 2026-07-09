@@ -1,6 +1,6 @@
 # Phase 02: sse-foundation
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 02)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §9.2, §10, §11, §12.1, §12.2
 
@@ -26,7 +26,7 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 
 | ID  | Task                                                                       | Status | Priority | Size | Depends on |
 | --- | -------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | 📋     | P0       | M    | Phase 01   |
+| 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | ✅     | P0       | M    | Phase 01   |
 | 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | 📋     | P0       | M    | 2.1        |
 | 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | 📋     | P0       | L    | 2.2        |
 | 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | 📋     | P0       | M    | 2.3        |
@@ -37,7 +37,7 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 
 ### Task 2.1: NestJS app skeleton with health and bootstrap
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 01
@@ -48,11 +48,11 @@ Replace the api stub with a real NestJS 11 application: `main.ts` (CORS from con
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-02-sse-foundation` created with `git switch -c`.
-- [ ] `nest start` boots on `PORT` with CORS allowing `WEB_ORIGIN` (credentials true).
-- [ ] `GET /health` returns `{ status: 'ok', instance, transport, version }` from config.
-- [ ] `main.ts` split into a testable `createApp()` seam; e2e boot spec covers it.
-- [ ] Coverage stays 100% on implemented files.
+- [x] Branch `feat/phase-02-sse-foundation` created with `git switch -c`.
+- [x] `nest start` boots on `PORT` with CORS allowing `WEB_ORIGIN` (credentials true).
+- [x] `GET /health` returns `{ status: 'ok', instance, transport, version }` from config.
+- [x] `main.ts` split into a testable `createApp()` seam; e2e boot spec covers it.
+- [x] Coverage stays 100% on implemented files.
 
 #### Files to create / modify
 
@@ -455,3 +455,5 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 2.1 ✅ 2026-07-09 NestJS app skeleton: createApp seam, config-driven CORS, api prefix (health excluded), GET /health, e2e boot spec.
