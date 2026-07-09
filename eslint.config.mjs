@@ -33,10 +33,11 @@ const BANNED_IMPORTS = [
 
 export default defineConfig([
   globalIgnores(['**/dist/**', '**/.next/**', '**/coverage/**', '**/node_modules/**']),
+  js.configs.recommended,
   {
-    files: ['**/*.{ts,tsx}'],
+    // Real application source: typed linting against each app's own tsconfig.
+    files: ['apps/*/src/**/*.{ts,tsx}'],
     extends: [
-      js.configs.recommended,
       tseslint.configs.recommendedTypeChecked,
       importX.flatConfigs.recommended,
       importX.flatConfigs.typescript,
@@ -62,6 +63,13 @@ export default defineConfig([
         },
       ],
     },
+  },
+  {
+    // Tooling config files (vitest.config.ts, etc.): syntax-level typed rules only,
+    // since these live outside each app's tsconfig "include" and have no project to type-check against.
+    files: ['**/*.{ts,tsx}'],
+    ignores: ['apps/*/src/**'],
+    extends: [tseslint.configs.recommended],
   },
   {
     files: ['apps/web/**/*.{ts,tsx}'],

@@ -28,7 +28,7 @@ The repository contains only `docs/` on `main`. This phase produces a clean pnpm
 | 0.1 | Branch + pnpm workspace + root manifests                    | ✅     | P0       | S    | none       |
 | 0.2 | Strict TypeScript + ESLint flat config + Prettier           | ✅     | P0       | M    | 0.1        |
 | 0.3 | husky + commitlint + lint-staged + .gitmessage              | ✅     | P1       | S    | 0.1        |
-| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 📋     | P0       | M    | 0.2        |
+| 0.4 | CI: ci.yml + visibility-gated codeql/scorecard + dependabot | 🟡     | P0       | M    | 0.2        |
 | 0.5 | README skeleton + docs cross-links                          | 📋     | P1       | S    | 0.1        |
 | 0.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 0.1-0.5    |
 
@@ -245,7 +245,7 @@ Completion Protocol: standard 5 steps (status, index, header, plan §1, log, com
 
 ### Task 0.4: CI from day one plus visibility-gated security workflows
 
-- **Status**: 📋 ToDo
+- **Status**: 🟡 Partial
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 0.2
@@ -256,10 +256,10 @@ The heart of the phase: `ci.yml` gates every PR from now on. CodeQL and Scorecar
 
 #### Acceptance criteria
 
-- [ ] `.github/workflows/ci.yml`: on pull_request + push to main; jobs sequential: install (pnpm cache), typecheck, lint, unit (`--passWithNoTests` for now, both apps sequentially), build. Node 24, pnpm pinned.
-- [ ] `.github/workflows/codeql.yml` and `.github/workflows/scorecard.yml` complete, each job guarded by `if: ${{ !github.event.repository.private }}`.
-- [ ] `.github/dependabot.yml` for npm (weekly, grouped) + github-actions.
-- [ ] Actions pinned by SHA; least-privilege `permissions:` blocks.
+- [x] `.github/workflows/ci.yml`: on pull_request + push to main; jobs sequential: install (pnpm cache), typecheck, lint, unit (`--passWithNoTests` for now, both apps sequentially), build. Node 24, pnpm pinned.
+- [x] `.github/workflows/codeql.yml` and `.github/workflows/scorecard.yml` complete, each job guarded by `if: ${{ !github.event.repository.private }}`.
+- [x] `.github/dependabot.yml` for npm (weekly, grouped) + github-actions.
+- [x] Actions pinned by SHA; least-privilege `permissions:` blocks.
 - [ ] The phase PR (opened in 0.6) shows ci green and codeql/scorecard skipped.
 
 #### Files to create / modify
@@ -436,3 +436,4 @@ Completion Protocol: standard steps + append the phase-completion line to the Co
 - 0.1 ✅ 2026-07-09 workspace scaffold
 - 0.2 ✅ 2026-07-09 strict tsconfig base + eslint flat config + prettier, repo-wide format pass
 - 0.3 ✅ 2026-07-09 husky pre-commit/commit-msg hooks + commitlint + lint-staged + .gitmessage
+- 0.4 🟡 2026-07-09 ci.yml + gated codeql/scorecard + dependabot committed; final PR-green check lands in 0.6

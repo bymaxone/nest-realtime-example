@@ -11,8 +11,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --max-warnings 0",
     "build": "tsc -p tsconfig.json",
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  }
 }

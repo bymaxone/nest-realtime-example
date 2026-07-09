@@ -11,8 +11,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --max-warnings 0",
     "build": "tsc -p tsconfig.json",
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11"
+  }
 }
