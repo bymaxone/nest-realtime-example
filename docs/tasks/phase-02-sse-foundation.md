@@ -1,6 +1,6 @@
 # Phase 02: sse-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 02)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §9.2, §10, §11, §12.1, §12.2
 
@@ -29,7 +29,7 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 | 2.1 | Branch + NestJS app skeleton + /health + main.ts bootstrap                 | ✅     | P0       | M    | Phase 01   |
 | 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | ✅     | P0       | M    | 2.1        |
 | 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | ✅     | P0       | L    | 2.2        |
-| 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | 📋     | P0       | M    | 2.3        |
+| 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | ✅     | P0       | M    | 2.3        |
 | 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | 📋     | P1       | M    | 2.3        |
 | 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 📋     | P0       | S    | 2.1-2.5    |
 
@@ -263,7 +263,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.4: Emit console, domain simulator and tenant isolation
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 2.3
@@ -274,10 +274,10 @@ The endpoints that make the example alive: emit console (`user`/`tenant`/`room`/
 
 #### Acceptance criteria
 
-- [ ] `POST /emit/user/:userId`, `/emit/tenant/:tenantId`, `/emit/room/:roomId`, `/emit/broadcast` with zod DTOs (`event`, `data`), delegating to `RealtimeService` (tenant guard arrives in phase 03; endpoint shape ready for it).
-- [ ] `POST /domain/orders/simulate` emits a small scripted burst (created, paid, shipped) to the caller's tenant.
-- [ ] E2E: two clients (acme, globex) connected; tenant emit reaches only acme; broadcast reaches both; user emit reaches only that user's connection.
-- [ ] Reserved event names are not used by the app (guard test compares emitted names against `RESERVED_EVENT_NAMES`).
+- [x] `POST /emit/user/:userId`, `/emit/tenant/:tenantId`, `/emit/room/:roomId`, `/emit/broadcast` with zod DTOs (`event`, `data`), delegating to `RealtimeService` (tenant guard arrives in phase 03; endpoint shape ready for it).
+- [x] `POST /domain/orders/simulate` emits a small scripted burst (created, paid, shipped) to the caller's tenant.
+- [x] E2E: two clients (acme, globex) connected; tenant emit reaches only acme; broadcast reaches both; user emit reaches only that user's connection.
+- [x] Reserved event names are not used by the app (guard test compares emitted names against `RESERVED_EVENT_NAMES`).
 
 #### Files to create / modify
 
@@ -459,3 +459,4 @@ Completion Protocol: standard steps + phase completion line.
 - 2.1 ✅ 2026-07-09 NestJS app skeleton: createApp seam, config-driven CORS, api prefix (health excluded), GET /health, e2e boot spec.
 - 2.2 ✅ 2026-07-09 Demo cookie auth: seeded users, HMAC-signed HttpOnly cookie (node:crypto, timingSafeEqual), login/logout/me, CookieSessionAuthenticator + Redis-revocation revalidate.
 - 2.3 ✅ 2026-07-09 Canonical forRootAsync wiring + options factory (sse, /api/events via global api prefix), SSE connect e2e (client-safe traits, no metadata leak), sync forRoot + negative-boot specs. Vendored library patched to inject the SSE controller handler (esbuild build shipped no decorator metadata).
+- 2.4 ✅ 2026-07-09 Emit console (user/tenant/room/broadcast, reserved-name-safe) + order/deployment domain simulators; two-tenant isolation e2e proves tenant/user/broadcast scoping with lexicographically increasing ids.

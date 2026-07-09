@@ -10,7 +10,7 @@
 | ----- | ------------------------------------ | --------- | ------ | ------------------------------------------------------------------------------------------------------------------------ |
 | 00    | `phase-00-repo-foundation.md`        | 6/6       | ✅     | pnpm workspace, strict tooling, husky/commitlint, CI from day one (public-only workflows visibility-gated)               |
 | 01    | `phase-01-infra-and-library-link.md` | 5/5       | ✅     | redis:7 compose, Dockerfile, `file:` library link, subpath probe, typed env                                              |
-| 02    | `phase-02-sse-foundation.md`         | 3/6       | 🔄     | SSE profile end to end: cookie auth, canonical `forRootAsync`, emit console, tenant isolation, audit feed, heartbeat lab |
+| 02    | `phase-02-sse-foundation.md`         | 4/6       | 🔄     | SSE profile end to end: cookie auth, canonical `forRootAsync`, emit console, tenant isolation, audit feed, heartbeat lab |
 | 03    | `phase-03-auth-policies-rooms.md`    | 0/6       | 📋     | ticket + bearer patterns, reauth policy, revocation, FIFO eviction, rooms, anti-IDOR, decorators                         |
 | 04    | `phase-04-replay-and-offline.md`     | 0/5       | 📋     | Last-Event-ID replay lab, RedisOfflineQueue, buffer-miss fallback, id ordering                                           |
 | 05    | `phase-05-scaling-cluster.md`        | 0/6       | 📋     | RedisRealtimePubSub, nginx SSE-safe cluster, loop-prevention counters, cross-instance revocation, degradation, presence  |
@@ -19,7 +19,7 @@
 | 08    | `phase-08-web-frontend.md`           | 0/6       | 📋     | Next.js 16 + design system + every page on `./react` hooks + bundle assertion                                            |
 | 09    | `phase-09-testing-quality.md`        | 0/5       | 📋     | 100% unit both apps, E2E every flow (HTTP/SSE/WS/cluster), Playwright                                                    |
 | 10    | `phase-10-docs-audit-hardening.md`   | 0/5       | 📋     | README journeys, export-usage + matrix audit, Stryker, CI finalization                                                   |
-|       | **Total**                            | **14/60** | 🔄     |                                                                                                                          |
+|       | **Total**                            | **15/60** | 🔄     |                                                                                                                          |
 
 ## Task-file anatomy
 
