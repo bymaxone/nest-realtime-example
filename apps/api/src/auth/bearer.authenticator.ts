@@ -18,7 +18,7 @@ import { Injectable } from '@nestjs/common';
 import { WsTokenService } from './ws-token.service';
 
 /** Prefix every bearer authorization header carries. */
-const BEARER_PREFIX = 'Bearer ';
+export const BEARER_PREFIX = 'Bearer ';
 
 /** Authenticates WebSocket connections from a short-lived bearer token. */
 @Injectable()

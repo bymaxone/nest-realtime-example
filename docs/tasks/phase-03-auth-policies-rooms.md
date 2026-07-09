@@ -30,7 +30,7 @@ The SSE profile works with cookie auth. This phase completes the authentication 
 | 3.3 | Reauth policy lab + revocation set + kill switch              | ✅     | P0       | L    | 3.2        |
 | 3.4 | FIFO eviction lab + emitConnectionEvent toggle                | ✅     | P0       | M    | 3.2        |
 | 3.5 | Rooms module + anti-IDOR + decorators                         | ✅     | P0       | M    | 3.2        |
-| 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 📋     | P0       | S    | 3.1-3.5    |
+| 3.6 | Phase close: audit, dashboards, PR + Copilot review           | 👀     | P0       | S    | 3.1-3.5    |
 
 ## Tasks
 

@@ -18,13 +18,10 @@ import type {
 } from '@bymax-one/nest-realtime';
 import { Injectable } from '@nestjs/common';
 
-import { BearerAuthenticator } from './bearer.authenticator';
+import { BEARER_PREFIX, BearerAuthenticator } from './bearer.authenticator';
 import { CookieSessionAuthenticator } from './cookie-session.authenticator';
 import { RevalidationStatsService } from './revalidation-stats.service';
 import { TicketAuthenticator } from './ticket.authenticator';
-
-/** Prefix a WebSocket bearer authorization header carries. */
-const BEARER_PREFIX = 'Bearer ';
 
 /** Dispatches connection authentication across the cookie, ticket and bearer patterns. */
 @Injectable()

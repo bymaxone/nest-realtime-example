@@ -24,7 +24,8 @@ import type { AppConfig } from '../config/env.loader';
  *
  * @param config - The frozen application configuration.
  * @param authenticator - The connection authenticator resolved through DI.
- * @param hooks - Optional lifecycle hooks (the audit sink when configured).
+ * @param hooks - Optional lifecycle hooks (the composite that fans out to the
+ *   audit ring, the connection event log and the decorator handlers).
  * @returns The options passed to `BymaxRealtimeModule`.
  */
 export function buildRealtimeOptions(
