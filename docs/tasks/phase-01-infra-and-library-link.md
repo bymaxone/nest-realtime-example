@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 5 tasks · **Last updated**: 2026-07-06
+> **Status**: 👀 Review · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
@@ -25,17 +25,17 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 
 | ID  | Task                                                                        | Status | Priority | Size | Depends on |
 | --- | --------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | 📋     | P0       | M    | Phase 00   |
-| 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | 📋     | P0       | S    | 1.1        |
-| 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | 📋     | P0       | M    | 1.2        |
-| 1.4 | Typed env config module + .env.example                                      | 📋     | P0       | M    | 1.1        |
-| 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 📋     | P0       | S    | 1.1-1.4    |
+| 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | ✅     | P0       | M    | Phase 00   |
+| 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | ✅     | P0       | S    | 1.1        |
+| 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | ✅     | P0       | M    | 1.2        |
+| 1.4 | Typed env config module + .env.example                                      | ✅     | P0       | M    | 1.1        |
+| 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 👀     | P0       | S    | 1.1-1.4    |
 
 ## Tasks
 
 ### Task 1.1: Branch, docker-compose with Redis, api Dockerfile
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 00
@@ -46,10 +46,10 @@ The local stack skeleton: `redis:7-alpine` with a healthcheck as the always-on s
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-01-infra-and-library-link` created with `git switch -c`.
-- [ ] `docker-compose.yml`: `redis` service (`redis:7-alpine`, healthcheck `redis-cli ping`, port 6379).
-- [ ] `docker/api.Dockerfile`: multi-stage (deps, build, runtime), Node 24 alpine, non-root user, `HEALTHCHECK`.
-- [ ] `docker compose up -d redis` reaches healthy; `docker build -f docker/api.Dockerfile .` succeeds.
+- [x] Branch `feat/phase-01-infra-and-library-link` created with `git switch -c`.
+- [x] `docker-compose.yml`: `redis` service (`redis:7-alpine`, healthcheck `redis-cli ping`, port 6379).
+- [x] `docker/api.Dockerfile`: multi-stage (deps, build, runtime), Node 24 alpine, non-root user, `HEALTHCHECK`.
+- [x] `docker compose up -d redis` reaches healthy; `docker build -f docker/api.Dockerfile .` succeeds.
 
 #### Files to create / modify
 
@@ -102,7 +102,7 @@ docs/DEVELOPMENT_PLAN.md §1, append to Completion log, Conventional commit, no 
 
 ### Task 1.2: Link the library and install optional peers
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 1.1
@@ -113,10 +113,10 @@ Wire `@bymax-one/nest-realtime` into both apps via `file:` protocol and install 
 
 #### Acceptance criteria
 
-- [ ] `apps/api/package.json`: `"@bymax-one/nest-realtime": "file:../../../nest-realtime"` + `@nestjs/common@^11`, `@nestjs/core@^11`, `reflect-metadata`, `rxjs@^7.8`, `ioredis@^5`, and the optional WS peers (`@nestjs/websockets`, `@nestjs/platform-socket.io`, `socket.io@^4`, `@socket.io/redis-adapter@^8`).
-- [ ] `apps/web/package.json`: same `file:` link + `react@^19`, `react-dom@^19`, `socket.io-client@^4`, `next@^16`.
-- [ ] `pnpm install` resolves the link; `pnpm typecheck` still green.
-- [ ] If the sibling checkout lacks a built `dist/`, run its build once and document the requirement in the README quick-start placeholder.
+- [x] `apps/api/package.json`: `"@bymax-one/nest-realtime": "file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz"` (committed pack tarball, resolves in tree, clone and CI) + `@nestjs/common@^11`, `@nestjs/core@^11`, `reflect-metadata`, `rxjs@^7.8`, `ioredis@^5`, and the optional WS peers (`@nestjs/websockets`, `@nestjs/platform-socket.io`, `socket.io@^4`, `@socket.io/redis-adapter@^8`).
+- [x] `apps/web/package.json`: same tarball link + `react@^19`, `react-dom@^19`, `socket.io-client@^4`, `next@^16` (plus `@types/react`, `@types/react-dom` for the `./react` probe typecheck).
+- [x] `pnpm install` resolves the link; `pnpm typecheck` still green.
+- [x] Sibling `dist/` built and packed into `vendor/`; the consumption strategy is documented in the README quick-start.
 
 #### Files to create / modify
 
@@ -165,7 +165,7 @@ Completion Protocol: standard steps (status, index, header, plan §1 row, log, c
 
 ### Task 1.3: Subpath probe spec and honest CI tests
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 1.2
@@ -176,10 +176,10 @@ The first real tests: Jest in the api proving `.` and `./shared` resolve (ESM + 
 
 #### Acceptance criteria
 
-- [ ] `apps/api` Jest configured (`maxWorkers: '50%'`, coverage thresholds staged at 100 for implemented files) with `test/probe/subpaths.spec.ts` importing `BymaxRealtimeModule`, `RealtimeService` types from `.` and `RESERVED_EVENT_NAMES`, `ROOM_PREFIXES`, `composeRoomId` from `./shared`, via both `import` and `createRequire`.
-- [ ] `apps/web` Vitest configured (`maxWorkers` bounded) with a probe importing `useRealtime`, `RealtimeProvider` from `./react` and types from `./shared`.
-- [ ] `--passWithNoTests` removed from CI; unit steps run the real suites sequentially.
-- [ ] `pnpm test` green from clean clone (with the sibling library built).
+- [x] `apps/api` Jest configured (`maxWorkers: '50%'`, coverage collected with 100% thresholds; the bootstrap entry is excluded) with `test/probe/subpaths.spec.ts` importing `BymaxRealtimeModule`, `RealtimeService` from `.` (via both `import` and `createRequire`) and `RESERVED_EVENT_NAMES`, `ROOM_PREFIXES` from `./shared`. `composeRoomId` is imported from the root `.` subpath, not `./shared`: the shipped library exports the helper from the server subpath (spec drift, see the PR body).
+- [x] `apps/web` Vitest configured (jsdom, `maxWorkers: '50%'`) with a probe importing `useRealtime`, `useRealtimeConnection`, `usePresence`, `RealtimeProvider` from `./react` and types from `./shared`.
+- [x] `--passWithNoTests` removed from both app test scripts; the two CI unit steps run the real suites sequentially with a heap-cap guard.
+- [x] `pnpm test` green from a clean install (with the sibling library packed into `vendor/`).
 
 #### Files to create / modify
 
@@ -236,7 +236,7 @@ Completion Protocol: standard steps.
 
 ### Task 1.4: Typed env config module
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 1.1
@@ -247,10 +247,10 @@ The single `process.env` reader of `apps/api`: parses the §9.1 registry into a 
 
 #### Acceptance criteria
 
-- [ ] `apps/api/src/config/`: schema + loader + Nest module exposing `APP_CONFIG` (Symbol token) with the full §9.1 registry (ports, transport profile, realtime tunables, redis url, pubsub driver, session secret, web origin).
-- [ ] Malformed env produces ONE aggregated error listing every violation; values are never echoed (names + issue only).
-- [ ] Config object is deep-frozen; unit specs cover happy path, aggregation, freeze, defaults.
-- [ ] `.env.example` documents every variable with its default.
+- [x] `apps/api/src/config/`: schema + loader + Nest module exposing `APP_CONFIG` (Symbol token) with the full §9.1 registry (ports, transport profile, realtime tunables, redis url, pubsub driver, session secret, web origin).
+- [x] Malformed env produces ONE aggregated error listing every violation; values are never echoed (variable name + issue code only).
+- [x] Config object is deep-frozen (root plus the grouped realtime/reauth sub-objects); unit specs cover happy path, overrides, aggregation, freeze, enum rejection, and the process.env default at 100% coverage.
+- [x] `.env.example` documents every variable with its default (api plus the two web `NEXT_PUBLIC_*` values).
 
 #### Files to create / modify
 
@@ -304,7 +304,7 @@ Completion Protocol: standard steps.
 
 ### Task 1.5: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 1.1-1.4
@@ -315,9 +315,9 @@ Standard phase close: re-verify criteria, sync dashboards, PR, Copilot review, m
 
 #### Acceptance criteria
 
-- [ ] Tasks 1.1-1.4 ✅ with verifications re-run.
-- [ ] Dashboards synced (this header, plan §1, tasks README).
-- [ ] PR merged with Copilot findings addressed and CI green; branch deleted.
+- [x] Tasks 1.1-1.4 ✅ with verifications re-run (typecheck, lint, format, build, tests at 100% coverage, redis healthy, Dockerfile builds non-root, aggregated boot error unit-proven, invariant greps clean).
+- [x] Dashboards synced (this header, plan §1, tasks README).
+- [x] PR opened with the GitHub Copilot code review requested; code review and security review at zero findings. Merge on green CI and branch deletion are owned by the orchestrator under this run's architecture override.
 
 #### Files to create / modify
 
@@ -362,3 +362,9 @@ Completion Protocol: standard steps + phase completion line in the log.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 1.1 ✅ 2026-07-09 Branch, healthchecked redis:7-alpine compose service, and multi-stage non-root api Dockerfile (verified healthy + build exit 0).
+- 1.2 ✅ 2026-07-09 Linked the library into both apps via a committed pack tarball plus the Nest/WS/React peer sets; install and typecheck green.
+- 1.3 ✅ 2026-07-09 Subpath probes (api Jest CJS: `.` + `./shared`; web Vitest ESM: `./react` + `./shared`) with 100% coverage thresholds; removed passWithNoTests so CI runs real suites.
+- 1.4 ✅ 2026-07-09 Typed, deep-frozen env config module (zod schema, aggregated value-safe boot error, APP_CONFIG Symbol, global Nest module) with .env.example and 100%-covered specs.
+- 1.5 👀 2026-07-09 Phase close: re-ran every gate green, synced all three dashboards, opened the PR and requested the Copilot review (merge owned by the orchestrator).
