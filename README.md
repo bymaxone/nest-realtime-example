@@ -21,6 +21,22 @@ Build progress is tracked in the [Development Plan's progress dashboard](docs/DE
 
 The setup and run instructions land here as the application takes shape across the build's phase progression: a pnpm workspace with two apps (`apps/api`, a NestJS backend; `apps/web`, a Next.js frontend), a Redis-backed local stack, and the multi-transport boot profiles the library supports. Until then, the [Technical Specification](docs/TECHNICAL_SPECIFICATION.md) is the authoritative description of what will run and how.
 
+### Library consumption (prerequisite)
+
+`@bymax-one/nest-realtime` is not yet published to npm, so both apps consume it from a committed package tarball under [`vendor/`](vendor), referenced as `file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz`. This is a `pnpm pack` artifact of the sibling checkout, which is the exact bytes npm would serve, so it is a link to the built package and not a copy of the library source.
+
+A committed tarball is used instead of a bare relative `file:` link to the sibling checkout because it resolves identically in three places: a working tree, a fresh clone, and CI (which checks out only this repository and never the sibling). Consuming the library from a directory path outside the repository fails in the last two.
+
+To refresh the tarball after changing the sibling library:
+
+```bash
+pnpm -C ../nest-realtime build
+pnpm -C ../nest-realtime pack --pack-destination "$PWD/vendor"
+pnpm install
+```
+
+When the library publishes, this becomes a one-line change per app: replace the `file:` specifier with `^0.1.0` and refresh the lockfile.
+
 ## License
 
 Released under the [MIT License](LICENSE). This is an example application: it is not published to npm and is not intended for production deployment as-is.

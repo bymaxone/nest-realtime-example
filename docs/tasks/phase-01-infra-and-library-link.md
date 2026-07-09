@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 🔄 In Progress · **Progress**: 1 / 5 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 2 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
@@ -26,7 +26,7 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 | ID  | Task                                                                        | Status | Priority | Size | Depends on |
 | --- | --------------------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | ✅     | P0       | M    | Phase 00   |
-| 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | 📋     | P0       | S    | 1.1        |
+| 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | ✅     | P0       | S    | 1.1        |
 | 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | 📋     | P0       | M    | 1.2        |
 | 1.4 | Typed env config module + .env.example                                      | 📋     | P0       | M    | 1.1        |
 | 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 📋     | P0       | S    | 1.1-1.4    |
@@ -102,7 +102,7 @@ docs/DEVELOPMENT_PLAN.md §1, append to Completion log, Conventional commit, no 
 
 ### Task 1.2: Link the library and install optional peers
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 1.1
@@ -113,10 +113,10 @@ Wire `@bymax-one/nest-realtime` into both apps via `file:` protocol and install 
 
 #### Acceptance criteria
 
-- [ ] `apps/api/package.json`: `"@bymax-one/nest-realtime": "file:../../../nest-realtime"` + `@nestjs/common@^11`, `@nestjs/core@^11`, `reflect-metadata`, `rxjs@^7.8`, `ioredis@^5`, and the optional WS peers (`@nestjs/websockets`, `@nestjs/platform-socket.io`, `socket.io@^4`, `@socket.io/redis-adapter@^8`).
-- [ ] `apps/web/package.json`: same `file:` link + `react@^19`, `react-dom@^19`, `socket.io-client@^4`, `next@^16`.
-- [ ] `pnpm install` resolves the link; `pnpm typecheck` still green.
-- [ ] If the sibling checkout lacks a built `dist/`, run its build once and document the requirement in the README quick-start placeholder.
+- [x] `apps/api/package.json`: `"@bymax-one/nest-realtime": "file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz"` (committed pack tarball, resolves in tree, clone and CI) + `@nestjs/common@^11`, `@nestjs/core@^11`, `reflect-metadata`, `rxjs@^7.8`, `ioredis@^5`, and the optional WS peers (`@nestjs/websockets`, `@nestjs/platform-socket.io`, `socket.io@^4`, `@socket.io/redis-adapter@^8`).
+- [x] `apps/web/package.json`: same tarball link + `react@^19`, `react-dom@^19`, `socket.io-client@^4`, `next@^16` (plus `@types/react`, `@types/react-dom` for the `./react` probe typecheck).
+- [x] `pnpm install` resolves the link; `pnpm typecheck` still green.
+- [x] Sibling `dist/` built and packed into `vendor/`; the consumption strategy is documented in the README quick-start.
 
 #### Files to create / modify
 
@@ -364,3 +364,4 @@ Completion Protocol: standard steps + phase completion line in the log.
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
 
 - 1.1 ✅ 2026-07-09 Branch, healthchecked redis:7-alpine compose service, and multi-stage non-root api Dockerfile (verified healthy + build exit 0).
+- 1.2 ✅ 2026-07-09 Linked the library into both apps via a committed pack tarball plus the Nest/WS/React peer sets; install and typecheck green.
