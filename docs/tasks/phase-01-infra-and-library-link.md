@@ -1,6 +1,6 @@
 # Phase 01: infra-and-library-link
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 5 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 4 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 01)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §8, §9.1, §16
 
@@ -28,7 +28,7 @@ Phase 00 delivered the tooling shell. This phase makes the library consumable an
 | 1.1 | Branch + docker-compose (redis:7) + api Dockerfile                          | ✅     | P0       | M    | Phase 00   |
 | 1.2 | Link `@bymax-one/nest-realtime` via file: + install optional peers          | ✅     | P0       | S    | 1.1        |
 | 1.3 | Subpath probe spec (., /shared, /react; ESM + CJS) + remove passWithNoTests | ✅     | P0       | M    | 1.2        |
-| 1.4 | Typed env config module + .env.example                                      | 📋     | P0       | M    | 1.1        |
+| 1.4 | Typed env config module + .env.example                                      | ✅     | P0       | M    | 1.1        |
 | 1.5 | Phase close: audit, dashboards, PR + Copilot review                         | 📋     | P0       | S    | 1.1-1.4    |
 
 ## Tasks
@@ -236,7 +236,7 @@ Completion Protocol: standard steps.
 
 ### Task 1.4: Typed env config module
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 1.1
@@ -247,10 +247,10 @@ The single `process.env` reader of `apps/api`: parses the §9.1 registry into a 
 
 #### Acceptance criteria
 
-- [ ] `apps/api/src/config/`: schema + loader + Nest module exposing `APP_CONFIG` (Symbol token) with the full §9.1 registry (ports, transport profile, realtime tunables, redis url, pubsub driver, session secret, web origin).
-- [ ] Malformed env produces ONE aggregated error listing every violation; values are never echoed (names + issue only).
-- [ ] Config object is deep-frozen; unit specs cover happy path, aggregation, freeze, defaults.
-- [ ] `.env.example` documents every variable with its default.
+- [x] `apps/api/src/config/`: schema + loader + Nest module exposing `APP_CONFIG` (Symbol token) with the full §9.1 registry (ports, transport profile, realtime tunables, redis url, pubsub driver, session secret, web origin).
+- [x] Malformed env produces ONE aggregated error listing every violation; values are never echoed (variable name + issue code only).
+- [x] Config object is deep-frozen (root plus the grouped realtime/reauth sub-objects); unit specs cover happy path, overrides, aggregation, freeze, enum rejection, and the process.env default at 100% coverage.
+- [x] `.env.example` documents every variable with its default (api plus the two web `NEXT_PUBLIC_*` values).
 
 #### Files to create / modify
 
@@ -366,3 +366,4 @@ Completion Protocol: standard steps + phase completion line in the log.
 - 1.1 ✅ 2026-07-09 Branch, healthchecked redis:7-alpine compose service, and multi-stage non-root api Dockerfile (verified healthy + build exit 0).
 - 1.2 ✅ 2026-07-09 Linked the library into both apps via a committed pack tarball plus the Nest/WS/React peer sets; install and typecheck green.
 - 1.3 ✅ 2026-07-09 Subpath probes (api Jest CJS: `.` + `./shared`; web Vitest ESM: `./react` + `./shared`) with 100% coverage thresholds; removed passWithNoTests so CI runs real suites.
+- 1.4 ✅ 2026-07-09 Typed, deep-frozen env config module (zod schema, aggregated value-safe boot error, APP_CONFIG Symbol, global Nest module) with .env.example and 100%-covered specs.
