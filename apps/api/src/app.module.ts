@@ -17,6 +17,7 @@ import { DomainModule } from './domain/domain.module';
 import { EmitModule } from './emit/emit.module';
 import { HealthModule } from './health/health.module';
 import { RealtimeWiringModule } from './realtime/wiring.module';
+import { RoomsModule } from './rooms/rooms.module';
 
 /** Wires configuration, liveness, demo auth, realtime and the demo features. */
 @Module({
@@ -29,6 +30,7 @@ import { RealtimeWiringModule } from './realtime/wiring.module';
     DomainModule,
     AuditModule,
     ConnectionsModule,
+    RoomsModule,
   ],
 })
 export class AppModule {}

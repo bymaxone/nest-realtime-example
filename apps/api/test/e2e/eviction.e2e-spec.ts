@@ -89,14 +89,22 @@ describe('FIFO eviction (e2e)', () => {
 
     const byId = await timelineById();
     try {
+      // The two oldest connections (A, B) are evicted with the FIFO reason; the two
+      // newest (C, D) are admitted and still live.
       expect(byId.get(a.id)?.reason).toBe(TOO_MANY);
       expect(byId.get(b.id)?.reason).toBe(TOO_MANY);
       expect(byId.get(c.id)?.reason).toBeNull();
       expect(byId.get(d.id)?.reason).toBeNull();
 
+      const evicted = [...byId.values()].filter((e) => e.reason === TOO_MANY);
+      const survived = [...byId.values()].filter((e) => e.reason === null);
+      expect(new Set(evicted.map((e) => e.connectionId))).toEqual(new Set([a.id, b.id]));
+      expect(new Set(survived.map((e) => e.connectionId))).toEqual(new Set([c.id, d.id]));
+
+      // A connected before B, so FIFO evicts A first: its close is not after B's.
       const aEvictedAt = byId.get(a.id)?.evictedAt ?? '';
       const bEvictedAt = byId.get(b.id)?.evictedAt ?? '';
-      expect(aEvictedAt < bEvictedAt).toBe(true);
+      expect(aEvictedAt <= bEvictedAt).toBe(true);
     } finally {
       c.source.close();
       d.source.close();

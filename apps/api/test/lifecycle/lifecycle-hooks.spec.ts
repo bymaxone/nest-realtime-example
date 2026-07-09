@@ -10,8 +10,10 @@
 import type { ConnectionEventMeta } from '@bymax-one/nest-realtime';
 
 import type { AuditService } from '../../src/audit/audit.service';
+import type { LifecycleDecoratorDispatcher } from '../../src/audit/decorator-handlers';
 import type { ConnectionEventLog } from '../../src/lifecycle/connection-event-log';
 import { CompositeLifecycleHooks } from '../../src/lifecycle/lifecycle-hooks';
+import type { RoomMembershipTracker } from '../../src/lifecycle/room-membership.tracker';
 
 const META: ConnectionEventMeta = {
   connectionId: 'c1',
@@ -28,9 +30,10 @@ interface Harness {
   readonly composite: CompositeLifecycleHooks;
   readonly audit: Record<string, jest.Mock>;
   readonly log: Record<string, jest.Mock>;
+  readonly decorators: Record<string, jest.Mock>;
 }
 
-/** Build the composite over spied audit and connection-log consumers. */
+/** Build the composite over spied audit, connection-log and decorator consumers. */
 function build(): Harness {
   const audit = {
     onConnect: jest.fn(),
@@ -39,30 +42,36 @@ function build(): Harness {
     onReauthenticationFailed: jest.fn(),
   };
   const log = { onConnect: jest.fn(), onDisconnect: jest.fn() };
+  const rooms = { onDisconnect: jest.fn() };
+  const decorators = { onConnect: jest.fn(), onDisconnect: jest.fn() };
   const composite = new CompositeLifecycleHooks(
     audit as unknown as AuditService,
     log as unknown as ConnectionEventLog,
+    rooms as unknown as RoomMembershipTracker,
+    decorators as unknown as LifecycleDecoratorDispatcher,
   );
-  return { composite, audit, log };
+  return { composite, audit, log, decorators };
 }
 
 describe('CompositeLifecycleHooks', () => {
   /**
    * Connect fan-out and order.
    *
-   * onConnect must reach both consumers, and the audit consumer (a config hook)
-   * must run before the connection log, proving the documented ordering.
+   * onConnect must reach every consumer, and the cross-cutting config hooks (audit)
+   * must run before the feature-local decorator dispatcher, proving the documented
+   * "config hooks first" ordering.
    */
-  it('fans onConnect out with audit first', async () => {
-    const { composite, audit, log } = build();
+  it('fans onConnect out with config hooks before decorator handlers', async () => {
+    const { composite, audit, log, decorators } = build();
 
     await composite.onConnect(META);
 
     expect(audit.onConnect).toHaveBeenCalledWith(META);
     expect(log.onConnect).toHaveBeenCalledWith(META);
-    expect(audit.onConnect.mock.invocationCallOrder[0]).toBeLessThan(
-      log.onConnect.mock.invocationCallOrder[0] as number,
-    );
+    expect(decorators.onConnect).toHaveBeenCalledWith(META);
+    const auditOrder = audit.onConnect.mock.invocationCallOrder[0] as number;
+    expect(auditOrder).toBeLessThan(log.onConnect.mock.invocationCallOrder[0] as number);
+    expect(auditOrder).toBeLessThan(decorators.onConnect.mock.invocationCallOrder[0] as number);
   });
 
   /**

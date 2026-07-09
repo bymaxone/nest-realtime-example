@@ -14,8 +14,10 @@ import type { ConnectionEventMeta, IConnectionLifecycleHooks } from '@bymax-one/
 import { Injectable } from '@nestjs/common';
 
 import { AuditService } from '../audit/audit.service';
+import { LifecycleDecoratorDispatcher } from '../audit/decorator-handlers';
 
 import { ConnectionEventLog } from './connection-event-log';
+import { RoomMembershipTracker } from './room-membership.tracker';
 
 /** Metadata a disconnect hook receives. */
 type DisconnectMeta = ConnectionEventMeta & { reason?: string; durationMs: number };
@@ -31,11 +33,23 @@ export class CompositeLifecycleHooks implements IConnectionLifecycleHooks {
   /**
    * Build the composite hooks.
    *
+   * The order is the contract: the cross-cutting config hooks (audit, the
+   * connection timeline, room-membership cleanup) run before the decorator
+   * dispatcher, so the feature-local `@OnConnect` / `@OnDisconnect` handlers always
+   * fire last.
+   *
    * @param audit - The cross-cutting audit ring (a config hook, runs first).
    * @param connectionEventLog - The connection timeline log (a config hook).
+   * @param roomMembership - The room-membership tracker (cleared on disconnect).
+   * @param decoratorDispatcher - Invokes the feature-local decorator handlers last.
    */
-  constructor(audit: AuditService, connectionEventLog: ConnectionEventLog) {
-    this.consumers = [audit, connectionEventLog];
+  constructor(
+    audit: AuditService,
+    connectionEventLog: ConnectionEventLog,
+    roomMembership: RoomMembershipTracker,
+    decoratorDispatcher: LifecycleDecoratorDispatcher,
+  ) {
+    this.consumers = [audit, connectionEventLog, roomMembership, decoratorDispatcher];
   }
 
   /**

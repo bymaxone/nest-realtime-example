@@ -13,6 +13,7 @@ import { APP_SERVICE_NAME, APP_VERSION } from '../app.constants';
 import { SessionGuard } from '../auth/session.guard';
 
 import { type AuditEntry, type AuditKind, AuditService, isAuditKind } from './audit.service';
+import { type DecoratorStats, DecoratorHandlers } from './decorator-handlers';
 
 /** The audit feed response: service identity plus the newest-first entries. */
 interface AuditFeedResponse {
@@ -28,8 +29,12 @@ export class AuditController {
    * Build the audit controller.
    *
    * @param audit - The audit sink and feed.
+   * @param decorators - The decorator-driven lifecycle counters.
    */
-  constructor(private readonly audit: AuditService) {}
+  constructor(
+    private readonly audit: AuditService,
+    private readonly decorators: DecoratorHandlers,
+  ) {}
 
   /**
    * Return the audit feed, optionally filtered by `kind`.
@@ -44,6 +49,17 @@ export class AuditController {
       service: { name: APP_SERVICE_NAME, version: APP_VERSION },
       entries: this.audit.feed(this.parseKind(kind)),
     };
+  }
+
+  /**
+   * Return the decorator-driven lifecycle counters.
+   *
+   * @returns The connect and disconnect counts bumped by the `@OnConnect` /
+   *   `@OnDisconnect` handlers.
+   */
+  @Get('decorator-stats')
+  decoratorStats(): DecoratorStats {
+    return this.decorators.stats();
   }
 
   /** Validate and narrow the optional kind query parameter. */

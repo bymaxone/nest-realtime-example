@@ -13,11 +13,12 @@ import { AuditModule } from '../audit/audit.module';
 
 import { ConnectionEventLog } from './connection-event-log';
 import { CompositeLifecycleHooks } from './lifecycle-hooks';
+import { RoomMembershipTracker } from './room-membership.tracker';
 
-/** Wires the connection event log and the composite lifecycle hooks. */
+/** Wires the connection event log, room-membership tracker and composite hooks. */
 @Module({
   imports: [AuditModule],
-  providers: [ConnectionEventLog, CompositeLifecycleHooks],
-  exports: [ConnectionEventLog, CompositeLifecycleHooks],
+  providers: [ConnectionEventLog, RoomMembershipTracker, CompositeLifecycleHooks],
+  exports: [ConnectionEventLog, RoomMembershipTracker, CompositeLifecycleHooks],
 })
 export class LifecycleModule {}

@@ -37,10 +37,15 @@ describe('EmitController', () => {
   /**
    * Tenant endpoint.
    *
-   * POST /emit/tenant/:tenantId must emit to the tenant and acknowledge.
+   * POST /emit/tenant/:tenantId must pass the caller's own tenant and the target
+   * tenant to the guarded service and acknowledge for a same-tenant emit.
    */
-  it('emits to a tenant and acknowledges', async () => {
-    const ack = await controller.emitToTenant('acme', { event: 'order.paid', data: {} });
+  it('emits to the caller tenant and acknowledges', async () => {
+    const ack = await controller.emitToTenant(
+      'acme',
+      { event: 'order.paid', data: {} },
+      { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
+    );
 
     expect(realtime.emitToTenant).toHaveBeenCalledWith('acme', 'order.paid', {});
     expect(ack).toEqual({ accepted: true });

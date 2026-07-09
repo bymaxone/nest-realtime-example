@@ -13,6 +13,7 @@ import { ConfigModule } from '../../src/config/config.module';
 import { ConnectionEventLog } from '../../src/lifecycle/connection-event-log';
 import { CompositeLifecycleHooks } from '../../src/lifecycle/lifecycle-hooks';
 import { LifecycleModule } from '../../src/lifecycle/lifecycle.module';
+import { RoomMembershipTracker } from '../../src/lifecycle/room-membership.tracker';
 import { buildTestConfig } from '../support/config.fixture';
 
 describe('LifecycleModule', () => {
@@ -29,6 +30,7 @@ describe('LifecycleModule', () => {
       .compile();
 
     expect(moduleRef.get(ConnectionEventLog)).toBeInstanceOf(ConnectionEventLog);
+    expect(moduleRef.get(RoomMembershipTracker)).toBeInstanceOf(RoomMembershipTracker);
     expect(moduleRef.get(CompositeLifecycleHooks)).toBeInstanceOf(CompositeLifecycleHooks);
 
     await moduleRef.close();

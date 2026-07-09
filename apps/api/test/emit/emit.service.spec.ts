@@ -6,6 +6,8 @@
  * Mocks: a RealtimeService double with per-method spies.
  */
 
+import { ForbiddenException } from '@nestjs/common';
+
 import { EmitService } from '../../src/emit/emit.service';
 import { mockRealtimeService, type RealtimeMock } from '../support/realtime.fixture';
 
@@ -30,14 +32,28 @@ describe('EmitService', () => {
   });
 
   /**
-   * Tenant delegation.
+   * Same-tenant delegation.
    *
-   * emitToTenant must forward the tenant id, event and data unchanged.
+   * emitToTenant must forward to the library only when the target tenant is the
+   * caller's own tenant.
    */
-  it('delegates emitToTenant', async () => {
-    await service.emitToTenant('acme', 'order.paid', { id: 2 });
+  it('delegates emitToTenant within the caller tenant', async () => {
+    await service.emitToTenant('acme', 'acme', 'order.paid', { id: 2 });
 
     expect(realtime.emitToTenant).toHaveBeenCalledWith('acme', 'order.paid', { id: 2 });
+  });
+
+  /**
+   * Anti-IDOR rejection.
+   *
+   * Emitting to a tenant other than the caller's must throw before the library is
+   * touched, so no cross-tenant event is ever delivered.
+   */
+  it('rejects a cross-tenant emit before touching the library', async () => {
+    await expect(service.emitToTenant('acme', 'globex', 'order.paid', {})).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(realtime.emitToTenant).not.toHaveBeenCalled();
   });
 
   /**
