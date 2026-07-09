@@ -5,11 +5,22 @@
  * Each method forwards to the matching `RealtimeService` primitive. The tenant
  * emit is anti-IDOR: the library does not verify tenant ownership, so this
  * service rejects (403) any attempt to emit to a tenant other than the caller's
- * before the event ever reaches `RealtimeService`.
+ * before the event ever reaches `RealtimeService`. The room emit is scoped the
+ * same way: the console may only target resource/custom rooms, never the
+ * library's auto-joined `user:` / `tenant:` scope rooms (which would otherwise let
+ * a caller reach another user or tenant through a room id and bypass the tenant
+ * guard).
  */
 
 import { RealtimeService } from '@bymax-one/nest-realtime';
+import { ROOM_PREFIXES } from '@bymax-one/nest-realtime/shared';
 import { ForbiddenException, Injectable } from '@nestjs/common';
+
+/** Scope-room prefixes the emit console must not target directly. */
+const SCOPED_ROOM_PREFIXES: readonly string[] = [
+  `${ROOM_PREFIXES.USER}:`,
+  `${ROOM_PREFIXES.TENANT}:`,
+];
 
 /** Delegates emit-console operations to the library's realtime API. */
 @Injectable()
@@ -54,14 +65,18 @@ export class EmitService {
   }
 
   /**
-   * Emit an event to every connection in a room.
+   * Emit an event to every connection in a resource or custom room.
    *
-   * @param roomId - Target room id.
+   * @param roomId - Target room id (must not be a `user:` / `tenant:` scope room).
    * @param event - Event name.
    * @param data - Free-form payload.
+   * @throws ForbiddenException when the room id targets a library scope room.
    */
-  emitToRoom(roomId: string, event: string, data: unknown): Promise<void> {
-    return this.realtime.emitToRoom(roomId, event, data);
+  async emitToRoom(roomId: string, event: string, data: unknown): Promise<void> {
+    if (SCOPED_ROOM_PREFIXES.some((prefix) => roomId.startsWith(prefix))) {
+      throw new ForbiddenException('cannot emit to a user or tenant scope room');
+    }
+    await this.realtime.emitToRoom(roomId, event, data);
   }
 
   /**

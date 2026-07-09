@@ -59,14 +59,32 @@ describe('EmitService', () => {
   /**
    * Room delegation.
    *
-   * emitToRoom must forward the room id, event and data unchanged.
+   * emitToRoom must forward a resource (or custom) room id, event and data
+   * unchanged.
    */
-  it('delegates emitToRoom', async () => {
+  it('delegates emitToRoom for a resource room', async () => {
     await service.emitToRoom('resource:incident:1', 'order.shipped', { id: 3 });
 
     expect(realtime.emitToRoom).toHaveBeenCalledWith('resource:incident:1', 'order.shipped', {
       id: 3,
     });
+  });
+
+  /**
+   * Scope-room rejection.
+   *
+   * Emitting to a `user:` or `tenant:` scope room must be rejected before the
+   * library is touched, so the room console can never reach another user or tenant
+   * and bypass the tenant guard.
+   */
+  it('rejects emitting to a user or tenant scope room', async () => {
+    await expect(service.emitToRoom('tenant:globex', 'order.paid', {})).rejects.toThrow(
+      ForbiddenException,
+    );
+    await expect(service.emitToRoom('user:gil@globex', 'order.paid', {})).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(realtime.emitToRoom).not.toHaveBeenCalled();
   });
 
   /**

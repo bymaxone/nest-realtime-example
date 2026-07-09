@@ -6,10 +6,12 @@
  * actually revalidated. Because the library's reauth service caches a positive
  * result for `cacheTtlMs`, this count stays well below the number of reauth
  * cycles when the cache is active, making the cache-reduction behavior observable.
+ * The snapshot lists every connected user's id, so it is admin-only.
  */
 
 import { Controller, Get, UseGuards } from '@nestjs/common';
 
+import { AdminGuard } from './admin.guard';
 import { type RevalidationCount, RevalidationStatsService } from './revalidation-stats.service';
 import { SessionGuard } from './session.guard';
 
@@ -20,7 +22,7 @@ interface ReauthStatsResponse {
 
 /** Serves the reauthentication stats lab endpoint under `/labs/reauth`. */
 @Controller('labs/reauth')
-@UseGuards(SessionGuard)
+@UseGuards(SessionGuard, AdminGuard)
 export class ReauthLabController {
   /**
    * Build the reauth lab controller.
