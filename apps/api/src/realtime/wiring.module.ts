@@ -17,6 +17,8 @@
 import { BymaxRealtimeModule } from '@bymax-one/nest-realtime';
 import { Module } from '@nestjs/common';
 
+import { AuditModule } from '../audit/audit.module';
+import { AuditService } from '../audit/audit.service';
 import { AuthModule } from '../auth/auth.module';
 import { CookieSessionAuthenticator } from '../auth/cookie-session.authenticator';
 import { APP_CONFIG } from '../config/config.tokens';
@@ -29,13 +31,17 @@ import { buildRealtimeOptions } from './options.factory';
   imports: [
     BymaxRealtimeModule.forRootAsync({
       transport: 'sse',
-      imports: [AuthModule],
-      inject: [APP_CONFIG, CookieSessionAuthenticator],
+      imports: [AuthModule, AuditModule],
+      inject: [APP_CONFIG, CookieSessionAuthenticator, AuditService],
       // The library types useFactory as (...args: unknown[]); the injected values
       // are exactly the `inject` tuple, so narrow it to the concrete dependencies.
       useFactory: (...args: unknown[]) => {
-        const [config, authenticator] = args as [AppConfig, CookieSessionAuthenticator];
-        return buildRealtimeOptions(config, authenticator);
+        const [config, authenticator, hooks] = args as [
+          AppConfig,
+          CookieSessionAuthenticator,
+          AuditService,
+        ];
+        return buildRealtimeOptions(config, authenticator, hooks);
       },
       extraProviders: [CookieSessionAuthenticator],
     }),

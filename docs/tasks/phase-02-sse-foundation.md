@@ -1,6 +1,6 @@
 # Phase 02: sse-foundation
 
-> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 5 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 02)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §9.2, §10, §11, §12.1, §12.2
 
@@ -30,7 +30,7 @@ Everything before this was scaffolding. This phase boots the SSE profile end to 
 | 2.2 | Demo auth: users, login/logout, HMAC cookie, CookieSessionAuthenticator    | ✅     | P0       | M    | 2.1        |
 | 2.3 | Canonical realtime wiring (forRootAsync, sse profile) + boot-failure specs | ✅     | P0       | L    | 2.2        |
 | 2.4 | Emit console + domain simulator + two-tenant isolation E2E                 | ✅     | P0       | M    | 2.3        |
-| 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | 📋     | P1       | M    | 2.3        |
+| 2.5 | Audit feed (config hooks) + heartbeat raw-capture lab                      | ✅     | P1       | M    | 2.3        |
 | 2.6 | Phase close: audit, dashboards, PR + Copilot review                        | 📋     | P0       | S    | 2.1-2.5    |
 
 ## Tasks
@@ -332,7 +332,7 @@ Completion Protocol: standard steps.
 
 ### Task 2.5: Audit feed and heartbeat raw-capture lab
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: M
 - **Depends on**: 2.3
@@ -343,10 +343,10 @@ Wire `IConnectionLifecycleHooks` into an in-memory ring-buffer audit feed (`GET 
 
 #### Acceptance criteria
 
-- [ ] `AuditService` implements the four hooks (connect, disconnect with duration, error, reauth-failed) appending typed entries (capped ring buffer, instance-tagged); wired into the options factory `hooks`.
-- [ ] `GET /audit/feed` returns entries newest-first with filtering by kind.
-- [ ] Heartbeat e2e: raw HTTP client (node:net or undici stream) captures bytes for > 2 heartbeat intervals with `REALTIME_HEARTBEAT_MS` lowered; asserts `: keepalive` lines present, no `id:` on them; an `eventsource` client in parallel receives zero events during the silent window.
-- [ ] Matrix rows 22 and 52 satisfied.
+- [x] `AuditService` implements the four hooks (connect, disconnect with duration, error, reauth-failed) appending typed entries (capped ring buffer, instance-tagged); wired into the options factory `hooks`.
+- [x] `GET /audit/feed` returns entries newest-first with filtering by kind.
+- [x] Heartbeat e2e: raw HTTP client (fetch stream) captures bytes for > 2 heartbeat intervals with `REALTIME_HEARTBEAT_MS` lowered; asserts `: keepalive` lines present, no `id:` on them; an `eventsource` client in parallel receives zero events during the silent window.
+- [x] Matrix rows 22 and 52 satisfied.
 
 #### Files to create / modify
 
@@ -460,3 +460,4 @@ Completion Protocol: standard steps + phase completion line.
 - 2.2 ✅ 2026-07-09 Demo cookie auth: seeded users, HMAC-signed HttpOnly cookie (node:crypto, timingSafeEqual), login/logout/me, CookieSessionAuthenticator + Redis-revocation revalidate.
 - 2.3 ✅ 2026-07-09 Canonical forRootAsync wiring + options factory (sse, /api/events via global api prefix), SSE connect e2e (client-safe traits, no metadata leak), sync forRoot + negative-boot specs. Vendored library patched to inject the SSE controller handler (esbuild build shipped no decorator metadata).
 - 2.4 ✅ 2026-07-09 Emit console (user/tenant/room/broadcast, reserved-name-safe) + order/deployment domain simulators; two-tenant isolation e2e proves tenant/user/broadcast scoping with lexicographically increasing ids.
+- 2.5 ✅ 2026-07-09 Audit feed via IConnectionLifecycleHooks (capped ring, instance-tagged, service metadata, kind filter) + heartbeat honesty e2e (raw `: keepalive` comments, no id/event, zero listener fires).

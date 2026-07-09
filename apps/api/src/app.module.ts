@@ -9,6 +9,7 @@
 
 import { Module } from '@nestjs/common';
 
+import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from './config/config.module';
 import { DomainModule } from './domain/domain.module';
@@ -18,6 +19,14 @@ import { RealtimeWiringModule } from './realtime/wiring.module';
 
 /** Wires configuration, liveness, demo auth, realtime and the demo features. */
 @Module({
-  imports: [ConfigModule, HealthModule, AuthModule, RealtimeWiringModule, EmitModule, DomainModule],
+  imports: [
+    ConfigModule,
+    HealthModule,
+    AuthModule,
+    RealtimeWiringModule,
+    EmitModule,
+    DomainModule,
+    AuditModule,
+  ],
 })
 export class AppModule {}
