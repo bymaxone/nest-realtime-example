@@ -1,6 +1,6 @@
 # Phase 05: scaling-cluster
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 05)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §15, §12.8
 
@@ -24,7 +24,7 @@ Single-instance SSE works. This phase makes it horizontal: `RedisRealtimePubSub`
 
 | ID  | Task                                                           | Status | Priority | Size | Depends on |
 | --- | -------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 5.1 | Branch + RedisRealtimePubSub implementation                    | 📋     | P0       | M    | Phase 04   |
+| 5.1 | Branch + RedisRealtimePubSub implementation                    | ✅     | P0       | M    | Phase 04   |
 | 5.2 | nginx SSE-safe config + cluster compose profile                | 📋     | P0       | M    | 5.1        |
 | 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | 📋     | P0       | L    | 5.2        |
 | 5.4 | Cross-instance revocation + degradation lab                    | 📋     | P0       | M    | 5.3        |
@@ -35,7 +35,7 @@ Single-instance SSE works. This phase makes it horizontal: `RedisRealtimePubSub`
 
 ### Task 5.1: RedisRealtimePubSub
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 04
@@ -46,11 +46,11 @@ The consumer-side bus: publish on the shared channel with an instance origin id;
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-05-scaling-cluster` created with `git switch -c`.
-- [ ] `RedisRealtimePubSub` implements the library's `IRealtimePubSub`: `publish(message)` stamps `origin` (instance `randomUUID`), `subscribe(handler)` returns an async unsubscribe; subscriber via `duplicate()`.
-- [ ] Own-origin messages are dropped before handlers; malformed payloads are logged and skipped (never throw into the bus).
-- [ ] Options factory selects it when `PUBSUB_DRIVER=redis` (memory default otherwise).
-- [ ] Unit specs: publish stamps origin, self-filter, handler fan-in, unsubscribe, malformed skip. 100% coverage.
+- [x] Branch `feat/phase-05-scaling-cluster` created with `git switch -c`.
+- [x] `RedisRealtimePubSub` implements the library's `IRealtimePubSub`: `publish(message)` stamps `origin` (instance `randomUUID`), `subscribe(handler)` returns an async unsubscribe; subscriber via `duplicate()`.
+- [x] Own-origin messages are dropped before handlers; malformed payloads are logged and skipped (never throw into the bus).
+- [x] Options factory selects it when `PUBSUB_DRIVER=redis` (memory default otherwise), via `RealtimeInfraModule` shared singletons.
+- [x] Unit specs: publish stamps origin, self-filter, handler fan-in, unsubscribe, malformed skip, availability flag. 100% coverage.
 
 #### Files to create / modify
 
@@ -410,3 +410,5 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 5.1 ✅ 2026-07-09 RedisRealtimePubSub (origin stamp + self-filter, duplicate subscriber, availability flag) selected by PUBSUB_DRIVER=redis via RealtimeInfraModule; full units at 100%.

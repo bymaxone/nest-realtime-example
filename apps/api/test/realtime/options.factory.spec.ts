@@ -10,6 +10,8 @@ import type {
   IConnectionAuthenticator,
   IConnectionLifecycleHooks,
   IOfflineQueueStorage,
+  IPresenceStorage,
+  IRealtimePubSub,
 } from '@bymax-one/nest-realtime';
 
 import { APP_SERVICE_NAME, APP_VERSION } from '../../src/app.constants';
@@ -136,5 +138,66 @@ describe('buildRealtimeOptions', () => {
 
     expect(options.offlineQueue).toBe(offlineQueue);
     expect(options).not.toHaveProperty('hooks');
+  });
+
+  /**
+   * Pub/sub omitted by default.
+   *
+   * With no pub/sub bus the options must omit the property so the library keeps its
+   * single-instance InMemoryPubSub default.
+   */
+  it('omits the pub/sub bus when none is provided', () => {
+    expect(buildRealtimeOptions(buildTestConfig(), authenticator)).not.toHaveProperty('pubsub');
+  });
+
+  /**
+   * Pub/sub wired when provided.
+   *
+   * When a cross-instance bus is supplied it must be attached verbatim so emits
+   * fan out across instances.
+   */
+  it('attaches the pub/sub bus when provided', () => {
+    const pubsub: IRealtimePubSub = {
+      publish: () => Promise.resolve(),
+      subscribe: () => Promise.resolve(() => Promise.resolve()),
+    };
+
+    const options = buildRealtimeOptions(
+      buildTestConfig(),
+      authenticator,
+      undefined,
+      undefined,
+      pubsub,
+    );
+
+    expect(options.pubsub).toBe(pubsub);
+    expect(options).not.toHaveProperty('presence');
+  });
+
+  /**
+   * Presence wired when provided.
+   *
+   * When presence storage is supplied it must be attached verbatim so
+   * presence-dependent features can answer "who is online?".
+   */
+  it('attaches presence storage when provided', () => {
+    const presence: IPresenceStorage = {
+      setOnline: () => Promise.resolve(),
+      setOffline: () => Promise.resolve(),
+      isOnline: () => Promise.resolve(false),
+      listOnlineByTenant: () => Promise.resolve([]),
+      countOnline: () => Promise.resolve(0),
+    };
+
+    const options = buildRealtimeOptions(
+      buildTestConfig(),
+      authenticator,
+      undefined,
+      undefined,
+      undefined,
+      presence,
+    );
+
+    expect(options.presence).toBe(presence);
   });
 });
