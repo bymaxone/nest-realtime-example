@@ -1,6 +1,6 @@
 # Phase 09: testing-quality
 
-> **Status**: 👀 Review · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-10
+> **Status**: ✅ Done · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 09)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §18, §19
 
@@ -336,4 +336,4 @@ Completion Protocol: standard steps + phase completion line.
 - 9.2 ✅ 2026-07-10 Centralized the realtime hook fakes in one shared test util and enforced web coverage at pinned 100%.
 - 9.3 ✅ 2026-07-10 Added a typed route-inventory manifest and suite proving every HTTP route has happy, auth and validation coverage.
 - 9.4 ✅ 2026-07-10 Ordered heavy suites (`test:e2e:all`), a Playwright journey per page, and the e2e/playwright/cluster CI jobs.
-- 9.5 👀 2026-07-10 Phase-close audit; dashboards synced; PR opened with the GitHub Copilot review requested.
+- 9.5 ✅ 2026-07-10 Phase-close audit; dashboards synced; PR merged with the GitHub Copilot review addressed.

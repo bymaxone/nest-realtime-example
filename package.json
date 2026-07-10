@@ -16,10 +16,12 @@
     "test:e2e:cluster": "docker compose --profile cluster up -d --build && pnpm --filter @nest-realtime-example/api run test:e2e:cluster; status=$?; docker compose --profile cluster down; exit $status",
     "test:e2e:cluster:ws": "REALTIME_TRANSPORT=websocket docker compose --profile cluster up -d --build && pnpm --filter @nest-realtime-example/api run test:e2e:cluster:ws; status=$?; docker compose --profile cluster down; exit $status",
     "test:e2e:all": "sh scripts/e2e-all.sh",
+    "audit:exports": "node scripts/audit-exports.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "mutation": "pnpm --filter @nest-realtime-example/api run mutation"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",

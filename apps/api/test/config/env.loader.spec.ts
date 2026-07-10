@@ -149,3 +149,196 @@ describe('loadEnv', () => {
     }).toThrow(TypeError);
   });
 });
+
+describe('loadEnv numeric bounds', () => {
+  /**
+   * Boundary rejection and mid-range acceptance for every bounded numeric.
+   *
+   * Each field must reject a value below its floor and above its ceiling, and
+   * accept a distinct in-range value, so neither bound can be relaxed, dropped or
+   * collapsed onto the other without a test failing. `variable` names the env key,
+   * `below`/`above` are out-of-range, and `valid` is an in-range value read back
+   * through `read` to prove it is mapped, not silently defaulted.
+   */
+  const cases: ReadonlyArray<{
+    readonly variable: string;
+    readonly below: string;
+    readonly above: string;
+    readonly valid: string;
+    readonly read: (config: AppConfig) => number;
+    readonly expected: number;
+  }> = [
+    {
+      variable: 'PORT',
+      below: '0',
+      above: '65536',
+      valid: '4100',
+      read: (c) => c.port,
+      expected: 4100,
+    },
+    {
+      variable: 'REALTIME_HEARTBEAT_MS',
+      below: '999',
+      above: '600001',
+      valid: '5000',
+      read: (c) => c.realtime.heartbeatMs,
+      expected: 5000,
+    },
+    {
+      variable: 'REALTIME_REPLAY_BUFFER_SIZE',
+      below: '0',
+      above: '10001',
+      valid: '25',
+      read: (c) => c.realtime.replayBufferSize,
+      expected: 25,
+    },
+    {
+      variable: 'REALTIME_MAX_CONNECTIONS_PER_USER',
+      below: '0',
+      above: '1001',
+      valid: '7',
+      read: (c) => c.realtime.maxConnectionsPerUser,
+      expected: 7,
+    },
+    {
+      variable: 'REALTIME_WS_MAX_BUFFER_BYTES',
+      below: '1023',
+      above: '10485761',
+      valid: '2048',
+      read: (c) => c.realtime.wsMaxBufferBytes,
+      expected: 2048,
+    },
+    {
+      variable: 'REALTIME_WS_PING_INTERVAL_MS',
+      below: '999',
+      above: '300001',
+      valid: '9000',
+      read: (c) => c.realtime.wsPingIntervalMs,
+      expected: 9000,
+    },
+    {
+      variable: 'REALTIME_WS_PING_TIMEOUT_MS',
+      below: '999',
+      above: '300001',
+      valid: '8000',
+      read: (c) => c.realtime.wsPingTimeoutMs,
+      expected: 8000,
+    },
+    {
+      variable: 'REAUTH_INTERVAL_SECONDS',
+      below: '0',
+      above: '86401',
+      valid: '42',
+      read: (c) => c.reauth.intervalSeconds,
+      expected: 42,
+    },
+    {
+      variable: 'REAUTH_CACHE_TTL_MS',
+      below: '-1',
+      above: '3600001',
+      valid: '2500',
+      read: (c) => c.reauth.cacheTtlMs,
+      expected: 2500,
+    },
+    {
+      variable: 'OFFLINE_QUEUE_TTL_SECONDS',
+      below: '0',
+      above: '604801',
+      valid: '900',
+      read: (c) => c.offlineQueue.ttlSeconds,
+      expected: 900,
+    },
+    {
+      variable: 'OFFLINE_QUEUE_MAX_PER_USER',
+      below: '0',
+      above: '100001',
+      valid: '250',
+      read: (c) => c.offlineQueue.maxPerUser,
+      expected: 250,
+    },
+  ];
+
+  it.each(cases)('bounds $variable at both ends and maps a valid value', (testCase) => {
+    // Below the floor and above the ceiling are refused, naming the variable.
+    expect(() => loadEnv({ [testCase.variable]: testCase.below })).toThrow(
+      new RegExp(testCase.variable),
+    );
+    expect(() => loadEnv({ [testCase.variable]: testCase.above })).toThrow(
+      new RegExp(testCase.variable),
+    );
+    // A distinct in-range value is coerced and mapped, not defaulted.
+    expect(testCase.read(loadEnv({ [testCase.variable]: testCase.valid }))).toBe(testCase.expected);
+  });
+
+  it('rejects a non-integer for a coerced numeric', () => {
+    // Scenario: fractional input for an `.int()` field is refused rather than floored.
+    expect(() => loadEnv({ PORT: '3001.5' })).toThrow(/PORT/);
+  });
+});
+
+describe('loadEnv format constraints', () => {
+  /**
+   * Path fields must start with a slash.
+   *
+   * The SSE endpoint and WebSocket namespace are mounted paths, so a value without
+   * a leading slash is refused and a custom slash-prefixed value is mapped through,
+   * proving the `startsWith('/')` and non-empty guards are both live.
+   */
+  it('requires a leading slash on path fields and maps a custom one', () => {
+    expect(() => loadEnv({ REALTIME_SSE_ENDPOINT: 'api/events' })).toThrow(/REALTIME_SSE_ENDPOINT/);
+    expect(() => loadEnv({ REALTIME_WS_NAMESPACE: 'live' })).toThrow(/REALTIME_WS_NAMESPACE/);
+    const config = loadEnv({ REALTIME_SSE_ENDPOINT: '/stream', REALTIME_WS_NAMESPACE: '/rt' });
+    expect(config.realtime.sseEndpoint).toBe('/stream');
+    expect(config.realtime.wsNamespace).toBe('/rt');
+  });
+
+  /**
+   * Redis URL scheme anchoring.
+   *
+   * Both `redis://` and `rediss://` are accepted, but the scheme must be at the
+   * start of the string, so a URL whose scheme appears mid-string is refused. This
+   * kills mutations that drop the `^` anchor or the optional TLS `s`.
+   */
+  it('accepts redis and rediss schemes anchored at the start', () => {
+    expect(loadEnv({ REDIS_URL: 'redis://host:6379' }).redisUrl).toBe('redis://host:6379');
+    expect(loadEnv({ REDIS_URL: 'rediss://host:6380' }).redisUrl).toBe('rediss://host:6380');
+    expect(() => loadEnv({ REDIS_URL: 'not-redis://host' })).toThrow(/REDIS_URL/);
+    expect(() => loadEnv({ REDIS_URL: 'http://host' })).toThrow(/REDIS_URL/);
+  });
+
+  /**
+   * Web origin scheme anchoring.
+   *
+   * Both `http://` and `https://` are accepted anchored at the start; a mid-string
+   * scheme or a foreign scheme is refused, killing the anchor and optional-`s`
+   * mutations on the origin pattern.
+   */
+  it('accepts http and https origins anchored at the start', () => {
+    expect(loadEnv({ WEB_ORIGIN: 'http://app.local' }).webOrigin).toBe('http://app.local');
+    expect(loadEnv({ WEB_ORIGIN: 'https://app.example' }).webOrigin).toBe('https://app.example');
+    expect(() => loadEnv({ WEB_ORIGIN: 'x-http://app' })).toThrow(/WEB_ORIGIN/);
+    expect(() => loadEnv({ WEB_ORIGIN: 'ftp://app' })).toThrow(/WEB_ORIGIN/);
+  });
+
+  /**
+   * Session secret minimum length.
+   *
+   * A secret shorter than sixteen characters is refused so a weak HMAC key never
+   * boots; a sixteen-character secret is accepted at the boundary.
+   */
+  it('enforces the session secret minimum length', () => {
+    expect(() => loadEnv({ SESSION_SECRET: 'fifteen-chars-x' })).toThrow(/SESSION_SECRET/);
+    expect(loadEnv({ SESSION_SECRET: 'sixteen-chars-ok' }).sessionSecret).toBe('sixteen-chars-ok');
+  });
+
+  /**
+   * Non-empty string fields.
+   *
+   * The instance name must be non-empty and is mapped through, so the `min(1)`
+   * guard and the field mapping both stay live.
+   */
+  it('requires a non-empty instance name and maps it', () => {
+    expect(() => loadEnv({ INSTANCE_NAME: '' })).toThrow(/INSTANCE_NAME/);
+    expect(loadEnv({ INSTANCE_NAME: 'app-x' }).instanceName).toBe('app-x');
+  });
+});

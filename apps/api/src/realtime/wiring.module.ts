@@ -25,6 +25,7 @@
  */
 
 import {
+  type BymaxRealtimeModuleAsyncOptions,
   BymaxRealtimeModule,
   type IPresenceStorage,
   type IRealtimePubSub,
@@ -52,43 +53,48 @@ import { REALTIME_PRESENCE, REALTIME_PUBSUB_BUS } from './realtime.tokens';
  */
 const BOOT_TRANSPORT = resolveBootTransport();
 
+/**
+ * The canonical async registration the library consumes: the synchronous transport
+ * hint, the modules whose providers the factory injects, the injection tuple and
+ * the factory that maps the frozen config to the module options.
+ */
+const REALTIME_ASYNC_OPTIONS: BymaxRealtimeModuleAsyncOptions = {
+  transport: BOOT_TRANSPORT,
+  imports: [AuthModule, LifecycleModule, RealtimeInfraModule],
+  inject: [
+    APP_CONFIG,
+    CompositeAuthenticator,
+    CompositeLifecycleHooks,
+    REDIS_CLIENT,
+    REALTIME_PUBSUB_BUS,
+    REALTIME_PRESENCE,
+  ],
+  // The library types useFactory as (...args: unknown[]); the injected values
+  // are exactly the `inject` tuple, so narrow it to the concrete dependencies.
+  useFactory: (...args: unknown[]) => {
+    const [config, authenticator, hooks, redis, pubsub, presence] = args as [
+      AppConfig,
+      CompositeAuthenticator,
+      CompositeLifecycleHooks,
+      Redis,
+      IRealtimePubSub | undefined,
+      IPresenceStorage | undefined,
+    ];
+    return buildRealtimeOptions(
+      config,
+      authenticator,
+      hooks,
+      createOfflineQueue(config, redis),
+      pubsub,
+      presence,
+      redis,
+    );
+  },
+};
+
 /** Wires the library for the configured transport and exports its providers. */
 @Module({
-  imports: [
-    BymaxRealtimeModule.forRootAsync({
-      transport: BOOT_TRANSPORT,
-      imports: [AuthModule, LifecycleModule, RealtimeInfraModule],
-      inject: [
-        APP_CONFIG,
-        CompositeAuthenticator,
-        CompositeLifecycleHooks,
-        REDIS_CLIENT,
-        REALTIME_PUBSUB_BUS,
-        REALTIME_PRESENCE,
-      ],
-      // The library types useFactory as (...args: unknown[]); the injected values
-      // are exactly the `inject` tuple, so narrow it to the concrete dependencies.
-      useFactory: (...args: unknown[]) => {
-        const [config, authenticator, hooks, redis, pubsub, presence] = args as [
-          AppConfig,
-          CompositeAuthenticator,
-          CompositeLifecycleHooks,
-          Redis,
-          IRealtimePubSub | undefined,
-          IPresenceStorage | undefined,
-        ];
-        return buildRealtimeOptions(
-          config,
-          authenticator,
-          hooks,
-          createOfflineQueue(config, redis),
-          pubsub,
-          presence,
-          redis,
-        );
-      },
-    }),
-  ],
+  imports: [BymaxRealtimeModule.forRootAsync(REALTIME_ASYNC_OPTIONS)],
   exports: [BymaxRealtimeModule],
 })
 export class RealtimeWiringModule {}

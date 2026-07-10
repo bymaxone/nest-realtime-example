@@ -72,6 +72,40 @@ describe('SessionService', () => {
   });
 
   /**
+   * Extra-segment rejection.
+   *
+   * A token that is a valid `payload.signature` pair with an extra `.segment`
+   * appended must be rejected by the exact segment-count check, not accepted by
+   * ignoring the trailing segment, so the structural guard cannot be relaxed.
+   */
+  it('rejects a valid token with an extra trailing segment', () => {
+    const service = build();
+    const token = service.issue(USER, 1000);
+
+    expect(service.verify(`${token}.extra`, 1001)).toBeNull();
+  });
+
+  /**
+   * Default clock uses seconds.
+   *
+   * Issued without an explicit clock, the token's `exp` must be the current epoch
+   * in seconds plus the eight-hour TTL, proving the default divides `Date.now()`
+   * by 1000 rather than scaling it.
+   */
+  it('stamps expiry in epoch seconds under the default clock', () => {
+    const service = build();
+    const nowSeconds = Math.floor(Date.now() / 1000);
+
+    const token = service.issue(USER);
+    const claims = JSON.parse(
+      Buffer.from((token.split('.')[0] ?? '').toString(), 'base64url').toString('utf8'),
+    ) as SessionPayload;
+
+    expect(claims.exp).toBeGreaterThanOrEqual(nowSeconds + 8 * 60 * 60 - 2);
+    expect(claims.exp).toBeLessThanOrEqual(nowSeconds + 8 * 60 * 60 + 2);
+  });
+
+  /**
    * Payload tampering.
    *
    * Mutating the payload invalidates the HMAC, so verification must fail even
