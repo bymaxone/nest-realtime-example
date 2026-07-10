@@ -1,6 +1,6 @@
 # Phase 07: both-composite
 
-> **Status**: 👀 Review · **Progress**: 4 / 4 tasks · **Last updated**: 2026-07-10
+> **Status**: ✅ Done · **Progress**: 4 / 4 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 07)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12, library spec appendix on migration
 
