@@ -11,6 +11,7 @@ import { ConnectionRegistry, RealtimeService } from '@bymax-one/nest-realtime';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 import { ConnectionsService } from '../../src/connections/connections.service';
+import type { RedisPresenceStorage } from '../../src/realtime/redis-presence-storage';
 
 const CONNECTED_AT = new Date('2026-07-09T12:00:00.000Z');
 
@@ -23,12 +24,16 @@ interface RecordLike {
   connectedAt: Date;
 }
 
-/** Build the service over registry and realtime doubles. */
-function build(records: RecordLike[]): {
-  service: ConnectionsService;
-  disconnect: jest.Mock;
-  get: jest.Mock;
-} {
+/** The service double and the spies the tests assert on. */
+interface Harness {
+  readonly service: ConnectionsService;
+  readonly disconnect: jest.Mock;
+  readonly get: jest.Mock;
+  readonly owns: jest.Mock;
+}
+
+/** Build the service over registry, realtime and (optional) presence doubles. */
+function build(records: RecordLike[], presenceOwns?: boolean): Harness {
   const get = jest.fn((id: string) => records.find((r) => r.connectionId === id));
   const registry = {
     allByTransport: jest.fn().mockReturnValue(records),
@@ -36,7 +41,12 @@ function build(records: RecordLike[]): {
   } as unknown as ConnectionRegistry;
   const disconnect = jest.fn().mockResolvedValue(undefined);
   const realtime = { disconnect } as unknown as RealtimeService;
-  return { service: new ConnectionsService(registry, realtime), disconnect, get };
+  const owns = jest.fn().mockResolvedValue(presenceOwns ?? false);
+  const presence =
+    presenceOwns === undefined
+      ? undefined
+      : ({ isConnectionOwnedByUser: owns } as unknown as RedisPresenceStorage);
+  return { service: new ConnectionsService(registry, realtime, presence), disconnect, get, owns };
 }
 
 describe('ConnectionsService', () => {
@@ -120,13 +130,46 @@ describe('ConnectionsService', () => {
   });
 
   /**
-   * Unknown connection.
+   * Unknown connection, single-instance.
    *
-   * A connection id absent from the registry must 404 rather than silently succeed.
+   * With no presence index (single-instance mode), a connection id absent from the
+   * local registry must 404 rather than silently succeed.
    */
-  it('404s on an unknown connection id', async () => {
+  it('404s on an unknown connection id in single-instance mode', async () => {
     const { service } = build([]);
 
     await expect(service.disconnectOwned('missing', 'ana@acme')).rejects.toThrow(NotFoundException);
+  });
+
+  /**
+   * Cross-instance owned disconnect.
+   *
+   * A connection not on this instance but owned by the caller (confirmed via the
+   * shared presence index) must be force-closed through the library disconnect,
+   * which publishes the revocation cluster-wide.
+   */
+  it('force-closes a caller-owned connection living on another instance', async () => {
+    const { service, disconnect, owns } = build([], true);
+
+    await service.disconnectOwned('remote-c', 'ana@acme');
+
+    expect(owns).toHaveBeenCalledWith('ana@acme', 'remote-c');
+    expect(disconnect).toHaveBeenCalledWith('remote-c', 'USER_LOGGED_OUT');
+  });
+
+  /**
+   * Cross-instance anti-IDOR.
+   *
+   * A connection not on this instance and not owned by the caller (per the presence
+   * index) must 404 without ever reaching the library disconnect, so the kill switch
+   * stays anti-IDOR cluster-wide.
+   */
+  it('404s on a cross-instance connection the caller does not own', async () => {
+    const { service, disconnect } = build([], false);
+
+    await expect(service.disconnectOwned('remote-c', 'ana@acme')).rejects.toThrow(
+      NotFoundException,
+    );
+    expect(disconnect).not.toHaveBeenCalled();
   });
 });

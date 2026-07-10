@@ -1,6 +1,6 @@
 # Phase 05: scaling-cluster
 
-> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 5 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 05)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §15, §12.8
 
@@ -27,7 +27,7 @@ Single-instance SSE works. This phase makes it horizontal: `RedisRealtimePubSub`
 | 5.1 | Branch + RedisRealtimePubSub implementation                    | ✅     | P0       | M    | Phase 04   |
 | 5.2 | nginx SSE-safe config + cluster compose profile                | ✅     | P0       | M    | 5.1        |
 | 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | ✅     | P0       | L    | 5.2        |
-| 5.4 | Cross-instance revocation + degradation lab                    | 📋     | P0       | M    | 5.3        |
+| 5.4 | Cross-instance revocation + degradation lab                    | ✅     | P0       | M    | 5.3        |
 | 5.5 | RedisPresenceStorage                                           | ✅     | P1       | S    | 5.1        |
 | 5.6 | Phase close: audit, dashboards, PR + Copilot review            | 📋     | P0       | S    | 5.1-5.5    |
 
@@ -232,10 +232,10 @@ Completion Protocol: standard steps.
 
 ### Task 5.4: Cross-instance revocation and degradation lab
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
-- **Depends on**: 5.3
+- **Depends on**: 5.3 (and 5.5, whose presence index authorizes the cross-instance kill)
 
 #### Description
 
@@ -243,10 +243,10 @@ Two remaining scaling guarantees: revoking a connection owned by the _other_ ins
 
 #### Acceptance criteria
 
-- [ ] Cluster e2e: client on app-b; `POST /connections/:id/disconnect` against app-a closes it (observed client-side) within a bounded window.
-- [ ] Degradation e2e: with the cluster up, `docker stop` the redis container; both instances keep serving local connections and log the documented degradation warning (`REALTIME_PUBSUB_UNAVAILABLE` semantics); cross-instance delivery pauses; restarting redis restores it (or the documented recovery behavior of the linked version, asserted as documented).
-- [ ] `GET /health` reflects pub/sub availability (degraded flag) for the frontend.
-- [ ] Matrix rows 40, 41, 73 satisfied; row 17 marked complete (cross-instance half).
+- [x] Cluster e2e: client on app-b; `POST /connections/:id/disconnect` against app-a closes it (observed client-side) within a bounded window; ownership is verified against the shared presence index so the kill stays anti-IDOR cluster-wide (a non-owner gets 404).
+- [x] Degradation e2e: with the cluster up, `docker compose stop redis`; both instances flip `pubsub` to `degraded` and keep serving local connections (a local emit still delivers); cross-instance delivery pauses; restarting redis returns both to `ok` and resumes cross-instance fan-out (ioredis auto-resubscribes). The cluster uses a long reauth interval so the shared-Redis revocation check does not disconnect during the outage, isolating pub/sub availability.
+- [x] `GET /health` reflects pub/sub availability (`pubsub: 'ok' | 'degraded'`) for the frontend, sourced from the driver's observable state.
+- [x] Matrix rows 40, 41, 73 satisfied; row 17 cross-instance half complete.
 
 #### Files to create / modify
 
@@ -415,3 +415,4 @@ Completion Protocol: standard steps + phase completion line.
 - 5.2 ✅ 2026-07-09 nginx SSE-safe proxy + cluster compose profile (app-a/app-b/nginx); extended the pnpm patch to add the explicit @Inject(forwardRef(() => SseTransport)) the RealtimePubSubSubscriber needs, without which cross-instance delivery 500s in-image; smoke proved fan-out app-a to app-b.
 - 5.3 ✅ 2026-07-09 Cluster stats counters + CountingRealtimePubSub decorator + GET /labs/cluster/stats; cluster e2e (jest.e2e-cluster, runs alone) proves exactly-once fan-out and no re-publish storm direct and via nginx (app-a published=1/received=0, app-b published=0/received=1, no 5s drift). Matrix rows 38, 39.
 - 5.5 ✅ 2026-07-09 RedisPresenceStorage (per-user connection sets, tenant index, cross-instance ownership check) populated by a PresenceTracker lifecycle consumer (library 0.1.0 does not call presence itself); GET /presence/:tenantId own-tenant roster; cluster e2e proves a user connected on app-b appears in the roster read from app-a.
+- 5.4 ✅ 2026-07-09 Cross-instance kill switch (presence-authorized, publishes op:disconnect) + /health pubsub degraded flag; cluster e2e proves revoke-on-app-a closes an app-b stream (and 404s a non-owner) and that stopping Redis degrades both instances while local delivery continues, with recovery on restart. Matrix rows 40, 41, 73; row 17 cross-instance half.

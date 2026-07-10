@@ -16,9 +16,19 @@
  * ephemeral port.
  */
 
+import { execFile } from 'node:child_process';
+import { resolve } from 'node:path';
+import { promisify } from 'node:util';
+
 import { EventSource } from 'eventsource';
 
 import type { ClusterStats } from '../../src/connections/cluster-stats.service';
+
+/** Promise-returning `execFile` for driving the docker CLI from the suite. */
+const execFileAsync = promisify(execFile);
+
+/** Path to the compose file, resolved from the api package (jest's working dir). */
+const COMPOSE_FILE = resolve(process.cwd(), '../../docker-compose.yml');
 
 /** Direct base URL of the first api instance. */
 export const APP_A = 'http://127.0.0.1:3001';
@@ -145,6 +155,71 @@ export function openClusterSse(url: string, cookie: string): EventSource {
     controller.abort();
   };
   return source;
+}
+
+/**
+ * Force-disconnect a connection via one instance's kill switch.
+ *
+ * @param baseUrl - The instance base URL to send the disconnect through.
+ * @param cookie - The session cookie of the connection's owner.
+ * @param connectionId - The connection id to close (may live on another instance).
+ * @returns The HTTP response so the caller can assert its status.
+ */
+export function disconnectConnection(
+  baseUrl: string,
+  cookie: string,
+  connectionId: string,
+): Promise<Response> {
+  return fetch(`${baseUrl}/api/connections/${encodeURIComponent(connectionId)}/disconnect`, {
+    method: 'POST',
+    headers: { cookie },
+  });
+}
+
+/**
+ * Read an instance's liveness payload (unauthenticated, outside the api prefix).
+ *
+ * @param baseUrl - The instance base URL to probe.
+ * @returns The instance name and its pub/sub health flag.
+ */
+export async function readHealth(baseUrl: string): Promise<{ instance: string; pubsub: string }> {
+  const response = await fetch(`${baseUrl}/health`);
+  if (!response.ok) throw new Error(`health failed (${response.status}) at ${baseUrl}`);
+  return (await response.json()) as { instance: string; pubsub: string };
+}
+
+/**
+ * Emit an event to every connection of a user via one instance.
+ *
+ * @param baseUrl - The instance base URL to emit through.
+ * @param cookie - The session cookie of an authenticated caller.
+ * @param userId - The target user id.
+ * @param event - The event name.
+ * @param data - The event payload.
+ */
+export async function emitToUser(
+  baseUrl: string,
+  cookie: string,
+  userId: string,
+  event: string,
+  data: unknown,
+): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/emit/user/${encodeURIComponent(userId)}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', cookie },
+    body: JSON.stringify({ event, data }),
+  });
+  if (!response.ok) throw new Error(`emit user failed (${response.status}) at ${baseUrl}`);
+}
+
+/** Stop the cluster's Redis container to simulate a pub/sub outage. */
+export async function stopRedis(): Promise<void> {
+  await execFileAsync('docker', ['compose', '-f', COMPOSE_FILE, 'stop', 'redis']);
+}
+
+/** Start the cluster's Redis container again to restore cross-instance fan-out. */
+export async function startRedis(): Promise<void> {
+  await execFileAsync('docker', ['compose', '-f', COMPOSE_FILE, 'start', 'redis']);
 }
 
 /** Sleep for a fixed number of milliseconds. */

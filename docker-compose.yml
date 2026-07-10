@@ -44,6 +44,11 @@ services:
       REDIS_URL: redis://redis:6379
       SESSION_SECRET: cluster-demo-shared-session-secret
       WEB_ORIGIN: http://localhost:8080
+      # The cluster profile demonstrates scaling; a long reauth interval keeps the
+      # periodic revocation check (which shares this Redis) from disconnecting live
+      # connections during a deliberate Redis outage, so the degradation lab isolates
+      # pub/sub availability. Reauthentication itself is exercised in the dev profile.
+      REAUTH_INTERVAL_SECONDS: '3600'
     ports:
       - '3001:3001'
     depends_on:
@@ -64,6 +69,11 @@ services:
       REDIS_URL: redis://redis:6379
       SESSION_SECRET: cluster-demo-shared-session-secret
       WEB_ORIGIN: http://localhost:8080
+      # The cluster profile demonstrates scaling; a long reauth interval keeps the
+      # periodic revocation check (which shares this Redis) from disconnecting live
+      # connections during a deliberate Redis outage, so the degradation lab isolates
+      # pub/sub availability. Reauthentication itself is exercised in the dev profile.
+      REAUTH_INTERVAL_SECONDS: '3600'
     ports:
       - '3002:3002'
     depends_on:

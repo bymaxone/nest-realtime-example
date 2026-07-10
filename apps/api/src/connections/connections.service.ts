@@ -6,7 +6,11 @@
  * connections on this instance) and force-closes a connection through the
  * library's `RealtimeService`. The kill switch is anti-IDOR: a caller may only
  * disconnect a connection they own, so one user can never tear down another
- * user's stream by guessing its id.
+ * user's stream by guessing its id. Ownership is verified locally for a connection
+ * on this instance; for a connection living on another instance it is verified
+ * against the shared presence index, and the disconnect is published cluster-wide
+ * (the library turns `disconnect()` into an `op:'disconnect'` message the owning
+ * instance applies).
  */
 
 import {
@@ -14,7 +18,10 @@ import {
   type PublicConnectionMeta,
   RealtimeService,
 } from '@bymax-one/nest-realtime';
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+
+import { REALTIME_PRESENCE } from '../realtime/realtime.tokens';
+import type { RedisPresenceStorage } from '../realtime/redis-presence-storage';
 
 /** Reason surfaced when a connection is closed by the kill switch. */
 const DISCONNECT_REASON_LOGGED_OUT = 'USER_LOGGED_OUT';
@@ -27,10 +34,13 @@ export class ConnectionsService {
    *
    * @param registry - The library registry of active connections.
    * @param realtime - The library realtime API (used for force-disconnect).
+   * @param presence - The shared presence index, or `undefined` in single-instance
+   *   mode; used to authorize a cross-instance disconnect.
    */
   constructor(
     private readonly registry: ConnectionRegistry,
     private readonly realtime: RealtimeService,
+    @Inject(REALTIME_PRESENCE) private readonly presence: RedisPresenceStorage | undefined,
   ) {}
 
   /**
@@ -49,17 +59,30 @@ export class ConnectionsService {
   }
 
   /**
-   * Force-disconnect a connection the caller owns.
+   * Force-disconnect a connection the caller owns, on this instance or another.
+   *
+   * A connection on this instance is checked against the local registry; one that
+   * is not local is checked against the shared presence index, and the disconnect
+   * is then published cluster-wide so the owning instance closes it.
    *
    * @param connectionId - The connection to close.
    * @param callerUserId - The authenticated caller's user id.
-   * @throws NotFoundException when no such connection exists on this instance.
-   * @throws ForbiddenException when the connection belongs to another user.
+   * @throws NotFoundException when the caller owns no such connection anywhere.
+   * @throws ForbiddenException when a local connection belongs to another user.
    */
   async disconnectOwned(connectionId: string, callerUserId: string): Promise<void> {
     const record = this.registry.get(connectionId);
-    if (!record) throw new NotFoundException('unknown connection');
-    if (record.userId !== callerUserId) throw new ForbiddenException('not your connection');
+    if (record) {
+      if (record.userId !== callerUserId) throw new ForbiddenException('not your connection');
+      await this.realtime.disconnect(connectionId, DISCONNECT_REASON_LOGGED_OUT);
+      return;
+    }
+    if (
+      !this.presence ||
+      !(await this.presence.isConnectionOwnedByUser(callerUserId, connectionId))
+    ) {
+      throw new NotFoundException('unknown connection');
+    }
     await this.realtime.disconnect(connectionId, DISCONNECT_REASON_LOGGED_OUT);
   }
 }
