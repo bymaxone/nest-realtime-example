@@ -59,3 +59,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      # Empirically proves the SSE-only build never ships socket.io-client in a
+      # statically-required chunk, and that it exists only behind the chat/both
+      # labs' dynamic import.
+      - name: Bundle honesty check (web)
+        run: pnpm --filter @nest-realtime-example/web run assert:bundle

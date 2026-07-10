@@ -35,6 +35,18 @@ export default defineConfig([
   globalIgnores(['**/dist/**', '**/.next/**', '**/coverage/**', '**/node_modules/**']),
   js.configs.recommended,
   {
+    // Plain Node scripts and build config files (next.config.mjs, assert-bundle.mjs, ...):
+    // no TypeScript project, so they only need the runtime globals Node provides.
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        URL: 'readonly',
+      },
+    },
+  },
+  {
     // Real application source: typed linting against each app's own tsconfig.
     files: ['apps/*/src/**/*.{ts,tsx}'],
     extends: [
@@ -49,8 +61,14 @@ export default defineConfig([
       },
     },
     settings: {
+      // An explicit project glob keeps tsconfig discovery correct regardless of the
+      // invoking process's cwd (e.g. a repo-root git hook vs. a per-package script);
+      // the resolver's cwd-based default lookup finds nothing since no tsconfig.json
+      // lives at the workspace root (only the shared `tsconfig.base.json`).
       'import-x/resolver': {
-        typescript: true,
+        typescript: {
+          project: ['apps/*/tsconfig.json'],
+        },
       },
     },
     rules: {
