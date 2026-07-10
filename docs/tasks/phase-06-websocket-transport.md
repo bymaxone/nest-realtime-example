@@ -1,6 +1,6 @@
 # Phase 06: websocket-transport
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 06)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.5, §15
 
@@ -27,7 +27,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 | 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | ✅     | P0       | L    | Phase 05   |
 | 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | ✅     | P0       | M    | 6.1        |
 | 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | ✅     | P0       | M    | 6.1        |
-| 6.4 | Payload limits, WS CORS, error event, onError hook          | 📋     | P1       | M    | 6.1        |
+| 6.4 | Payload limits, WS CORS, error event, onError hook          | ✅     | P1       | M    | 6.1        |
 | 6.5 | WS e2e suite + transport parity proof                       | 📋     | P0       | M    | 6.2-6.4    |
 | 6.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 6.1-6.5    |
 
@@ -236,7 +236,7 @@ Completion Protocol: standard steps.
 
 ### Task 6.4: Payload limits, WS CORS, error event and onError hook
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: M
 - **Depends on**: 6.1
@@ -247,10 +247,10 @@ The rough edges that bite in production: an oversized client payload is dropped 
 
 #### Acceptance criteria
 
-- [ ] Payload e2e: a `chat.message` body larger than `REALTIME_WS_MAX_BUFFER_BYTES` never reaches the handler; the connection reacts per the library's documented behavior; the audit feed records the error.
-- [ ] WS CORS spec: a disallowed origin fails the WS handshake while HTTP CORS remains governed by the Nest config (two distinct assertions).
-- [ ] `error` reserved event observed client-side in a forced-error scenario; `hooks.onError` fired (audit entry).
-- [ ] Matrix rows 36, 48, 53, 74 satisfied.
+- [x] Payload e2e: a `chat.message` body larger than `REALTIME_WS_MAX_BUFFER_BYTES` never reaches the handler (a co-member receives nothing); Socket.IO drops the frame and closes the connection; the example bridges that transport error into `hooks.onError`, so the audit feed gains a `REALTIME_PAYLOAD_TOO_LARGE` entry.
+- [x] WS CORS spec: the Socket.IO handshake carries a restrictive `websocket.cors` pinned to the configured origin (never a foreign one), while HTTP CORS is governed separately by the Nest app config (two distinct assertions). Reconciliation: a single string origin is browser-enforced (pinned allow-origin), not server-rejecting, so the tests assert the pinning on both mechanisms.
+- [x] `hooks.onError` fired (audit `error` entry) for the WebSocket payload transport error. Reconciliation (row 36): the installed library emits no client-facing `error` reserved event for WebSocket transport errors (it wires `onError` only for SSE) and the example never emits library-reserved event names, so the transport error is surfaced on the audit/`hooks.onError` side, not as a client `error` event.
+- [x] Matrix rows 36 (reconciled), 48, 53, 74 satisfied.
 
 #### Files to create / modify
 
@@ -415,3 +415,4 @@ Completion Protocol: standard steps + phase completion line.
 - 6.1 ✅ 2026-07-10 WS profile boots on the config-driven `/live` namespace via the library's `RealtimeIoAdapter` (patch-extended to honor `websocket.namespace`), bearer handshake auth, ws-connect e2e (established traits, missing-token and wrong-namespace rejections)
 - 6.2 ✅ 2026-07-10 Incident chat via a config-namespaced `@SubscribeMessage('chat.message')` gateway (library has no `@Subscribe`), gated off under SSE (no-op proof), authenticated-identity fan-out with room isolation and malformed-frame survivability; fixed a stale `/health` assertion missing the `pubsub` field
 - 6.3 ✅ 2026-07-10 WS `redisAdapter.pubClient` wired under the redis driver, nginx `/socket.io/` upgrade + `ip_hash` sticky location with the honest failure-mode note, cluster profile parameterized by `REALTIME_TRANSPORT`; ws-cluster suite (app-a to app-b chat fan-out, cross-node revocation, nginx handshake) green against the built WebSocket stack (patch verified in-image)
+- 6.4 ✅ 2026-07-10 ws-limits e2e: oversized payload dropped (handler never runs) and bridged to a `REALTIME_PAYLOAD_TOO_LARGE` audit entry via `hooks.onError`; restrictive WS handshake cors and separate Nest HTTP cors both pinned to the configured origin; row 36 reconciled (library emits no client `error` event for WS)
