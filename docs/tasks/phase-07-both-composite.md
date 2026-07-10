@@ -1,6 +1,6 @@
 # Phase 07: both-composite
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 4 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 3 / 4 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 07)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12, library spec appendix on migration
 
@@ -26,7 +26,7 @@ The migration story: `transport: 'both'` runs SSE and WebSocket simultaneously, 
 | --- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 7.1 | Branch + both profile boot + config surface         | ✅     | P0       | S    | Phase 06   |
 | 7.2 | Split-screen e2e: one emit, two transports          | ✅     | P0       | M    | 7.1        |
-| 7.3 | Migration journey walkthrough                       | 📋     | P1       | S    | 7.2        |
+| 7.3 | Migration journey walkthrough                       | ✅     | P1       | S    | 7.2        |
 | 7.4 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 7.1-7.3    |
 
 ## Tasks
@@ -151,7 +151,7 @@ Completion Protocol: standard steps.
 
 ### Task 7.3: Migration journey walkthrough
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: S
 - **Depends on**: 7.2
@@ -162,9 +162,9 @@ The written journey: an SSE-only deployment adds chat by flipping to `both`, wir
 
 #### Acceptance criteria
 
-- [ ] README gains a "Migrating from SSE to WebSocket (or running both)" section: before/after env, the one client-side change, what stays untouched (services, emits, auth server-side), the sticky-session caveat cross-referenced.
-- [ ] Every code snippet in the walkthrough compiles (snippets extracted from real repo files, referenced by path).
-- [ ] Matrix row 51 satisfied.
+- [x] README gains a "Migrating from SSE to WebSocket (or running both)" section: before/after env, the one client-side change, what stays untouched (services, emits, auth server-side), the sticky-session caveat cross-referenced.
+- [x] Every code snippet in the walkthrough compiles (snippets extracted from real repo files, referenced by path).
+- [x] Matrix row 51 satisfied.
 
 #### Files to create / modify
 
@@ -267,3 +267,4 @@ Completion Protocol: standard steps + phase completion line.
 
 - 7.1 ✅ 2026-07-10 Both profile boot proven: audited every transport-literal guard in `apps/api/src` (options factory, main.ts, chat module) and confirmed each already reads `!== 'sse'` rather than `=== 'websocket'`, so `'both'` was already correctly wired with zero source changes; added `both-boot.e2e-spec.ts` asserting `GET /health` reports `transport: 'both'` and a cookie SSE client plus a bearer WS client both reach `connection:established` concurrently against one running app.
 - 7.2 ✅ 2026-07-10 Split-screen fan-out proven: `both-fanout.e2e-spec.ts` connects the SAME user over SSE and over WebSocket at once (the literal split screen) and asserts a nonce-stamped tenant, user and room emit each land exactly once on both transports with zero duplicates after a settle window; `parity/both.parity.e2e-spec.ts` runs the phase-06 shared parity suite twice against one 'both'-profile app (once over SSE, once over WebSocket), proving delivery semantics hold unchanged under the composite profile. Matrix rows 6 and 50 satisfied.
+- 7.3 ✅ 2026-07-10 Migration journey documented in `README.md` ("Migrating from SSE to WebSocket (or running both)"): the env diff, every source location that already branches on `!== 'sse'` (quoted verbatim by path), what stays untouched (emit service, composite authenticator), the client-side `useRealtime({ url: 'wss://...' })` change sourced from the installed library's `./react` API, the sticky-session caveat cross-referenced to `docker/nginx/nginx.conf`, and the rollback story. Matrix row 51 satisfied.
