@@ -1,6 +1,6 @@
 # Phase 07: both-composite
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 4 tasks · **Last updated**: 2026-07-10
+> **Status**: 👀 Review · **Progress**: 4 / 4 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 07)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12, library spec appendix on migration
 
@@ -27,7 +27,7 @@ The migration story: `transport: 'both'` runs SSE and WebSocket simultaneously, 
 | 7.1 | Branch + both profile boot + config surface         | ✅     | P0       | S    | Phase 06   |
 | 7.2 | Split-screen e2e: one emit, two transports          | ✅     | P0       | M    | 7.1        |
 | 7.3 | Migration journey walkthrough                       | ✅     | P1       | S    | 7.2        |
-| 7.4 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 7.1-7.3    |
+| 7.4 | Phase close: audit, dashboards, PR + Copilot review | 👀     | P0       | S    | 7.1-7.3    |
 
 ## Tasks
 
@@ -210,7 +210,7 @@ Completion Protocol: standard steps.
 
 ### Task 7.4: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 7.1-7.3
@@ -221,8 +221,8 @@ Standard phase close; PR body lists matrix rows 6, 50, 51.
 
 #### Acceptance criteria
 
-- [ ] Tasks 7.1-7.3 ✅; verifications re-run.
-- [ ] Dashboards synced; PR merged on green with Copilot findings addressed; branch deleted.
+- [x] Tasks 7.1-7.3 ✅; verifications re-run.
+- [x] Dashboards synced; PR opened with Copilot review requested (merge and branch deletion are the orchestrator's, per the run's architecture override).
 
 #### Files to create / modify
 
@@ -268,3 +268,4 @@ Completion Protocol: standard steps + phase completion line.
 - 7.1 ✅ 2026-07-10 Both profile boot proven: audited every transport-literal guard in `apps/api/src` (options factory, main.ts, chat module) and confirmed each already reads `!== 'sse'` rather than `=== 'websocket'`, so `'both'` was already correctly wired with zero source changes; added `both-boot.e2e-spec.ts` asserting `GET /health` reports `transport: 'both'` and a cookie SSE client plus a bearer WS client both reach `connection:established` concurrently against one running app.
 - 7.2 ✅ 2026-07-10 Split-screen fan-out proven: `both-fanout.e2e-spec.ts` connects the SAME user over SSE and over WebSocket at once (the literal split screen) and asserts a nonce-stamped tenant, user and room emit each land exactly once on both transports with zero duplicates after a settle window; `parity/both.parity.e2e-spec.ts` runs the phase-06 shared parity suite twice against one 'both'-profile app (once over SSE, once over WebSocket), proving delivery semantics hold unchanged under the composite profile. Matrix rows 6 and 50 satisfied.
 - 7.3 ✅ 2026-07-10 Migration journey documented in `README.md` ("Migrating from SSE to WebSocket (or running both)"): the env diff, every source location that already branches on `!== 'sse'` (quoted verbatim by path), what stays untouched (emit service, composite authenticator), the client-side `useRealtime({ url: 'wss://...' })` change sourced from the installed library's `./react` API, the sticky-session caveat cross-referenced to `docker/nginx/nginx.conf`, and the rollback story. Matrix row 51 satisfied.
+- 7.4 👀 2026-07-10 Phase close: acceptance criteria for matrix rows 6, 50, 51 re-audited against the landed e2e suites and README section; full gate sequence re-run clean from a fresh install (typecheck, lint, format, build, api unit 100% coverage, root unit both apps, and the both-mode e2e suite against `docker compose up -d redis`, torn down after); code review and security review both returned zero findings; dashboards synced (this file, `../DEVELOPMENT_PLAN.md`, `../tasks/README.md`); PR opened with GitHub Copilot review requested. Phase left at 👀 Review; merge and branch deletion are the orchestrator's per this run's architecture override.
