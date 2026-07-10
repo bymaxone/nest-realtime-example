@@ -15,6 +15,7 @@
     "test": "pnpm -r --workspace-concurrency=1 run test",
     "test:e2e:cluster": "docker compose --profile cluster up -d --build && pnpm --filter @nest-realtime-example/api run test:e2e:cluster; docker compose --profile cluster down",
     "test:e2e:cluster:ws": "REALTIME_TRANSPORT=websocket docker compose --profile cluster up -d --build && pnpm --filter @nest-realtime-example/api run test:e2e:cluster:ws; docker compose --profile cluster down",
+    "test:e2e:all": "sh scripts/e2e-all.sh",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
