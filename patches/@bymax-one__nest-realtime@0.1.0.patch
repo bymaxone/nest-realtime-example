@@ -1,5 +1,5 @@
 diff --git a/dist/server/index.cjs b/dist/server/index.cjs
-index 98d4419..2eabea9 100644
+index 98d4419..2fc080f 100644
 --- a/dist/server/index.cjs
 +++ b/dist/server/index.cjs
 @@ -129,7 +129,8 @@ function createSseController(endpoint) {
@@ -22,8 +22,61 @@ index 98d4419..2eabea9 100644
  ], RealtimePubSubSubscriber);
  var RETRIEVE_LIMIT = 200;
  var OfflineQueueDeliveryService = class {
+@@ -1391,7 +1393,7 @@ exports.WebSocketTransport = class WebSocketTransport {
+    * @param roomId - The room to join.
+    */
+   async joinRoom(connectionId, roomId) {
+-    const socket = this.server?.sockets.sockets.get(connectionId);
++    const socket = nspSockets(this.server)?.get(connectionId);
+     if (socket) {
+       await socket.join(roomId);
+       this.rooms.join(connectionId, roomId);
+@@ -1404,7 +1406,7 @@ exports.WebSocketTransport = class WebSocketTransport {
+    * @param roomId - The room to leave.
+    */
+   async leaveRoom(connectionId, roomId) {
+-    const socket = this.server?.sockets.sockets.get(connectionId);
++    const socket = nspSockets(this.server)?.get(connectionId);
+     if (socket) {
+       await socket.leave(roomId);
+       this.rooms.leave(connectionId, roomId);
+@@ -1426,7 +1428,7 @@ exports.WebSocketTransport = class WebSocketTransport {
+   async disconnect(connectionId, _reason) {
+     const server = this.server;
+     if (!server) return;
+-    const local = server.sockets.sockets.get(connectionId);
++    const local = nspSockets(server)?.get(connectionId);
+     if (local) local.disconnect(true);
+     server.in(`${CONNECTION_ROOM_PREFIX}:${connectionId}`).disconnectSockets(true);
+   }
+@@ -1458,6 +1460,10 @@ exports.WebSocketTransport = __decorateClass([
+ function firstQueryValue(value) {
+   return Array.isArray(value) ? value[0] : value;
+ }
++function nspSockets(server) {
++  if (!server) return void 0;
++  return server.sockets instanceof Map ? server.sockets : server.sockets.sockets;
++}
+ exports.RealtimeGateway = class RealtimeGateway {
+   constructor(transport, options) {
+     this.transport = transport;
+@@ -2174,6 +2180,14 @@ var RealtimeIoAdapter = class _RealtimeIoAdapter extends platformSocket_io.IoAda
+     super(app);
+     this.options = app.get(REALTIME_OPTIONS_TOKEN);
+   }
++  create(port, options) {
++    const server = super.create(port, options);
++    const ns = this.options.websocket?.namespace;
++    if (ns && ns !== "/" && typeof server?.of === "function") {
++      return server.of(ns);
++    }
++    return server;
++  }
+   /**
+    * Create the Socket.IO server with merged WebSocket options.
+    *
 diff --git a/dist/server/index.mjs b/dist/server/index.mjs
-index df783ae..dda6fa5 100644
+index df783ae..a9fc167 100644
 --- a/dist/server/index.mjs
 +++ b/dist/server/index.mjs
 @@ -1,5 +1,5 @@
@@ -53,3 +106,56 @@ index df783ae..dda6fa5 100644
  ], RealtimePubSubSubscriber);
  var RETRIEVE_LIMIT = 200;
  var OfflineQueueDeliveryService = class {
+@@ -1389,7 +1391,7 @@ var WebSocketTransport = class {
+    * @param roomId - The room to join.
+    */
+   async joinRoom(connectionId, roomId) {
+-    const socket = this.server?.sockets.sockets.get(connectionId);
++    const socket = nspSockets(this.server)?.get(connectionId);
+     if (socket) {
+       await socket.join(roomId);
+       this.rooms.join(connectionId, roomId);
+@@ -1402,7 +1404,7 @@ var WebSocketTransport = class {
+    * @param roomId - The room to leave.
+    */
+   async leaveRoom(connectionId, roomId) {
+-    const socket = this.server?.sockets.sockets.get(connectionId);
++    const socket = nspSockets(this.server)?.get(connectionId);
+     if (socket) {
+       await socket.leave(roomId);
+       this.rooms.leave(connectionId, roomId);
+@@ -1424,7 +1426,7 @@ var WebSocketTransport = class {
+   async disconnect(connectionId, _reason) {
+     const server = this.server;
+     if (!server) return;
+-    const local = server.sockets.sockets.get(connectionId);
++    const local = nspSockets(server)?.get(connectionId);
+     if (local) local.disconnect(true);
+     server.in(`${CONNECTION_ROOM_PREFIX}:${connectionId}`).disconnectSockets(true);
+   }
+@@ -1456,6 +1458,10 @@ WebSocketTransport = __decorateClass([
+ function firstQueryValue(value) {
+   return Array.isArray(value) ? value[0] : value;
+ }
++function nspSockets(server) {
++  if (!server) return void 0;
++  return server.sockets instanceof Map ? server.sockets : server.sockets.sockets;
++}
+ var RealtimeGateway = class {
+   constructor(transport, options) {
+     this.transport = transport;
+@@ -2172,6 +2178,14 @@ var RealtimeIoAdapter = class _RealtimeIoAdapter extends IoAdapter {
+     super(app);
+     this.options = app.get(REALTIME_OPTIONS_TOKEN);
+   }
++  create(port, options) {
++    const server = super.create(port, options);
++    const ns = this.options.websocket?.namespace;
++    if (ns && ns !== "/" && typeof server?.of === "function") {
++      return server.of(ns);
++    }
++    return server;
++  }
+   /**
+    * Create the Socket.IO server with merged WebSocket options.
+    *

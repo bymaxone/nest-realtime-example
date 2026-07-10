@@ -23,6 +23,8 @@ interface RealtimeConfig {
   readonly emitConnectionEvent: boolean;
   readonly wsNamespace: string;
   readonly wsMaxBufferBytes: number;
+  readonly wsPingIntervalMs: number;
+  readonly wsPingTimeoutMs: number;
 }
 
 /** Reauthentication policy tunables sourced from the environment. */
@@ -82,6 +84,8 @@ function mapEnv(env: RawEnv): AppConfig {
       emitConnectionEvent: env.REALTIME_EMIT_CONNECTION_EVENT,
       wsNamespace: env.REALTIME_WS_NAMESPACE,
       wsMaxBufferBytes: env.REALTIME_WS_MAX_BUFFER_BYTES,
+      wsPingIntervalMs: env.REALTIME_WS_PING_INTERVAL_MS,
+      wsPingTimeoutMs: env.REALTIME_WS_PING_TIMEOUT_MS,
     },
     reauth: {
       intervalSeconds: env.REAUTH_INTERVAL_SECONDS,

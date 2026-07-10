@@ -6,8 +6,11 @@
  * `APP_CONFIG`, never from `process.env` or a literal. Cross-origin access for the
  * SSE endpoint is applied at the application level (`app.enableCors`) because the
  * installed library exposes no `sse.cors` option (a plain HTTP GET is governed by
- * the app's CORS policy). Leaving `pubsub` unset selects the library's
- * `InMemoryPubSub` default for single-instance runs.
+ * the app's CORS policy); the WebSocket transport, in contrast, owns its own CORS
+ * through Socket.IO, so the `websocket.cors` option is set here. The `websocket`
+ * block is present only when the transport involves WebSocket, so an SSE-only boot
+ * never carries WebSocket configuration. Leaving `pubsub` unset selects the
+ * library's `InMemoryPubSub` default for single-instance runs.
  */
 
 import type {
@@ -17,6 +20,7 @@ import type {
   IOfflineQueueStorage,
   IPresenceStorage,
   IRealtimePubSub,
+  WebSocketOptions,
 } from '@bymax-one/nest-realtime';
 
 import { APP_SERVICE_NAME, APP_VERSION } from '../app.constants';
@@ -46,7 +50,7 @@ export function buildRealtimeOptions(
   pubsub?: IRealtimePubSub,
   presence?: IPresenceStorage,
 ): BymaxRealtimeModuleOptions {
-  const options: BymaxRealtimeModuleOptions = {
+  const base: BymaxRealtimeModuleOptions = {
     transport: config.realtime.transport,
     service: { name: APP_SERVICE_NAME, version: APP_VERSION },
     authenticator,
@@ -64,8 +68,36 @@ export function buildRealtimeOptions(
       cacheTtlMs: config.reauth.cacheTtlMs,
     },
   };
+  const websocket = buildWebsocketOptions(config);
+  const options = websocket ? { ...base, websocket } : base;
   const withHooks = hooks ? { ...options, hooks } : options;
   const withQueue = offlineQueue ? { ...withHooks, offlineQueue } : withHooks;
   const withPubsub = pubsub ? { ...withQueue, pubsub } : withQueue;
   return presence ? { ...withPubsub, presence } : withPubsub;
+}
+
+/**
+ * Build the WebSocket-transport options block from configuration.
+ *
+ * Returns `undefined` for the SSE-only profile so no WebSocket configuration is
+ * carried when Socket.IO is never booted. For the `websocket` and `both` profiles
+ * every Socket.IO tunable is sourced from the frozen config: the config-driven
+ * namespace the custom IoAdapter binds the gateway to, the transport's own CORS
+ * policy (distinct from the app-level HTTP CORS), the payload cap, the ping
+ * keepalive cadence and its timeout, and the per-user FIFO connection limit.
+ *
+ * @param config - The frozen application configuration.
+ * @returns The WebSocket options block, or `undefined` for the SSE-only profile.
+ */
+function buildWebsocketOptions(config: AppConfig): WebSocketOptions | undefined {
+  if (config.realtime.transport === 'sse') return undefined;
+  return {
+    namespace: config.realtime.wsNamespace,
+    cors: { origin: config.webOrigin, credentials: true },
+    maxHttpBufferSize: config.realtime.wsMaxBufferBytes,
+    pingIntervalMs: config.realtime.wsPingIntervalMs,
+    pingTimeoutMs: config.realtime.wsPingTimeoutMs,
+    maxConnectionsPerUser: config.realtime.maxConnectionsPerUser,
+    emitConnectionEvent: config.realtime.emitConnectionEvent,
+  };
 }

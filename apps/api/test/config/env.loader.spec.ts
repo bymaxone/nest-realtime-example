@@ -23,6 +23,8 @@ describe('loadEnv', () => {
     expect(config.realtime.emitConnectionEvent).toBe(true);
     expect(config.realtime.wsNamespace).toBe('/live');
     expect(config.realtime.wsMaxBufferBytes).toBe(16384);
+    expect(config.realtime.wsPingIntervalMs).toBe(25000);
+    expect(config.realtime.wsPingTimeoutMs).toBe(20000);
     expect(config.reauth.intervalSeconds).toBe(15);
     expect(config.reauth.onFailure).toBe('disconnect');
     expect(config.reauth.cacheTtlMs).toBe(10000);
@@ -42,6 +44,8 @@ describe('loadEnv', () => {
       INSTANCE_NAME: 'app-b',
       REALTIME_TRANSPORT: 'websocket',
       REALTIME_EMIT_CONNECTION_EVENT: 'false',
+      REALTIME_WS_PING_INTERVAL_MS: '5000',
+      REALTIME_WS_PING_TIMEOUT_MS: '4000',
       PUBSUB_DRIVER: 'redis',
       REAUTH_ON_FAILURE: 'event',
       REAUTH_CACHE_TTL_MS: '0',
@@ -53,6 +57,8 @@ describe('loadEnv', () => {
     expect(config.instanceName).toBe('app-b');
     expect(config.realtime.transport).toBe('websocket');
     expect(config.realtime.emitConnectionEvent).toBe(false);
+    expect(config.realtime.wsPingIntervalMs).toBe(5000);
+    expect(config.realtime.wsPingTimeoutMs).toBe(4000);
     expect(config.pubsubDriver).toBe('redis');
     expect(config.reauth.onFailure).toBe('event');
     expect(config.reauth.cacheTtlMs).toBe(0);

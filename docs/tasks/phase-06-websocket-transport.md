@@ -1,6 +1,6 @@
 # Phase 06: websocket-transport
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 06)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.5, §15
 
@@ -24,7 +24,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 
 | ID  | Task                                                        | Status | Priority | Size | Depends on |
 | --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | 📋     | P0       | L    | Phase 05   |
+| 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | ✅     | P0       | L    | Phase 05   |
 | 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | 📋     | P0       | M    | 6.1        |
 | 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | 📋     | P0       | M    | 6.1        |
 | 6.4 | Payload limits, WS CORS, error event, onError hook          | 📋     | P1       | M    | 6.1        |
@@ -35,7 +35,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 
 ### Task 6.1: WS profile boot with config-driven namespace and bearer auth
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: Phase 05
@@ -46,11 +46,11 @@ Boot the app with `REALTIME_TRANSPORT=websocket`: the library's adapter mechanis
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-06-websocket-transport` created with `git switch -c`.
-- [ ] Options factory fills the `websocket` block from config (namespace, cors, ping intervals, maxHttpBufferSize, maxConnectionsPerUser); `main.ts` performs the adapter registration the library README documents.
-- [ ] `socket.io-client` connects to the configured namespace with `auth: { token }`; invalid/missing token disconnects.
-- [ ] `connection:established` arrives with client-safe traits (same assertion as SSE).
-- [ ] Matrix rows 5, 12, 45, 49 satisfied.
+- [x] Branch `feat/phase-06-websocket-transport` created with `git switch -c`.
+- [x] Options factory fills the `websocket` block from config (namespace, cors, ping intervals, maxHttpBufferSize, maxConnectionsPerUser); `main.ts` performs the adapter registration the library README documents.
+- [x] `socket.io-client` connects to the configured namespace with `auth: { token }`; invalid/missing token disconnects.
+- [x] `connection:established` arrives with client-safe traits (same assertion as SSE).
+- [x] Matrix rows 5, 12, 45, 49 satisfied.
 
 #### Files to create / modify
 
@@ -411,3 +411,5 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 6.1 ✅ 2026-07-10 WS profile boots on the config-driven `/live` namespace via the library's `RealtimeIoAdapter` (patch-extended to honor `websocket.namespace`), bearer handshake auth, ws-connect e2e (established traits, missing-token and wrong-namespace rejections)
