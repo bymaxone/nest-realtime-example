@@ -67,6 +67,6 @@ export class HealthController {
    */
   private pubsubHealth(): PubSubHealth {
     if (!this.pubsub) return 'ok';
-    return this.pubsub.available ? 'ok' : 'degraded';
+    return this.pubsub.isAvailable ? 'ok' : 'degraded';
   }
 }

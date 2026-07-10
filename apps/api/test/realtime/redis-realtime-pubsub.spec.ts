@@ -221,7 +221,7 @@ describe('RedisRealtimePubSub', () => {
     pubA.armPublishFailure();
 
     await expect(busA.publish(message('broadcast', {}))).rejects.toThrow('publish failed');
-    expect(busA.available).toBe(false);
+    expect(busA.isAvailable).toBe(false);
   });
 
   /**
@@ -236,7 +236,7 @@ describe('RedisRealtimePubSub', () => {
 
     await busA.publish(message('broadcast', {}));
 
-    expect(busA.available).toBe(true);
+    expect(busA.isAvailable).toBe(true);
   });
 
   /**
@@ -252,7 +252,7 @@ describe('RedisRealtimePubSub', () => {
     jest.spyOn(pubB, 'duplicate').mockReturnValue(subscriber);
 
     await expect(busB.subscribe(() => undefined)).rejects.toThrow('subscribe failed');
-    expect(busB.available).toBe(false);
+    expect(busB.isAvailable).toBe(false);
     expect(subscriber.disconnectCalls).toBe(1);
   });
 
@@ -267,16 +267,16 @@ describe('RedisRealtimePubSub', () => {
     const subscriber = new FakePubSubRedis(broker);
     jest.spyOn(pubB, 'duplicate').mockReturnValue(subscriber);
     await busB.subscribe(() => undefined);
-    expect(busB.available).toBe(true);
+    expect(busB.isAvailable).toBe(true);
 
     subscriber.emit('close');
-    expect(busB.available).toBe(false);
+    expect(busB.isAvailable).toBe(false);
 
     subscriber.emit('ready');
-    expect(busB.available).toBe(true);
+    expect(busB.isAvailable).toBe(true);
 
     subscriber.emit('end');
-    expect(busB.available).toBe(false);
+    expect(busB.isAvailable).toBe(false);
   });
 
   /**

@@ -13,7 +13,7 @@ import { buildTestConfig } from '../support/config.fixture';
 
 /** A pub/sub double reporting a fixed availability. */
 function pubsub(available: boolean): RedisRealtimePubSub {
-  return { available } as unknown as RedisRealtimePubSub;
+  return { isAvailable: available } as unknown as RedisRealtimePubSub;
 }
 
 describe('HealthController', () => {

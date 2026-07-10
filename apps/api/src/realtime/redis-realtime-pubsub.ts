@@ -74,7 +74,7 @@ export class RedisRealtimePubSub implements IRealtimePubSub {
    *
    * @returns `true` while the bus is usable, `false` after a Redis outage.
    */
-  get available(): boolean {
+  get isAvailable(): boolean {
     return this.busAvailable;
   }
 
