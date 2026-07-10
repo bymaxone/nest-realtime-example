@@ -1,5 +1,5 @@
 diff --git a/dist/server/index.cjs b/dist/server/index.cjs
-index 98d4419..89b070a 100644
+index 98d4419..2eabea9 100644
 --- a/dist/server/index.cjs
 +++ b/dist/server/index.cjs
 @@ -129,7 +129,8 @@ function createSseController(endpoint) {
@@ -12,10 +12,27 @@ index 98d4419..89b070a 100644
    ], DynamicSseController);
    return DynamicSseController;
  }
+@@ -240,7 +241,8 @@ var RealtimePubSubSubscriber = class {
+ RealtimePubSubSubscriber = __decorateClass([
+   common.Injectable(),
+   __decorateParam(0, common.Inject(REALTIME_PUBSUB_TOKEN)),
+-  __decorateParam(1, common.Inject(REALTIME_INSTANCE_ID_TOKEN))
++  __decorateParam(1, common.Inject(REALTIME_INSTANCE_ID_TOKEN)),
++  __decorateParam(2, common.Inject(common.forwardRef(() => SseTransport)))
+ ], RealtimePubSubSubscriber);
+ var RETRIEVE_LIMIT = 200;
+ var OfflineQueueDeliveryService = class {
 diff --git a/dist/server/index.mjs b/dist/server/index.mjs
-index df783ae..4d8f376 100644
+index df783ae..dda6fa5 100644
 --- a/dist/server/index.mjs
 +++ b/dist/server/index.mjs
+@@ -1,5 +1,5 @@
+ import { randomUUID } from 'crypto';
+-import { Injectable, Inject, Optional, Logger, Global, Module, Sse, Req, Res, Controller, UnauthorizedException } from '@nestjs/common';
++import { Injectable, Inject, Optional, Logger, Global, Module, Sse, Req, Res, Controller, UnauthorizedException, forwardRef } from '@nestjs/common';
+ import { Subject, of, EMPTY, Observable, merge } from 'rxjs';
+ import { takeUntil, catchError, finalize } from 'rxjs/operators';
+ import { WebSocketServer, WebSocketGateway } from '@nestjs/websockets';
 @@ -127,7 +127,8 @@ function createSseController(endpoint) {
      __decorateParam(1, Res({ passthrough: true }))
    ], DynamicSseController.prototype, "subscribe", 1);
@@ -26,3 +43,13 @@ index df783ae..4d8f376 100644
    ], DynamicSseController);
    return DynamicSseController;
  }
+@@ -238,7 +239,8 @@ var RealtimePubSubSubscriber = class {
+ RealtimePubSubSubscriber = __decorateClass([
+   Injectable(),
+   __decorateParam(0, Inject(REALTIME_PUBSUB_TOKEN)),
+-  __decorateParam(1, Inject(REALTIME_INSTANCE_ID_TOKEN))
++  __decorateParam(1, Inject(REALTIME_INSTANCE_ID_TOKEN)),
++  __decorateParam(2, Inject(forwardRef(() => SseTransport)))
+ ], RealtimePubSubSubscriber);
+ var RETRIEVE_LIMIT = 200;
+ var OfflineQueueDeliveryService = class {

@@ -1,6 +1,6 @@
 # Phase 05: scaling-cluster
 
-> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 05)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §15, §12.8
 
@@ -25,7 +25,7 @@ Single-instance SSE works. This phase makes it horizontal: `RedisRealtimePubSub`
 | ID  | Task                                                           | Status | Priority | Size | Depends on |
 | --- | -------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 5.1 | Branch + RedisRealtimePubSub implementation                    | ✅     | P0       | M    | Phase 04   |
-| 5.2 | nginx SSE-safe config + cluster compose profile                | 📋     | P0       | M    | 5.1        |
+| 5.2 | nginx SSE-safe config + cluster compose profile                | ✅     | P0       | M    | 5.1        |
 | 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | 📋     | P0       | L    | 5.2        |
 | 5.4 | Cross-instance revocation + degradation lab                    | 📋     | P0       | M    | 5.3        |
 | 5.5 | RedisPresenceStorage                                           | 📋     | P1       | S    | 5.1        |
@@ -101,7 +101,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 5.2: nginx SSE-safe proxy and the cluster compose profile
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 5.1
@@ -112,10 +112,10 @@ The honest infrastructure: `docker/nginx/nginx.conf` with the SSE location rules
 
 #### Acceptance criteria
 
-- [ ] nginx conf: upstream over app-a/app-b; SSE location (`/api/events`): `proxy_buffering off`, `proxy_cache off`, `gzip off`, `proxy_read_timeout` >> heartbeat, HTTP/1.1 with empty `Connection`; other locations round-robin.
-- [ ] Compose `cluster` profile: app-a/app-b built from `docker/api.Dockerfile`, distinct `INSTANCE_NAME`/`PORT`, shared Redis, healthchecks; nginx depends on healthy apps.
-- [ ] The app sends `Cache-Control: no-cache, no-transform` and `X-Accel-Buffering: no` on the SSE route (verify the library sets them; add only what is missing, at the app layer).
-- [ ] Smoke: `docker compose --profile cluster up -d` then a logged-in `curl -N` through 8080 streams events with visible keepalives.
+- [x] nginx conf: upstream over app-a/app-b; SSE location (`/api/events`): `proxy_buffering off`, `proxy_cache off`, `gzip off`, `proxy_read_timeout` >> heartbeat, HTTP/1.1 with empty `Connection`; other locations round-robin (verified 6/4 split over 10 requests).
+- [x] Compose `cluster` profile: app-a/app-b built from `docker/api.Dockerfile`, distinct `INSTANCE_NAME`/`PORT`, shared Redis, healthchecks; nginx depends on healthy apps.
+- [x] The library sets `Cache-Control: ...no-cache...no-store...no-transform` and `X-Accel-Buffering: no` on the SSE route (verified through the proxy; nginx consumes `X-Accel-Buffering`); the app adds nothing.
+- [x] Smoke: `docker compose --profile cluster up -d --build` then a logged-in `curl -N` through 8080 streams `connection:established` immediately; cross-instance emit on app-a reaches a client on app-b.
 
 #### Files to create / modify
 
@@ -412,3 +412,4 @@ Completion Protocol: standard steps + phase completion line.
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
 
 - 5.1 ✅ 2026-07-09 RedisRealtimePubSub (origin stamp + self-filter, duplicate subscriber, availability flag) selected by PUBSUB_DRIVER=redis via RealtimeInfraModule; full units at 100%.
+- 5.2 ✅ 2026-07-09 nginx SSE-safe proxy + cluster compose profile (app-a/app-b/nginx); extended the pnpm patch to add the explicit @Inject(forwardRef(() => SseTransport)) the RealtimePubSubSubscriber needs, without which cross-instance delivery 500s in-image; smoke proved fan-out app-a to app-b.
