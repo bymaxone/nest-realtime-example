@@ -17,6 +17,7 @@ import { DomainModule } from './domain/domain.module';
 import { EmitModule } from './emit/emit.module';
 import { HealthModule } from './health/health.module';
 import { RealtimeWiringModule } from './realtime/wiring.module';
+import { ReplayModule } from './replay/replay.module';
 import { RoomsModule } from './rooms/rooms.module';
 
 /** Wires configuration, liveness, demo auth, realtime and the demo features. */
@@ -31,6 +32,7 @@ import { RoomsModule } from './rooms/rooms.module';
     AuditModule,
     ConnectionsModule,
     RoomsModule,
+    ReplayModule,
   ],
 })
 export class AppModule {}
