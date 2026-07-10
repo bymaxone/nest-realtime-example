@@ -18,11 +18,12 @@ import { ClusterStatsController } from './cluster-stats.controller';
 import { ConnectionsController } from './connections.controller';
 import { ConnectionsService } from './connections.service';
 import { EvictionLabController } from './eviction-lab.controller';
+import { RealtimeIntrospectionService } from './realtime-introspection.service';
 
 /** Wires the connection introspection, kill-switch, eviction and cluster-stats endpoints. */
 @Module({
   imports: [AuthModule, LifecycleModule, RealtimeInfraModule],
   controllers: [ConnectionsController, EvictionLabController, ClusterStatsController],
-  providers: [ConnectionsService],
+  providers: [ConnectionsService, RealtimeIntrospectionService],
 })
 export class ConnectionsModule {}

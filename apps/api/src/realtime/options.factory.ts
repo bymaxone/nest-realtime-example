@@ -15,11 +15,14 @@
 
 import type {
   BymaxRealtimeModuleOptions,
+  CorsConfig,
   IConnectionAuthenticator,
   IConnectionLifecycleHooks,
   IOfflineQueueStorage,
   IPresenceStorage,
   IRealtimePubSub,
+  ReauthenticationPolicy,
+  SseOptions,
   WebSocketOptions,
 } from '@bymax-one/nest-realtime';
 
@@ -54,23 +57,25 @@ export function buildRealtimeOptions(
   presence?: IPresenceStorage,
   wsRedisClient?: unknown,
 ): BymaxRealtimeModuleOptions {
+  const sse: SseOptions = {
+    endpoint: config.realtime.sseEndpoint,
+    heartbeatMs: config.realtime.heartbeatMs,
+    replayBufferSize: config.realtime.replayBufferSize,
+    maxConnectionsPerUser: config.realtime.maxConnectionsPerUser,
+    emitConnectionEvent: config.realtime.emitConnectionEvent,
+  };
+  const reauthenticationPolicy: ReauthenticationPolicy = {
+    intervalSeconds: config.reauth.intervalSeconds,
+    onFailure: config.reauth.onFailure,
+    cacheTtlMs: config.reauth.cacheTtlMs,
+  };
   const base: BymaxRealtimeModuleOptions = {
     transport: config.realtime.transport,
     service: { name: APP_SERVICE_NAME, version: APP_VERSION },
     authenticator,
     tenantResolver: (auth) => auth.tenantId,
-    sse: {
-      endpoint: config.realtime.sseEndpoint,
-      heartbeatMs: config.realtime.heartbeatMs,
-      replayBufferSize: config.realtime.replayBufferSize,
-      maxConnectionsPerUser: config.realtime.maxConnectionsPerUser,
-      emitConnectionEvent: config.realtime.emitConnectionEvent,
-    },
-    reauthenticationPolicy: {
-      intervalSeconds: config.reauth.intervalSeconds,
-      onFailure: config.reauth.onFailure,
-      cacheTtlMs: config.reauth.cacheTtlMs,
-    },
+    sse,
+    reauthenticationPolicy,
   };
   const websocket = buildWebsocketOptions(config, wsRedisClient);
   const options = websocket ? { ...base, websocket } : base;
@@ -104,9 +109,10 @@ function buildWebsocketOptions(
   wsRedisClient?: unknown,
 ): WebSocketOptions | undefined {
   if (config.realtime.transport === 'sse') return undefined;
+  const cors: CorsConfig = { origin: config.webOrigin, credentials: true };
   const base: WebSocketOptions = {
     namespace: config.realtime.wsNamespace,
-    cors: { origin: config.webOrigin, credentials: true },
+    cors,
     maxHttpBufferSize: config.realtime.wsMaxBufferBytes,
     pingIntervalMs: config.realtime.wsPingIntervalMs,
     pingTimeoutMs: config.realtime.wsPingTimeoutMs,

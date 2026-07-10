@@ -68,6 +68,12 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Asserts every public export of the linked library is referenced somewhere in
+      # the example (or carries a spec-sanctioned justified exception), so the
+      # coverage matrix cannot silently drift from the library surface.
+      - name: Export-usage audit
+        run: pnpm audit:exports
+
       # Empirically proves the SSE-only build never ships socket.io-client in a
       # statically-required chunk, and that it exists only behind the chat/both
       # labs' dynamic import.

@@ -11,7 +11,7 @@
 
 ## 1. Progress dashboard
 
-> **Progress:** 10 / 11 phases complete (91%) · 56 / 60 tasks
+> **Progress:** 10 / 11 phases complete (91%) · 57 / 60 tasks
 > **Active phase:** phase 10 (🔄 in progress)
 > **Blockers:** none
 
@@ -27,7 +27,7 @@
 | 07  | both-composite         | `tasks/phase-07-both-composite.md`         | ✅ Done        | 4/4      | S    | 2026-07-10   |
 | 08  | web-frontend           | `tasks/phase-08-web-frontend.md`           | ✅ Done        | 6/6      | L    | 2026-07-10   |
 | 09  | testing-quality        | `tasks/phase-09-testing-quality.md`        | ✅ Done        | 5/5      | L    | 2026-07-10   |
-| 10  | docs-audit-hardening   | `tasks/phase-10-docs-audit-hardening.md`   | 🔄 In Progress | 1/5      | M    | 2026-07-10   |
+| 10  | docs-audit-hardening   | `tasks/phase-10-docs-audit-hardening.md`   | 🔄 In Progress | 2/5      | M    | 2026-07-10   |
 
 ### External precondition
 

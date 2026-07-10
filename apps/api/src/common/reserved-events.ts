@@ -7,10 +7,13 @@
  * and lets a unit test prove the domain event set never collides with them.
  */
 
-import { RESERVED_EVENT_NAMES } from '@bymax-one/nest-realtime/shared';
+import { RESERVED_EVENT_NAMES, type ReservedEventName } from '@bymax-one/nest-realtime/shared';
+
+/** Every event name the library reserves, typed as its own union. */
+const RESERVED_NAMES: readonly ReservedEventName[] = Object.values(RESERVED_EVENT_NAMES);
 
 /** Set of every event name reserved by the library. */
-const RESERVED_NAME_SET: ReadonlySet<string> = new Set(Object.values(RESERVED_EVENT_NAMES));
+const RESERVED_NAME_SET: ReadonlySet<string> = new Set(RESERVED_NAMES);
 
 /**
  * Report whether an event name is reserved by the library.

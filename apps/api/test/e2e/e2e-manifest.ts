@@ -98,6 +98,12 @@ export const E2E_MANIFEST: readonly RouteContract[] = [
     specs: ['offline-drain.e2e-spec.ts', 'kill-switch.e2e-spec.ts'],
   }),
   route({
+    method: 'GET',
+    path: '/api/connections/introspection',
+    guarded: true,
+    specs: ['introspection.e2e-spec.ts'],
+  }),
+  route({
     method: 'POST',
     path: '/api/connections/:id/disconnect',
     guarded: true,

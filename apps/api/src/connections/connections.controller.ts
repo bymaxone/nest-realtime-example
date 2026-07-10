@@ -19,6 +19,10 @@ import { SessionGuard } from '../auth/session.guard';
 import type { SessionTraits } from '../auth/session.types';
 
 import { ConnectionsService } from './connections.service';
+import {
+  RealtimeIntrospectionService,
+  type RealtimeWiringSnapshot,
+} from './realtime-introspection.service';
 
 /** The connection listing response, tagged with the reporting instance. */
 interface ConnectionsResponse {
@@ -38,8 +42,12 @@ export class ConnectionsController {
    * Build the connections controller.
    *
    * @param connections - The connection introspection and kill-switch service.
+   * @param introspection - The resolved realtime wiring introspection service.
    */
-  constructor(private readonly connections: ConnectionsService) {}
+  constructor(
+    private readonly connections: ConnectionsService,
+    private readonly introspection: RealtimeIntrospectionService,
+  ) {}
 
   /**
    * List every active connection on this instance (admin only).
@@ -50,6 +58,21 @@ export class ConnectionsController {
   @UseGuards(SessionGuard, AdminGuard)
   list(): ConnectionsResponse {
     return { instance: APP_SERVICE_NAME, connections: this.connections.list() };
+  }
+
+  /**
+   * Report the realtime wiring the library resolved at boot (admin only).
+   *
+   * Reads the library's exported Symbol DI tokens to prove the module resolved the
+   * configuration and collaborators the example handed it; it exposes only scalar
+   * options and provider class names, never a live principal's metadata.
+   *
+   * @returns The resolved realtime wiring snapshot.
+   */
+  @Get('introspection')
+  @UseGuards(SessionGuard, AdminGuard)
+  wiring(): RealtimeWiringSnapshot {
+    return this.introspection.snapshot();
   }
 
   /**

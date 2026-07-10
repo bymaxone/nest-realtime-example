@@ -1,6 +1,6 @@
 # Phase 10: docs-audit-hardening
 
-> **Status**: 🔄 In Progress · **Progress**: 1 / 5 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 2 / 5 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 10)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §7, §8.1, §18
 
@@ -24,7 +24,7 @@ The finish line: the repo must read as the canonical reference and prove its own
 | ID   | Task                                                | Status | Priority | Size | Depends on |
 | ---- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 10.1 | Branch + full README with reproducible journeys     | ✅     | P0       | M    | Phase 09   |
-| 10.2 | Export-usage + coverage-matrix audit (75 rows)      | 📋     | P0       | M    | 10.1       |
+| 10.2 | Export-usage + coverage-matrix audit (75 rows)      | ✅     | P0       | M    | 10.1       |
 | 10.3 | Stryker mutation baseline + hardening (api)         | 📋     | P0       | L    | 10.2       |
 | 10.4 | CI finalization + npm-switch procedure              | 📋     | P1       | S    | 10.2       |
 | 10.5 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 10.1-10.4  |
@@ -94,7 +94,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 10.2: Export-usage and coverage-matrix audit
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 10.1
@@ -105,9 +105,9 @@ The completeness proof: an audit table mapping all 75 matrix rows to evidence (r
 
 #### Acceptance criteria
 
-- [ ] `docs/COVERAGE_AUDIT.md`: 75 rows, each with status, route/UI evidence, test evidence (file path), notes; zero red rows at close.
-- [ ] Export sweep script (`scripts/audit-exports.mjs`): reads the library's export maps (all three subpaths), greps the example source for each symbol, reports unused exports; wired as `pnpm audit:exports`; zero unused (or each justified in the audit doc with a reason the spec sanctions).
-- [ ] CI runs `audit:exports` in the main pipeline.
+- [x] `docs/COVERAGE_AUDIT.md`: 75 rows, each with status, route/UI evidence, test evidence (file path), notes; zero red rows at close (75/75 green).
+- [x] Export sweep script (`scripts/audit-exports.mjs`): reads the library's export maps (all three subpaths), greps the example source for each symbol, reports unused exports; wired as `pnpm audit:exports`; zero unjustified unused (58 referenced, 10 justified exceptions each citing a spec section).
+- [x] CI runs `audit:exports` in the main pipeline (a step in the `ci` job).
 
 #### Files to create / modify
 
@@ -336,3 +336,4 @@ Completion Protocol: standard steps + the final phase-completion line.
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
 
 - 10.1 ✅ 2026-07-10 Wrote the full house-style README with badges and the nine journeys quoted from real stack output; added the offline-queue env to `.env.example`.
+- 10.2 ✅ 2026-07-10 Committed the 75/75 coverage audit and the `audit:exports` sweep (wired into CI); strengthened matrix row 8 with a real `GET /connections/introspection` endpoint injecting the library Symbol DI tokens, and typed option/reserved-name usages so only 10 exports remain justified exceptions.
