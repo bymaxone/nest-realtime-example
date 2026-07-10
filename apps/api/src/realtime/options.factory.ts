@@ -15,6 +15,8 @@ import type {
   IConnectionAuthenticator,
   IConnectionLifecycleHooks,
   IOfflineQueueStorage,
+  IPresenceStorage,
+  IRealtimePubSub,
 } from '@bymax-one/nest-realtime';
 
 import { APP_SERVICE_NAME, APP_VERSION } from '../app.constants';
@@ -29,6 +31,11 @@ import type { AppConfig } from '../config/env.loader';
  *   audit ring, the connection event log and the decorator handlers).
  * @param offlineQueue - Optional durable offline queue; when present, the library
  *   persists events for users with no live connection and drains them on reconnect.
+ * @param pubsub - Optional cross-instance pub/sub bus; when present, an emit on one
+ *   instance fans out to clients connected to the others. Leaving it unset selects
+ *   the library's single-instance `InMemoryPubSub`.
+ * @param presence - Optional presence storage answering "who is online?" across
+ *   instances; when unset, presence-dependent features stay disabled.
  * @returns The options passed to `BymaxRealtimeModule`.
  */
 export function buildRealtimeOptions(
@@ -36,6 +43,8 @@ export function buildRealtimeOptions(
   authenticator: IConnectionAuthenticator,
   hooks?: IConnectionLifecycleHooks,
   offlineQueue?: IOfflineQueueStorage,
+  pubsub?: IRealtimePubSub,
+  presence?: IPresenceStorage,
 ): BymaxRealtimeModuleOptions {
   const options: BymaxRealtimeModuleOptions = {
     transport: config.realtime.transport,
@@ -56,5 +65,7 @@ export function buildRealtimeOptions(
     },
   };
   const withHooks = hooks ? { ...options, hooks } : options;
-  return offlineQueue ? { ...withHooks, offlineQueue } : withHooks;
+  const withQueue = offlineQueue ? { ...withHooks, offlineQueue } : withHooks;
+  const withPubsub = pubsub ? { ...withQueue, pubsub } : withQueue;
+  return presence ? { ...withPubsub, presence } : withPubsub;
 }

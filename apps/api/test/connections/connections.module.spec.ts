@@ -10,6 +10,7 @@ import { Test } from '@nestjs/testing';
 
 import { APP_CONFIG } from '../../src/config/config.tokens';
 import { ConfigModule } from '../../src/config/config.module';
+import { ClusterStatsController } from '../../src/connections/cluster-stats.controller';
 import { ConnectionsController } from '../../src/connections/connections.controller';
 import { ConnectionsModule } from '../../src/connections/connections.module';
 import { EvictionLabController } from '../../src/connections/eviction-lab.controller';
@@ -20,10 +21,11 @@ describe('ConnectionsModule', () => {
   /**
    * Wiring check.
    *
-   * The module must expose ConnectionsController with its service resolved against
-   * the globally-registered ConnectionRegistry and RealtimeService.
+   * The module must expose the connections, eviction and cluster-stats controllers
+   * with their services resolved against the globally-registered ConnectionRegistry,
+   * RealtimeService and the shared realtime infrastructure.
    */
-  it('resolves the connections controller', async () => {
+  it('resolves the connections, eviction and cluster-stats controllers', async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [ConfigModule, realtimeStubModule(mockRealtimeService().service), ConnectionsModule],
     })
@@ -33,6 +35,7 @@ describe('ConnectionsModule', () => {
 
     expect(moduleRef.get(ConnectionsController)).toBeInstanceOf(ConnectionsController);
     expect(moduleRef.get(EvictionLabController)).toBeInstanceOf(EvictionLabController);
+    expect(moduleRef.get(ClusterStatsController)).toBeInstanceOf(ClusterStatsController);
 
     await moduleRef.close();
   });

@@ -5,9 +5,15 @@
 # inner development loop is `docker compose up -d redis` plus `pnpm dev`, running
 # the api and web directly on the host against this Redis.
 #
-# The `cluster` profile (two api instances behind nginx) is added when the
-# multi-instance scaling scenarios are demonstrated; it is intentionally absent
-# here so the default `up` only starts the dependency every profile needs.
+# The `cluster` profile (two api instances behind nginx) demonstrates the
+# multi-instance scaling scenarios. Both api containers run one image built from
+# `docker/api.Dockerfile` (the vendored library tarball and its pnpm patch are in
+# the build context, so `pnpm install` resolves and patches the library in-image),
+# differ only by `INSTANCE_NAME`/`PORT`, share one Redis for pub/sub fan-out, and
+# sit behind an SSE-safe nginx. Bring it up with `docker compose --profile cluster
+# up -d --build` and always tear it down with `docker compose --profile cluster
+# down`. Only demo values appear here; the shared session secret must match across
+# instances so a cookie minted on one is accepted on the other.
 
 services:
   redis:
@@ -23,4 +29,70 @@ services:
       timeout: 3s
       retries: 5
       start_period: 2s
+    restart: unless-stopped
+
+  app-a:
+    profiles: ['cluster']
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: nest-realtime-example-api:local
+    environment:
+      INSTANCE_NAME: app-a
+      PORT: '3001'
+      PUBSUB_DRIVER: redis
+      REDIS_URL: redis://redis:6379
+      SESSION_SECRET: cluster-demo-shared-session-secret
+      WEB_ORIGIN: http://localhost:8080
+      # The cluster profile demonstrates scaling; a long reauth interval keeps the
+      # periodic revocation check (which shares this Redis) from disconnecting live
+      # connections during a deliberate Redis outage, so the degradation lab isolates
+      # pub/sub availability. Reauthentication itself is exercised in the dev profile.
+      REAUTH_INTERVAL_SECONDS: '3600'
+    ports:
+      - '3001:3001'
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app-b:
+    profiles: ['cluster']
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: nest-realtime-example-api:local
+    environment:
+      INSTANCE_NAME: app-b
+      PORT: '3002'
+      PUBSUB_DRIVER: redis
+      REDIS_URL: redis://redis:6379
+      SESSION_SECRET: cluster-demo-shared-session-secret
+      WEB_ORIGIN: http://localhost:8080
+      # The cluster profile demonstrates scaling; a long reauth interval keeps the
+      # periodic revocation check (which shares this Redis) from disconnecting live
+      # connections during a deliberate Redis outage, so the degradation lab isolates
+      # pub/sub availability. Reauthentication itself is exercised in the dev profile.
+      REAUTH_INTERVAL_SECONDS: '3600'
+    ports:
+      - '3002:3002'
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    profiles: ['cluster']
+    image: nginx:1.27-alpine
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    # nginx must not accept traffic until both instances pass their liveness
+    # probe, so the first proxied request always reaches a ready app.
+    depends_on:
+      app-a:
+        condition: service_healthy
+      app-b:
+        condition: service_healthy
     restart: unless-stopped

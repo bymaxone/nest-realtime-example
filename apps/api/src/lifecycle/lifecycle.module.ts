@@ -10,6 +10,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuditModule } from '../audit/audit.module';
+import { PresenceModule } from '../presence/presence.module';
 
 import { ConnectionEventLog } from './connection-event-log';
 import { CompositeLifecycleHooks } from './lifecycle-hooks';
@@ -17,7 +18,7 @@ import { RoomMembershipTracker } from './room-membership.tracker';
 
 /** Wires the connection event log, room-membership tracker and composite hooks. */
 @Module({
-  imports: [AuditModule],
+  imports: [AuditModule, PresenceModule],
   providers: [ConnectionEventLog, RoomMembershipTracker, CompositeLifecycleHooks],
   exports: [ConnectionEventLog, RoomMembershipTracker, CompositeLifecycleHooks],
 })

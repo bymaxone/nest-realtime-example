@@ -14,6 +14,7 @@ import type { LifecycleDecoratorDispatcher } from '../../src/audit/decorator-han
 import type { ConnectionEventLog } from '../../src/lifecycle/connection-event-log';
 import { CompositeLifecycleHooks } from '../../src/lifecycle/lifecycle-hooks';
 import type { RoomMembershipTracker } from '../../src/lifecycle/room-membership.tracker';
+import type { PresenceTracker } from '../../src/presence/presence.tracker';
 
 const META: ConnectionEventMeta = {
   connectionId: 'c1',
@@ -30,6 +31,7 @@ interface Harness {
   readonly composite: CompositeLifecycleHooks;
   readonly audit: Record<string, jest.Mock>;
   readonly log: Record<string, jest.Mock>;
+  readonly presence: Record<string, jest.Mock>;
   readonly decorators: Record<string, jest.Mock>;
 }
 
@@ -43,14 +45,16 @@ function build(): Harness {
   };
   const log = { onConnect: jest.fn(), onDisconnect: jest.fn() };
   const rooms = { onDisconnect: jest.fn() };
+  const presence = { onConnect: jest.fn(), onDisconnect: jest.fn() };
   const decorators = { onConnect: jest.fn(), onDisconnect: jest.fn() };
   const composite = new CompositeLifecycleHooks(
     audit as unknown as AuditService,
     log as unknown as ConnectionEventLog,
     rooms as unknown as RoomMembershipTracker,
+    presence as unknown as PresenceTracker,
     decorators as unknown as LifecycleDecoratorDispatcher,
   );
-  return { composite, audit, log, decorators };
+  return { composite, audit, log, presence, decorators };
 }
 
 describe('CompositeLifecycleHooks', () => {
@@ -62,12 +66,13 @@ describe('CompositeLifecycleHooks', () => {
    * "config hooks first" ordering.
    */
   it('fans onConnect out with config hooks before decorator handlers', async () => {
-    const { composite, audit, log, decorators } = build();
+    const { composite, audit, log, presence, decorators } = build();
 
     await composite.onConnect(META);
 
     expect(audit.onConnect).toHaveBeenCalledWith(META);
     expect(log.onConnect).toHaveBeenCalledWith(META);
+    expect(presence.onConnect).toHaveBeenCalledWith(META);
     expect(decorators.onConnect).toHaveBeenCalledWith(META);
     const auditOrder = audit.onConnect.mock.invocationCallOrder[0] as number;
     expect(auditOrder).toBeLessThan(log.onConnect.mock.invocationCallOrder[0] as number);

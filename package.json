@@ -13,6 +13,7 @@
     "lint": "pnpm -r --workspace-concurrency=1 run lint",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "test": "pnpm -r --workspace-concurrency=1 run test",
+    "test:e2e:cluster": "docker compose --profile cluster up -d --build && pnpm --filter @nest-realtime-example/api run test:e2e:cluster; docker compose --profile cluster down",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",

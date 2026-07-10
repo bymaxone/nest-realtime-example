@@ -15,6 +15,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AuditService } from '../audit/audit.service';
 import { LifecycleDecoratorDispatcher } from '../audit/decorator-handlers';
+import { PresenceTracker } from '../presence/presence.tracker';
 
 import { ConnectionEventLog } from './connection-event-log';
 import { RoomMembershipTracker } from './room-membership.tracker';
@@ -34,22 +35,24 @@ export class CompositeLifecycleHooks implements IConnectionLifecycleHooks {
    * Build the composite hooks.
    *
    * The order is the contract: the cross-cutting config hooks (audit, the
-   * connection timeline, room-membership cleanup) run before the decorator
-   * dispatcher, so the feature-local `@OnConnect` / `@OnDisconnect` handlers always
-   * fire last.
+   * connection timeline, room-membership cleanup, presence population) run before
+   * the decorator dispatcher, so the feature-local `@OnConnect` / `@OnDisconnect`
+   * handlers always fire last.
    *
    * @param audit - The cross-cutting audit ring (a config hook, runs first).
    * @param connectionEventLog - The connection timeline log (a config hook).
    * @param roomMembership - The room-membership tracker (cleared on disconnect).
+   * @param presence - The presence tracker (marks connections online/offline).
    * @param decoratorDispatcher - Invokes the feature-local decorator handlers last.
    */
   constructor(
     audit: AuditService,
     connectionEventLog: ConnectionEventLog,
     roomMembership: RoomMembershipTracker,
+    presence: PresenceTracker,
     decoratorDispatcher: LifecycleDecoratorDispatcher,
   ) {
-    this.consumers = [audit, connectionEventLog, roomMembership, decoratorDispatcher];
+    this.consumers = [audit, connectionEventLog, roomMembership, presence, decoratorDispatcher];
   }
 
   /**
