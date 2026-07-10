@@ -1,6 +1,6 @@
 # Phase 07: both-composite
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 4 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 4 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 07)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12, library spec appendix on migration
 
@@ -24,7 +24,7 @@ The migration story: `transport: 'both'` runs SSE and WebSocket simultaneously, 
 
 | ID  | Task                                                | Status | Priority | Size | Depends on |
 | --- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 7.1 | Branch + both profile boot + config surface         | 📋     | P0       | S    | Phase 06   |
+| 7.1 | Branch + both profile boot + config surface         | ✅     | P0       | S    | Phase 06   |
 | 7.2 | Split-screen e2e: one emit, two transports          | 📋     | P0       | M    | 7.1        |
 | 7.3 | Migration journey walkthrough                       | 📋     | P1       | S    | 7.2        |
 | 7.4 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 7.1-7.3    |
@@ -33,7 +33,7 @@ The migration story: `transport: 'both'` runs SSE and WebSocket simultaneously, 
 
 ### Task 7.1: Both profile boot
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: Phase 06
@@ -44,10 +44,10 @@ Boot with `REALTIME_TRANSPORT=both`: SSE endpoint and WS namespace both live, op
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-07-both-composite` created with `git switch -c`.
-- [ ] Both profile boots; `/api/events` (cookie) and the `/live` namespace (bearer) accept connections concurrently.
-- [ ] `GET /health` reports `transport: 'both'`.
-- [ ] Boot spec asserts both endpoints respond in the same process.
+- [x] Branch `feat/phase-07-both-composite` created with `git switch -c`.
+- [x] Both profile boots; `/api/events` (cookie) and the `/live` namespace (bearer) accept connections concurrently.
+- [x] `GET /health` reports `transport: 'both'`.
+- [x] Boot spec asserts both endpoints respond in the same process.
 
 #### Files to create / modify
 
@@ -264,3 +264,5 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 7.1 ✅ 2026-07-10 Both profile boot proven: audited every transport-literal guard in `apps/api/src` (options factory, main.ts, chat module) and confirmed each already reads `!== 'sse'` rather than `=== 'websocket'`, so `'both'` was already correctly wired with zero source changes; added `both-boot.e2e-spec.ts` asserting `GET /health` reports `transport: 'both'` and a cookie SSE client plus a bearer WS client both reach `connection:established` concurrently against one running app.
