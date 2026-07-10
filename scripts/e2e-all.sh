@@ -6,7 +6,7 @@
 # the compose stack is always torn down at the end even if a suite fails.
 set -eu
 
-ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+ROOT=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
