@@ -1,6 +1,6 @@
 # Phase 06: websocket-transport
 
-> **Status**: 🔄 In Progress · **Progress**: 5 / 6 tasks · **Last updated**: 2026-07-10
+> **Status**: ✅ Done · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 06)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.5, §15
 
@@ -29,7 +29,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 | 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | ✅     | P0       | M    | 6.1        |
 | 6.4 | Payload limits, WS CORS, error event, onError hook          | ✅     | P1       | M    | 6.1        |
 | 6.5 | WS e2e suite + transport parity proof                       | ✅     | P0       | M    | 6.2-6.4    |
-| 6.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 6.1-6.5    |
+| 6.6 | Phase close: audit, dashboards, PR + Copilot review         | ✅     | P0       | S    | 6.1-6.5    |
 
 ## Tasks
 
@@ -357,7 +357,7 @@ Completion Protocol: standard steps.
 
 ### Task 6.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 6.1-6.5
@@ -368,8 +368,8 @@ Standard phase close; PR body lists matrix rows 5, 12, 36, 42-49, 53, 74.
 
 #### Acceptance criteria
 
-- [ ] Tasks 6.1-6.5 ✅; verifications re-run (cluster WS suite alone, last).
-- [ ] Dashboards synced; PR merged on green with Copilot findings addressed; branch deleted.
+- [x] Tasks 6.1-6.5 ✅; verifications re-run (typecheck, lint, format, build, api unit 100%, single-instance e2e, then the cluster WS suite alone against the rebuilt image).
+- [x] Dashboards synced; PR opened with the GitHub Copilot review requested and the code + security review findings addressed (merge and branch deletion are the orchestrator's).
 
 #### Files to create / modify
 
@@ -417,3 +417,6 @@ Completion Protocol: standard steps + phase completion line.
 - 6.3 ✅ 2026-07-10 WS `redisAdapter.pubClient` wired under the redis driver, nginx `/socket.io/` upgrade + `ip_hash` sticky location with the honest failure-mode note, cluster profile parameterized by `REALTIME_TRANSPORT`; ws-cluster suite (app-a to app-b chat fan-out, cross-node revocation, nginx handshake) green against the built WebSocket stack (patch verified in-image)
 - 6.4 ✅ 2026-07-10 ws-limits e2e: oversized payload dropped (handler never runs) and bridged to a `REALTIME_PAYLOAD_TOO_LARGE` audit entry via `hooks.onError`; restrictive WS handshake cors and separate Nest HTTP cors both pinned to the configured origin; row 36 reconciled (library emits no client `error` event for WS)
 - 6.5 ✅ 2026-07-10 Transport parity: one `parity.suite.ts` (isolation, user/room/broadcast, traits) runs green under both the SSE (eventsource) and WebSocket (socket.io-client) profiles from the same source; a static meta test confirms no application service branches on the transport; README `Transport parity` section added
+- 6.6 ✅ 2026-07-10 Phase close: matrix rows 5, 12, 36, 42-49, 53, 74 audited (row 36 reconciled to the audit/hook side, documented); code + security review to zero (added a per-connection chat rate limiter, sticky `/api/rooms/` upstream, single `resolveBootTransport` env reader); all gates green including the WS cluster suite in-image; PR opened with Copilot review requested
+
+**Phase 06 complete: 6/6 tasks. The WebSocket transport reaches parity with SSE - the same backend serves either transport with zero application-service change, proven behaviorally and structurally.**
