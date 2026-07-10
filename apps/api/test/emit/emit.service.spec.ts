@@ -53,6 +53,9 @@ describe('EmitService', () => {
     await expect(service.emitToTenant('acme', 'globex', 'order.paid', {})).rejects.toThrow(
       ForbiddenException,
     );
+    await expect(service.emitToTenant('acme', 'globex', 'order.paid', {})).rejects.toThrow(
+      'cross-tenant emit denied',
+    );
     expect(realtime.emitToTenant).not.toHaveBeenCalled();
   });
 
@@ -80,6 +83,9 @@ describe('EmitService', () => {
   it('rejects emitting to a user or tenant scope room', async () => {
     await expect(service.emitToRoom('tenant:globex', 'order.paid', {})).rejects.toThrow(
       ForbiddenException,
+    );
+    await expect(service.emitToRoom('tenant:globex', 'order.paid', {})).rejects.toThrow(
+      'cannot emit to a user or tenant scope room',
     );
     await expect(service.emitToRoom('user:gil@globex', 'order.paid', {})).rejects.toThrow(
       ForbiddenException,

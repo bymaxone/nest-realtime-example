@@ -16,7 +16,8 @@
     "test": "jest",
     "test:e2e": "jest --config jest.e2e.config.ts",
     "test:e2e:cluster": "jest --config jest.e2e-cluster.config.ts",
-    "test:e2e:cluster:ws": "jest --config jest.e2e-cluster-ws.config.ts"
+    "test:e2e:cluster:ws": "jest --config jest.e2e-cluster-ws.config.ts",
+    "mutation": "stryker run"
   },
   "dependencies": {
     "@bymax-one/nest-realtime": "file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz",
@@ -36,6 +37,8 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.0.0",
+    "@stryker-mutator/core": "^9",
+    "@stryker-mutator/jest-runner": "^9",
     "@swc/core": "^1.7.0",
     "@swc/jest": "^0.2.37",
     "@types/express": "^5.0.0",

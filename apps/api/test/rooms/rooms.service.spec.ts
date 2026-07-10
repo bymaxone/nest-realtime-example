@@ -59,6 +59,9 @@ describe('RoomsService', () => {
     await expect(service.join('c1', 'incident', 'i1', 'ana@acme')).rejects.toThrow(
       ForbiddenException,
     );
+    await expect(service.join('c1', 'incident', 'i1', 'ana@acme')).rejects.toThrow(
+      'not your connection',
+    );
     expect(joinRoom).not.toHaveBeenCalled();
   });
 
@@ -72,6 +75,9 @@ describe('RoomsService', () => {
 
     await expect(service.join('missing', 'incident', 'i1', 'ana@acme')).rejects.toThrow(
       NotFoundException,
+    );
+    await expect(service.join('missing', 'incident', 'i1', 'ana@acme')).rejects.toThrow(
+      'unknown connection',
     );
   });
 

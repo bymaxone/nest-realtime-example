@@ -20,7 +20,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "mutation": "pnpm --filter @nest-realtime-example/api run mutation"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",
