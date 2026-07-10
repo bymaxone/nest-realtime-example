@@ -1,6 +1,6 @@
 # Phase 06: websocket-transport
 
-> **Status**: 🔄 In Progress · **Progress**: 1 / 6 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 06)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.5, §15
 
@@ -25,7 +25,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 | ID  | Task                                                        | Status | Priority | Size | Depends on |
 | --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | ✅     | P0       | L    | Phase 05   |
-| 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | 📋     | P0       | M    | 6.1        |
+| 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | ✅     | P0       | M    | 6.1        |
 | 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | 📋     | P0       | M    | 6.1        |
 | 6.4 | Payload limits, WS CORS, error event, onError hook          | 📋     | P1       | M    | 6.1        |
 | 6.5 | WS e2e suite + transport parity proof                       | 📋     | P0       | M    | 6.2-6.4    |
@@ -106,7 +106,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 6.2: Incident chat with @Subscribe and the SSE no-op proof
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 6.1
@@ -117,10 +117,10 @@ The bi-directional showcase: `chat.message` handled via the library's `@Subscrib
 
 #### Acceptance criteria
 
-- [ ] `ChatModule` with a `@Subscribe('chat.message')` handler: zod-validates `{ roomId, body }`, enforces room membership + tenant, re-emits `chat.message` to the room via `RealtimeService`.
-- [ ] E2E: two WS clients in `resource:incident:i1` exchange messages; a third client outside the room receives nothing.
-- [ ] SSE no-op unit: booting the SSE profile registers zero chat handlers (per the library's documented no-op) and the app still boots clean.
-- [ ] Matrix rows 46, 47 satisfied.
+- [x] `ChatModule` with a `chat.message` handler: zod-validates `{ roomId, body }`, enforces room membership + authenticated identity, re-emits `chat.message` to the room via `RealtimeService`. Reconciliation: the installed library exposes no `@Subscribe` decorator, so the handler uses the standard NestJS `@SubscribeMessage` on a config-namespaced gateway; the library still owns auth, rooms and fan-out.
+- [x] E2E: two WS clients in `resource:incident:i1` exchange messages; a third client outside the room receives nothing.
+- [x] SSE no-op unit: booting the SSE profile registers zero chat handlers (the gateway provider is gated off) and the app still boots clean.
+- [x] Matrix rows 46, 47 satisfied.
 
 #### Files to create / modify
 
@@ -413,3 +413,4 @@ Completion Protocol: standard steps + phase completion line.
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
 
 - 6.1 ✅ 2026-07-10 WS profile boots on the config-driven `/live` namespace via the library's `RealtimeIoAdapter` (patch-extended to honor `websocket.namespace`), bearer handshake auth, ws-connect e2e (established traits, missing-token and wrong-namespace rejections)
+- 6.2 ✅ 2026-07-10 Incident chat via a config-namespaced `@SubscribeMessage('chat.message')` gateway (library has no `@Subscribe`), gated off under SSE (no-op proof), authenticated-identity fan-out with room isolation and malformed-frame survivability; fixed a stale `/health` assertion missing the `pubsub` field

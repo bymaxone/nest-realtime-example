@@ -11,6 +11,7 @@ import { Module } from '@nestjs/common';
 
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
 import { ConfigModule } from './config/config.module';
 import { ConnectionsModule } from './connections/connections.module';
 import { DomainModule } from './domain/domain.module';
@@ -35,6 +36,7 @@ import { RoomsModule } from './rooms/rooms.module';
     RoomsModule,
     ReplayModule,
     PresenceModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

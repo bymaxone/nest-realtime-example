@@ -10,6 +10,7 @@
 /** Every event name the application emits into a resource room. */
 export const ROOM_EVENT_NAMES = Object.freeze({
   INCIDENT_MESSAGE: 'incident.message',
+  CHAT_MESSAGE: 'chat.message',
 } as const);
 
 /** Union of room event name values. */
