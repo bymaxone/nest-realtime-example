@@ -1,6 +1,6 @@
 # Phase 10: docs-audit-hardening
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 5 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 3 / 5 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 10)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §7, §8.1, §18
 
@@ -26,7 +26,7 @@ The finish line: the repo must read as the canonical reference and prove its own
 | 10.1 | Branch + full README with reproducible journeys     | ✅     | P0       | M    | Phase 09   |
 | 10.2 | Export-usage + coverage-matrix audit (75 rows)      | ✅     | P0       | M    | 10.1       |
 | 10.3 | Stryker mutation baseline + hardening (api)         | 📋     | P0       | L    | 10.2       |
-| 10.4 | CI finalization + npm-switch procedure              | 📋     | P1       | S    | 10.2       |
+| 10.4 | CI finalization + npm-switch procedure              | ✅     | P1       | S    | 10.2       |
 | 10.5 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 10.1-10.4  |
 
 ## Tasks
@@ -215,7 +215,7 @@ Completion Protocol: standard steps.
 
 ### Task 10.4: CI finalization and the npm-switch procedure
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P1
 - **Size**: S
 - **Depends on**: 10.2
@@ -226,9 +226,9 @@ Freeze the pipeline (job names become contractual for branch protection), add th
 
 #### Acceptance criteria
 
-- [ ] `ci.yml` job names finalized and documented as contractual; badges in README point at the workflows.
-- [ ] `docs/NPM_SWITCH.md`: the exact diff and verification flow for moving to `"@bymax-one/nest-realtime": "^0.1.0"` (install, full ordered test flow, audit:exports re-run); executed in this task if the package is resolvable on npm at the time, otherwise left as the documented procedure with the check command.
-- [ ] Branch-protection recommendation block (required checks list) included in the doc for when the repo goes public.
+- [x] `ci.yml` job ids/names finalized and documented as contractual; README badges point at the ci workflow.
+- [x] `docs/NPM_SWITCH.md`: the exact diff and verification flow for moving to `"@bymax-one/nest-realtime": "^0.1.0"`; `npm view` returns 404 (unpublished), so the switch is left as the documented procedure and the committed pnpm patch is documented as a known consumer workaround.
+- [x] Branch-protection recommendation block (required checks list) included in the doc for when the repo goes public.
 
 #### Files to create / modify
 
@@ -336,4 +336,5 @@ Completion Protocol: standard steps + the final phase-completion line.
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
 
 - 10.1 ✅ 2026-07-10 Wrote the full house-style README with badges and the nine journeys quoted from real stack output; added the offline-queue env to `.env.example`.
+- 10.4 ✅ 2026-07-10 Froze the four CI job ids/names as contractual (with a note in ci.yml), added the export-audit step, and wrote docs/NPM_SWITCH.md documenting the unpublished-library switch procedure, the pnpm patch workaround, and the branch-protection required checks.
 - 10.2 ✅ 2026-07-10 Committed the 75/75 coverage audit and the `audit:exports` sweep (wired into CI); strengthened matrix row 8 with a real `GET /connections/introspection` endpoint injecting the library Symbol DI tokens, and typed option/reserved-name usages so only 10 exports remain justified exceptions.

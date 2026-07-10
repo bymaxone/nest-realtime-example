@@ -7,6 +7,11 @@ name: CI
 # browser journeys against a live api + web). The multi-instance `e2e-cluster` suite
 # is the heaviest and least proven on hosted runners, so it is gated to a manual
 # `workflow_dispatch` run rather than every push until runners prove it stable.
+#
+# The four job ids (`ci`, `e2e`, `playwright`, `e2e-cluster`) and their `name:`
+# fields are CONTRACTUAL: they are the branch-protection required-status-check names
+# for this repository (see docs/NPM_SWITCH.md). Do not rename or remove them; add
+# steps within `ci` rather than splitting new jobs out of it.
 on:
   pull_request:
   push:
