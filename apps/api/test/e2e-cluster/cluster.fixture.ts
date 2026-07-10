@@ -212,6 +212,44 @@ export async function emitToUser(
   if (!response.ok) throw new Error(`emit user failed (${response.status}) at ${baseUrl}`);
 }
 
+/**
+ * Mint a short-lived WebSocket bearer token via one instance.
+ *
+ * @param baseUrl - The instance base URL to mint through.
+ * @param cookie - The session cookie authorizing the mint.
+ * @returns The signed bearer for the Socket.IO `handshake.auth.token`.
+ */
+export async function mintClusterWsToken(baseUrl: string, cookie: string): Promise<string> {
+  const response = await fetch(`${baseUrl}/api/auth/ws-token`, {
+    method: 'POST',
+    headers: { cookie },
+  });
+  if (!response.ok) throw new Error(`ws-token failed (${response.status}) at ${baseUrl}`);
+  return ((await response.json()) as { token: string }).token;
+}
+
+/**
+ * Join a connection to the incident room via one instance.
+ *
+ * @param baseUrl - The instance base URL owning the connection.
+ * @param cookie - The session cookie of the connection's owner.
+ * @param connectionId - The connection to join.
+ * @param resourceId - The incident id (the room is `resource:incident:{id}`).
+ */
+export async function joinIncidentRoom(
+  baseUrl: string,
+  cookie: string,
+  connectionId: string,
+  resourceId: string,
+): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/rooms/join`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', cookie },
+    body: JSON.stringify({ connectionId, resourceType: 'incident', resourceId }),
+  });
+  if (!response.ok) throw new Error(`join failed (${response.status}) at ${baseUrl}`);
+}
+
 /** Stop the cluster's Redis container to simulate a pub/sub outage. */
 export async function stopRedis(): Promise<void> {
   await execFileAsync('docker', ['compose', '-f', COMPOSE_FILE, 'stop', 'redis']);

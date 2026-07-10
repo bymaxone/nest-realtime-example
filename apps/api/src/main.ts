@@ -7,9 +7,15 @@
  * its cross-origin access is controlled here at the app level, not in the library
  * options), and mounts every route under the `api` prefix so the library's SSE
  * controller is served at the configured `/api/events`. The liveness probe is
- * excluded from the prefix so infra checks hit a stable `/health`.
+ * excluded from the prefix so infra checks hit a stable `/health`. When the
+ * configured transport involves WebSocket, the library's `RealtimeIoAdapter` is
+ * registered before `listen` exactly as its README documents; the adapter reads
+ * the resolved module options to bind the gateway to the config-driven namespace,
+ * apply the WebSocket CORS, ping and payload limits, and install the Redis adapter
+ * when configured. An SSE-only boot never registers it, so Socket.IO never starts.
  */
 
+import { RealtimeIoAdapter } from '@bymax-one/nest-realtime';
 import { type INestApplication, RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
@@ -32,6 +38,9 @@ export async function createApp(): Promise<INestApplication> {
   app.setGlobalPrefix(GLOBAL_PREFIX, {
     exclude: [{ path: 'health', method: RequestMethod.GET }],
   });
+  if (config.realtime.transport !== 'sse') {
+    app.useWebSocketAdapter(new RealtimeIoAdapter(app));
+  }
   app.enableShutdownHooks();
   return app;
 }

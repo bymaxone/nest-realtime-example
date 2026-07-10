@@ -44,6 +44,11 @@ services:
       REDIS_URL: redis://redis:6379
       SESSION_SECRET: cluster-demo-shared-session-secret
       WEB_ORIGIN: http://localhost:8080
+      # Transport profile for the whole cluster. Defaults to `sse` so the SSE
+      # cluster suite runs unchanged; the WebSocket cluster suite brings the stack
+      # up with `REALTIME_TRANSPORT=websocket` so both instances serve Socket.IO
+      # and the Redis adapter fans WebSocket messages across them.
+      REALTIME_TRANSPORT: ${REALTIME_TRANSPORT:-sse}
       # The cluster profile demonstrates scaling; a long reauth interval keeps the
       # periodic revocation check (which shares this Redis) from disconnecting live
       # connections during a deliberate Redis outage, so the degradation lab isolates
@@ -69,6 +74,11 @@ services:
       REDIS_URL: redis://redis:6379
       SESSION_SECRET: cluster-demo-shared-session-secret
       WEB_ORIGIN: http://localhost:8080
+      # Transport profile for the whole cluster. Defaults to `sse` so the SSE
+      # cluster suite runs unchanged; the WebSocket cluster suite brings the stack
+      # up with `REALTIME_TRANSPORT=websocket` so both instances serve Socket.IO
+      # and the Redis adapter fans WebSocket messages across them.
+      REALTIME_TRANSPORT: ${REALTIME_TRANSPORT:-sse}
       # The cluster profile demonstrates scaling; a long reauth interval keeps the
       # periodic revocation check (which shares this Redis) from disconnecting live
       # connections during a deliberate Redis outage, so the degradation lab isolates

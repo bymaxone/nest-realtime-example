@@ -39,6 +39,7 @@ describe('Application bootstrap (e2e)', () => {
       instance: 'app-a',
       transport: 'sse',
       version: APP_VERSION,
+      pubsub: 'ok',
     });
   });
 

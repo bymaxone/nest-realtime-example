@@ -21,6 +21,8 @@ const MAX_REPLAY_BUFFER_SIZE = 10000;
 const MAX_CONNECTIONS_PER_USER = 1000;
 const MIN_WS_BUFFER_BYTES = 1024;
 const MAX_WS_BUFFER_BYTES = 10485760;
+const MIN_WS_PING_MS = 1000;
+const MAX_WS_PING_MS = 300000;
 const MAX_REAUTH_INTERVAL_SECONDS = 86400;
 const MAX_REAUTH_CACHE_TTL_MS = 3600000;
 const MIN_SESSION_SECRET_LENGTH = 16;
@@ -72,6 +74,18 @@ export const envSchema = z.object({
     .min(MIN_WS_BUFFER_BYTES)
     .max(MAX_WS_BUFFER_BYTES)
     .default(16384),
+  REALTIME_WS_PING_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .min(MIN_WS_PING_MS)
+    .max(MAX_WS_PING_MS)
+    .default(25000),
+  REALTIME_WS_PING_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .min(MIN_WS_PING_MS)
+    .max(MAX_WS_PING_MS)
+    .default(20000),
   REAUTH_INTERVAL_SECONDS: z.coerce
     .number()
     .int()

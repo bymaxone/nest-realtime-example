@@ -14,6 +14,10 @@
  * cross-spec races over the shared Redis), `globalSetup` fails fast with a clear
  * message when the stack is not up, and `forceExit` guarantees termination even if
  * an SSE keep-alive or a Redis socket outlives the run.
+ *
+ * The WebSocket cluster suite is excluded here: it needs the stack booted in
+ * WebSocket mode, so it runs through its own config against a separately-booted
+ * stack, keeping this SSE cluster run against the default SSE stack.
  */
 
 import type { Config } from 'jest';
@@ -36,6 +40,7 @@ const config: Config = {
     ],
   },
   testMatch: ['<rootDir>/test/e2e-cluster/**/*.e2e-spec.ts'],
+  testPathIgnorePatterns: ['/node_modules/', 'ws-cluster'],
   globalSetup: '<rootDir>/test/e2e-cluster/global-setup.ts',
   maxWorkers: 1,
   forceExit: true,

@@ -7,7 +7,7 @@
  * variable without echoing its value, and deep immutability of the result.
  */
 
-import { type AppConfig, loadEnv } from '../../src/config/env.loader';
+import { type AppConfig, loadEnv, resolveBootTransport } from '../../src/config/env.loader';
 
 describe('loadEnv', () => {
   it('applies every documented default for a bare environment', () => {
@@ -23,6 +23,8 @@ describe('loadEnv', () => {
     expect(config.realtime.emitConnectionEvent).toBe(true);
     expect(config.realtime.wsNamespace).toBe('/live');
     expect(config.realtime.wsMaxBufferBytes).toBe(16384);
+    expect(config.realtime.wsPingIntervalMs).toBe(25000);
+    expect(config.realtime.wsPingTimeoutMs).toBe(20000);
     expect(config.reauth.intervalSeconds).toBe(15);
     expect(config.reauth.onFailure).toBe('disconnect');
     expect(config.reauth.cacheTtlMs).toBe(10000);
@@ -42,6 +44,8 @@ describe('loadEnv', () => {
       INSTANCE_NAME: 'app-b',
       REALTIME_TRANSPORT: 'websocket',
       REALTIME_EMIT_CONNECTION_EVENT: 'false',
+      REALTIME_WS_PING_INTERVAL_MS: '5000',
+      REALTIME_WS_PING_TIMEOUT_MS: '4000',
       PUBSUB_DRIVER: 'redis',
       REAUTH_ON_FAILURE: 'event',
       REAUTH_CACHE_TTL_MS: '0',
@@ -53,6 +57,8 @@ describe('loadEnv', () => {
     expect(config.instanceName).toBe('app-b');
     expect(config.realtime.transport).toBe('websocket');
     expect(config.realtime.emitConnectionEvent).toBe(false);
+    expect(config.realtime.wsPingIntervalMs).toBe(5000);
+    expect(config.realtime.wsPingTimeoutMs).toBe(4000);
     expect(config.pubsubDriver).toBe('redis');
     expect(config.reauth.onFailure).toBe('event');
     expect(config.reauth.cacheTtlMs).toBe(0);
@@ -107,6 +113,24 @@ describe('loadEnv', () => {
   it('rejects a value outside an enum', () => {
     // Scenario: an unknown reauth policy is refused rather than silently defaulted.
     expect(() => loadEnv({ REAUTH_ON_FAILURE: 'ignore' })).toThrow(/REAUTH_ON_FAILURE/);
+  });
+
+  it('resolves the boot transport from the environment', () => {
+    // Scenario: the module tree reads the transport hint before DI; a valid value is
+    // returned, and an unset or invalid value falls back to the default so the hint
+    // never fails the boot on its own (loadEnv reports the real error).
+    const original = process.env.REALTIME_TRANSPORT;
+    try {
+      process.env.REALTIME_TRANSPORT = 'websocket';
+      expect(resolveBootTransport()).toBe('websocket');
+      delete process.env.REALTIME_TRANSPORT;
+      expect(resolveBootTransport()).toBe('sse');
+      process.env.REALTIME_TRANSPORT = 'carrier-pigeon';
+      expect(resolveBootTransport()).toBe('sse');
+    } finally {
+      if (original === undefined) delete process.env.REALTIME_TRANSPORT;
+      else process.env.REALTIME_TRANSPORT = original;
+    }
   });
 
   it('returns a deeply frozen configuration', () => {

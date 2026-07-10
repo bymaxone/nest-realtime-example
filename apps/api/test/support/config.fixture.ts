@@ -37,6 +37,8 @@ export function buildTestConfig(overrides: ConfigOverrides = {}): AppConfig {
     emitConnectionEvent: true,
     wsNamespace: '/live',
     wsMaxBufferBytes: 16384,
+    wsPingIntervalMs: 25000,
+    wsPingTimeoutMs: 20000,
     ...overrides.realtime,
   };
   const reauth: AppConfig['reauth'] = {

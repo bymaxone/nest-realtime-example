@@ -56,6 +56,135 @@ describe('buildRealtimeOptions', () => {
   });
 
   /**
+   * SSE profile carries no WebSocket block.
+   *
+   * An SSE-only boot must not carry any `websocket` configuration, so Socket.IO is
+   * never booted and the SSE profile stays free of WebSocket peer dependencies.
+   */
+  it('omits the websocket block for the SSE profile', () => {
+    const options = buildRealtimeOptions(
+      buildTestConfig({ realtime: { transport: 'sse' } }),
+      authenticator,
+    );
+
+    expect(options).not.toHaveProperty('websocket');
+  });
+
+  /**
+   * WebSocket profile sources every Socket.IO tunable from config.
+   *
+   * The websocket block must carry the config-driven namespace, the transport's
+   * own CORS (origin plus credentials), the payload cap, the ping cadence and
+   * timeout, the per-user connection limit and the connection-event toggle, so the
+   * custom IoAdapter and gateway are driven entirely by env, never by literals.
+   */
+  it('builds the websocket block for the WebSocket profile from configuration', () => {
+    const config = buildTestConfig({
+      realtime: {
+        transport: 'websocket',
+        wsNamespace: '/live',
+        wsMaxBufferBytes: 16384,
+        wsPingIntervalMs: 5000,
+        wsPingTimeoutMs: 4000,
+        maxConnectionsPerUser: 3,
+        emitConnectionEvent: true,
+      },
+      webOrigin: 'http://localhost:3000',
+    });
+
+    const options = buildRealtimeOptions(config, authenticator);
+
+    expect(options.transport).toBe('websocket');
+    expect(options.websocket).toEqual({
+      namespace: '/live',
+      cors: { origin: 'http://localhost:3000', credentials: true },
+      maxHttpBufferSize: 16384,
+      pingIntervalMs: 5000,
+      pingTimeoutMs: 4000,
+      maxConnectionsPerUser: 3,
+      emitConnectionEvent: true,
+    });
+  });
+
+  /**
+   * The `both` composite profile also carries the websocket block.
+   *
+   * Migration mode fans one emit to both transports, so it must carry both the SSE
+   * options and the websocket block; the block is present for any non-SSE profile.
+   */
+  it('builds the websocket block for the both profile', () => {
+    const options = buildRealtimeOptions(
+      buildTestConfig({ realtime: { transport: 'both' } }),
+      authenticator,
+    );
+
+    expect(options.websocket?.namespace).toBe('/live');
+  });
+
+  /**
+   * WebSocket Redis adapter under the cluster profile.
+   *
+   * Under the Redis pub/sub driver the shared ioredis client must be wired as the
+   * WebSocket `redisAdapter.pubClient`, so `@socket.io/redis-adapter` fans WebSocket
+   * messages across instances.
+   */
+  it('wires the websocket redis adapter under the redis pub/sub driver', () => {
+    const redisClient = { id: 'shared-ioredis' };
+    const config = buildTestConfig({ realtime: { transport: 'websocket' }, pubsubDriver: 'redis' });
+
+    const options = buildRealtimeOptions(
+      config,
+      authenticator,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      redisClient,
+    );
+
+    expect(options.websocket?.redisAdapter).toEqual({ pubClient: redisClient });
+  });
+
+  /**
+   * No adapter without a client, even under the redis driver.
+   *
+   * When no client is supplied the adapter must stay unset so the transport never
+   * receives a half-configured adapter block.
+   */
+  it('omits the websocket redis adapter when no client is supplied', () => {
+    const config = buildTestConfig({ realtime: { transport: 'websocket' }, pubsubDriver: 'redis' });
+
+    const options = buildRealtimeOptions(config, authenticator);
+
+    expect(options.websocket).not.toHaveProperty('redisAdapter');
+  });
+
+  /**
+   * No adapter under the memory driver, even with a client available.
+   *
+   * A single-instance WebSocket run (memory driver) must never install the Redis
+   * adapter, so the block stays free of `redisAdapter` even when a client is passed.
+   */
+  it('omits the websocket redis adapter under the memory pub/sub driver', () => {
+    const config = buildTestConfig({
+      realtime: { transport: 'websocket' },
+      pubsubDriver: 'memory',
+    });
+
+    const options = buildRealtimeOptions(
+      config,
+      authenticator,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { id: 'shared-ioredis' },
+    );
+
+    expect(options.websocket).not.toHaveProperty('redisAdapter');
+  });
+
+  /**
    * Reauthentication policy.
    *
    * The reauth interval, failure mode and positive-cache TTL must all be sourced

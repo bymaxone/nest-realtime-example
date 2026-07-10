@@ -17,6 +17,12 @@ The application models a Live Operations Board for a fictional multi-tenant SaaS
 
 Build progress is tracked in the [Development Plan's progress dashboard](docs/DEVELOPMENT_PLAN.md#1-progress-dashboard), which is the single source of truth for what has landed and what is in flight.
 
+## Transport parity
+
+The library's promise is that the transport is a boot-time choice, not an application concern: the same backend serves clients over Server-Sent Events (`REALTIME_TRANSPORT=sse`) or WebSocket (`REALTIME_TRANSPORT=websocket`) with no change to any application service. WebSocket clients connect to the config-driven namespace (`REALTIME_WS_NAMESPACE`, default `/live`) authenticated by a short-lived bearer in the Socket.IO `handshake.auth.token`, while SSE clients use the cookie or ticket patterns an `EventSource` can carry.
+
+Parity is proven, not asserted: one shared parity suite (tenant isolation, per-user, room and broadcast delivery, and the client-safe connection traits) runs unchanged against both profiles, and a static meta test confirms no application service branches on the transport. Sticky sessions (`ip_hash`) are required for the WebSocket polling fallback in a scaled deployment; the reverse-proxy config documents that requirement and its failure mode honestly.
+
 ## Quick start
 
 The setup and run instructions land here as the application takes shape across the build's phase progression: a pnpm workspace with two apps (`apps/api`, a NestJS backend; `apps/web`, a Next.js frontend), a Redis-backed local stack, and the multi-transport boot profiles the library supports. Until then, the [Technical Specification](docs/TECHNICAL_SPECIFICATION.md) is the authoritative description of what will run and how.
