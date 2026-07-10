@@ -83,6 +83,46 @@ export async function emitToTenant(
 }
 
 /**
+ * Read a tenant's online presence roster via one instance.
+ *
+ * @param baseUrl - The instance base URL to read from.
+ * @param cookie - The session cookie of a member of the tenant.
+ * @param tenantId - The tenant whose roster is requested.
+ * @returns The online user ids reported by that instance.
+ */
+export async function readPresence(
+  baseUrl: string,
+  cookie: string,
+  tenantId: string,
+): Promise<string[]> {
+  const response = await fetch(`${baseUrl}/api/presence/${encodeURIComponent(tenantId)}`, {
+    headers: { cookie },
+  });
+  if (!response.ok) throw new Error(`presence failed (${response.status}) at ${baseUrl}`);
+  const body = (await response.json()) as { online: string[] };
+  return body.online;
+}
+
+/**
+ * Poll an async predicate until it holds or the deadline passes.
+ *
+ * @param predicate - The async condition to await.
+ * @param timeoutMs - How long to poll before rejecting.
+ * @returns A promise resolving once the predicate first holds.
+ */
+export async function pollUntil(
+  predicate: () => Promise<boolean>,
+  timeoutMs = 8000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    if (await predicate()) return;
+    if (Date.now() > deadline) throw new Error('timed out waiting for condition');
+    await sleep(100);
+  }
+}
+
+/**
  * Open an SSE connection whose socket is destroyed on close.
  *
  * The session cookie is injected via a custom fetch (an `EventSource` cannot set

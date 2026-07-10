@@ -18,7 +18,11 @@
  * the wiring tests.
  */
 
-import { BymaxRealtimeModule, type IRealtimePubSub } from '@bymax-one/nest-realtime';
+import {
+  BymaxRealtimeModule,
+  type IPresenceStorage,
+  type IRealtimePubSub,
+} from '@bymax-one/nest-realtime';
 import { Module } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 
@@ -33,7 +37,7 @@ import { LifecycleModule } from '../lifecycle/lifecycle.module';
 import { createOfflineQueue } from './offline-queue.factory';
 import { buildRealtimeOptions } from './options.factory';
 import { RealtimeInfraModule } from './realtime-infra.module';
-import { REALTIME_PUBSUB_BUS } from './realtime.tokens';
+import { REALTIME_PRESENCE, REALTIME_PUBSUB_BUS } from './realtime.tokens';
 
 /** Wires the library for the SSE profile and exports its public providers. */
 @Module({
@@ -47,16 +51,18 @@ import { REALTIME_PUBSUB_BUS } from './realtime.tokens';
         CompositeLifecycleHooks,
         REDIS_CLIENT,
         REALTIME_PUBSUB_BUS,
+        REALTIME_PRESENCE,
       ],
       // The library types useFactory as (...args: unknown[]); the injected values
       // are exactly the `inject` tuple, so narrow it to the concrete dependencies.
       useFactory: (...args: unknown[]) => {
-        const [config, authenticator, hooks, redis, pubsub] = args as [
+        const [config, authenticator, hooks, redis, pubsub, presence] = args as [
           AppConfig,
           CompositeAuthenticator,
           CompositeLifecycleHooks,
           Redis,
           IRealtimePubSub | undefined,
+          IPresenceStorage | undefined,
         ];
         return buildRealtimeOptions(
           config,
@@ -64,6 +70,7 @@ import { REALTIME_PUBSUB_BUS } from './realtime.tokens';
           hooks,
           createOfflineQueue(config, redis),
           pubsub,
+          presence,
         );
       },
     }),

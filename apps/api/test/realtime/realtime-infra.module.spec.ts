@@ -15,8 +15,13 @@ import { ConfigModule } from '../../src/config/config.module';
 import { ClusterStatsService } from '../../src/connections/cluster-stats.service';
 import { CountingRealtimePubSub } from '../../src/realtime/counting-pubsub';
 import { RealtimeInfraModule } from '../../src/realtime/realtime-infra.module';
+import { RedisPresenceStorage } from '../../src/realtime/redis-presence-storage';
 import { RedisRealtimePubSub } from '../../src/realtime/redis-realtime-pubsub';
-import { REALTIME_PUBSUB, REALTIME_PUBSUB_BUS } from '../../src/realtime/realtime.tokens';
+import {
+  REALTIME_PRESENCE,
+  REALTIME_PUBSUB,
+  REALTIME_PUBSUB_BUS,
+} from '../../src/realtime/realtime.tokens';
 import type { AppConfig } from '../../src/config/env.loader';
 import { buildTestConfig } from '../support/config.fixture';
 import { asPubSubRedis, FakePubSubBroker, FakePubSubRedis } from '../support/fake-pubsub';
@@ -39,11 +44,12 @@ describe('RealtimeInfraModule', () => {
    * it) must both resolve, and the stats service must be shared, so the probe reads
    * the driver while the library consumes the measured bus.
    */
-  it('exposes the driver, the counting bus wrapping it, and the stats service', async () => {
+  it('exposes the driver, the counting bus, presence and the stats service', async () => {
     const moduleRef = await compile(buildTestConfig({ pubsubDriver: 'redis' }));
 
     expect(moduleRef.get(REALTIME_PUBSUB)).toBeInstanceOf(RedisRealtimePubSub);
     expect(moduleRef.get(REALTIME_PUBSUB_BUS)).toBeInstanceOf(CountingRealtimePubSub);
+    expect(moduleRef.get(REALTIME_PRESENCE)).toBeInstanceOf(RedisPresenceStorage);
     expect(moduleRef.get(ClusterStatsService)).toBeInstanceOf(ClusterStatsService);
 
     await moduleRef.close();
@@ -55,11 +61,12 @@ describe('RealtimeInfraModule', () => {
    * The default memory driver must leave both pub/sub tokens undefined so the
    * library uses its InMemoryPubSub and the boot needs no live Redis.
    */
-  it('leaves both pub/sub tokens undefined under the memory driver', async () => {
+  it('leaves the pub/sub and presence tokens undefined under the memory driver', async () => {
     const moduleRef = await compile(buildTestConfig({ pubsubDriver: 'memory' }));
 
     expect(moduleRef.get(REALTIME_PUBSUB, { optional: true })).toBeUndefined();
     expect(moduleRef.get(REALTIME_PUBSUB_BUS, { optional: true })).toBeUndefined();
+    expect(moduleRef.get(REALTIME_PRESENCE, { optional: true })).toBeUndefined();
 
     await moduleRef.close();
   });

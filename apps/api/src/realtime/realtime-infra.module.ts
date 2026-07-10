@@ -2,9 +2,10 @@
  * @fileoverview Shared singletons for the Redis-backed cluster infrastructure.
  * @layer module
  *
- * Provides the cluster pub/sub bus and its stats counters (and, later, presence)
- * as singletons so the realtime wiring, the liveness probe, the stats endpoint and
- * the connections kill switch all inject the same instances. The bus is provided
+ * Provides the cluster pub/sub bus, its stats counters and the presence storage as
+ * singletons so the realtime wiring, the liveness probe, the stats endpoint, the
+ * presence tracker and the connections kill switch all inject the same instances.
+ * The bus is provided
  * twice by design: `REALTIME_PUBSUB` is the concrete driver (its origin id and
  * availability flag feed the probe) and `REALTIME_PUBSUB_BUS` is what the library
  * consumes, wrapped in the counting decorator so publishes and remote deliveries
@@ -21,8 +22,9 @@ import { APP_CONFIG } from '../config/config.tokens';
 import { ClusterStatsService } from '../connections/cluster-stats.service';
 
 import { CountingRealtimePubSub } from './counting-pubsub';
+import { createPresenceStorage } from './presence.factory';
 import { createRealtimePubSub } from './pubsub.factory';
-import { REALTIME_PUBSUB, REALTIME_PUBSUB_BUS } from './realtime.tokens';
+import { REALTIME_PRESENCE, REALTIME_PUBSUB, REALTIME_PUBSUB_BUS } from './realtime.tokens';
 import type { RedisRealtimePubSub } from './redis-realtime-pubsub';
 
 /**
@@ -55,7 +57,12 @@ function createCountingBus(
       useFactory: createCountingBus,
       inject: [REALTIME_PUBSUB, ClusterStatsService],
     },
+    {
+      provide: REALTIME_PRESENCE,
+      useFactory: createPresenceStorage,
+      inject: [APP_CONFIG, REDIS_CLIENT],
+    },
   ],
-  exports: [REALTIME_PUBSUB, REALTIME_PUBSUB_BUS, ClusterStatsService],
+  exports: [REALTIME_PUBSUB, REALTIME_PUBSUB_BUS, REALTIME_PRESENCE, ClusterStatsService],
 })
 export class RealtimeInfraModule {}

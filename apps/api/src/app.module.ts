@@ -16,6 +16,7 @@ import { ConnectionsModule } from './connections/connections.module';
 import { DomainModule } from './domain/domain.module';
 import { EmitModule } from './emit/emit.module';
 import { HealthModule } from './health/health.module';
+import { PresenceModule } from './presence/presence.module';
 import { RealtimeWiringModule } from './realtime/wiring.module';
 import { ReplayModule } from './replay/replay.module';
 import { RoomsModule } from './rooms/rooms.module';
@@ -33,6 +34,7 @@ import { RoomsModule } from './rooms/rooms.module';
     ConnectionsModule,
     RoomsModule,
     ReplayModule,
+    PresenceModule,
   ],
 })
 export class AppModule {}
