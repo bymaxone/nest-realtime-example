@@ -8,14 +8,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
+import { makeRealtimeContext, type RealtimeContextFake } from '@/test-utils/realtime-mocks';
 
 import AuditPage from './page';
 
-interface MockContextValue {
-  readonly lastEvent: { type: string } | undefined;
-}
-
-const useRealtimeContextMock = vi.fn<() => MockContextValue>();
+const useRealtimeContextMock = vi.fn<() => RealtimeContextFake>();
 
 vi.mock('@bymax-one/nest-realtime/react', () => ({
   useRealtimeContext: () => useRealtimeContextMock(),
@@ -49,7 +46,7 @@ const ENTRY = {
 describe('AuditPage', () => {
   it('loads the feed and decorator stats on mount', async () => {
     // Scenario: the page loads the audit feed and decorator counters once.
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     feedMock.mockResolvedValue({ service: { name: 'api', version: '0.1.0' }, entries: [ENTRY] });
     decoratorStatsMock.mockResolvedValue({ connects: 3, disconnects: 1 });
     render(<AuditPage />);
@@ -59,7 +56,7 @@ describe('AuditPage', () => {
 
   it('filters by kind when a filter chip is clicked', async () => {
     // Scenario: clicking the "connect" chip re-fetches with that kind filter.
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     feedMock.mockResolvedValue({ service: { name: 'api', version: '0.1.0' }, entries: [] });
     decoratorStatsMock.mockResolvedValue({ connects: 0, disconnects: 0 });
     render(<AuditPage />);
@@ -74,14 +71,16 @@ describe('AuditPage', () => {
     feedMock.mockResolvedValue({ service: { name: 'api', version: '0.1.0' }, entries: [] });
     decoratorStatsMock.mockResolvedValue({ connects: 0, disconnects: 0 });
     const { rerender } = render(<AuditPage />);
-    useRealtimeContextMock.mockReturnValue({ lastEvent: { type: 'connection:established' } });
+    useRealtimeContextMock.mockReturnValue(
+      makeRealtimeContext({ lastEvent: { type: 'connection:established' } }),
+    );
     rerender(<AuditPage />);
     await waitFor(() => expect(feedMock.mock.calls.length).toBeGreaterThan(1));
   });
 
   it('shows an error and an empty state when the load fails', async () => {
     // Scenario: the api is unreachable when the page mounts.
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     feedMock.mockRejectedValue(new ApiError(500, 'internal error'));
     decoratorStatsMock.mockRejectedValue(new ApiError(500, 'internal error'));
     render(<AuditPage />);
@@ -91,7 +90,7 @@ describe('AuditPage', () => {
 
   it('shows a generic error message for a non-api failure', async () => {
     // Scenario: an unexpected non-ApiError rejection (e.g. a network failure).
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     feedMock.mockRejectedValue(new Error('network down'));
     decoratorStatsMock.mockRejectedValue(new Error('network down'));
     render(<AuditPage />);
@@ -100,7 +99,7 @@ describe('AuditPage', () => {
 
   it('clicks back to "all" and renders an entry with no duration, user, or transport', async () => {
     // Scenario: an error-kind entry lacks userId/transport/duration; "all" clears the filter.
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     feedMock.mockResolvedValue({
       service: { name: 'api', version: '0.1.0' },
       entries: [
@@ -127,7 +126,7 @@ describe('AuditPage', () => {
 
   it('manually refreshes via the refresh button', async () => {
     // Scenario: the operator clicks Refresh to force a reload.
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     feedMock.mockResolvedValue({ service: { name: 'api', version: '0.1.0' }, entries: [] });
     decoratorStatsMock.mockResolvedValue({ connects: 0, disconnects: 0 });
     render(<AuditPage />);

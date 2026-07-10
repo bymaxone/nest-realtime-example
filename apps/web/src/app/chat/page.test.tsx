@@ -8,16 +8,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
+import { establishedEvent, makeRealtime, type RealtimeFake } from '@/test-utils/realtime-mocks';
 
 import ChatPage from './page';
 
-interface MockRealtimeValue {
-  readonly connected: boolean;
-  readonly emit: (event: string, data: unknown) => void;
-  readonly events: ReadonlyArray<{ type: string; data: unknown }>;
-}
-
-const useRealtimeMock = vi.fn<() => MockRealtimeValue>();
+const useRealtimeMock = vi.fn<() => RealtimeFake>();
 const mintWsTokenMock = vi.fn<() => Promise<{ token: string; expiresAt: string }>>();
 const joinMock =
   vi.fn<
@@ -49,11 +44,9 @@ describe('ChatPage', () => {
       expiresAt: '2026-01-01T00:00:00.000Z',
     });
     const emit = vi.fn();
-    useRealtimeMock.mockReturnValue({
-      connected: true,
-      emit,
-      events: [{ type: 'connection:established', data: { connectionId: 'conn-1' } }],
-    });
+    useRealtimeMock.mockReturnValue(
+      makeRealtime({ connected: true, emit, events: [establishedEvent('conn-1')] }),
+    );
     joinMock.mockResolvedValueOnce({ roomId: 'resource:incident:2', joined: true });
     render(<ChatPage />);
     const user = userEvent.setup();
@@ -79,31 +72,32 @@ describe('ChatPage', () => {
       token: 'ws-token',
       expiresAt: '2026-01-01T00:00:00.000Z',
     });
-    useRealtimeMock.mockReturnValue({
-      connected: true,
-      emit: vi.fn(),
-      events: [
-        { type: 'connection:established', data: { connectionId: 'conn-1' } },
-        {
-          type: 'chat.message',
-          data: {
-            roomId: 'resource:incident:1',
-            from: 'bob@acme',
-            body: 'hi',
-            at: '2026-01-01T00:00:00.000Z',
+    useRealtimeMock.mockReturnValue(
+      makeRealtime({
+        connected: true,
+        events: [
+          establishedEvent('conn-1'),
+          {
+            type: 'chat.message',
+            data: {
+              roomId: 'resource:incident:1',
+              from: 'bob@acme',
+              body: 'hi',
+              at: '2026-01-01T00:00:00.000Z',
+            },
           },
-        },
-        {
-          type: 'chat.message',
-          data: {
-            roomId: 'resource:incident:2',
-            from: 'gil@globex',
-            body: 'other room',
-            at: '2026-01-01T00:00:00.000Z',
+          {
+            type: 'chat.message',
+            data: {
+              roomId: 'resource:incident:2',
+              from: 'gil@globex',
+              body: 'other room',
+              at: '2026-01-01T00:00:00.000Z',
+            },
           },
-        },
-      ],
-    });
+        ],
+      }),
+    );
     joinMock.mockResolvedValueOnce({ roomId: 'resource:incident:1', joined: true });
     render(<ChatPage />);
     const user = userEvent.setup();
@@ -119,11 +113,7 @@ describe('ChatPage', () => {
       token: 'ws-token',
       expiresAt: '2026-01-01T00:00:00.000Z',
     });
-    useRealtimeMock.mockReturnValue({
-      connected: false,
-      emit: vi.fn(),
-      events: [{ type: 'connection:established', data: { connectionId: 'conn-1' } }],
-    });
+    useRealtimeMock.mockReturnValue(makeRealtime({ events: [establishedEvent('conn-1')] }));
     joinMock.mockRejectedValueOnce(new ApiError(400, 'invalid room'));
     render(<ChatPage />);
     const user = userEvent.setup();
@@ -138,11 +128,7 @@ describe('ChatPage', () => {
       token: 'ws-token',
       expiresAt: '2026-01-01T00:00:00.000Z',
     });
-    useRealtimeMock.mockReturnValue({
-      connected: false,
-      emit: vi.fn(),
-      events: [{ type: 'connection:established', data: { connectionId: 'conn-1' } }],
-    });
+    useRealtimeMock.mockReturnValue(makeRealtime({ events: [establishedEvent('conn-1')] }));
     joinMock.mockRejectedValueOnce(new Error('network down'));
     render(<ChatPage />);
     const user = userEvent.setup();
@@ -154,7 +140,7 @@ describe('ChatPage', () => {
   it('disables Join while there is no connectionId, and shows "No messages yet"', () => {
     // Scenario: the socket has not yet delivered connection:established.
     mintWsTokenMock.mockRejectedValueOnce(new Error('no token'));
-    useRealtimeMock.mockReturnValue({ connected: false, emit: vi.fn(), events: [] });
+    useRealtimeMock.mockReturnValue(makeRealtime());
     render(<ChatPage />);
     expect(screen.getByRole('button', { name: 'Join room' })).toBeDisabled();
     expect(screen.getByText('No messages yet.')).toBeInTheDocument();
@@ -167,11 +153,9 @@ describe('ChatPage', () => {
       expiresAt: '2026-01-01T00:00:00.000Z',
     });
     const emit = vi.fn();
-    useRealtimeMock.mockReturnValue({
-      connected: true,
-      emit,
-      events: [{ type: 'connection:established', data: { connectionId: 'conn-1' } }],
-    });
+    useRealtimeMock.mockReturnValue(
+      makeRealtime({ connected: true, emit, events: [establishedEvent('conn-1')] }),
+    );
     joinMock.mockResolvedValueOnce({ roomId: 'resource:incident:1', joined: true });
     leaveMock.mockResolvedValueOnce({ roomId: 'resource:incident:1', left: true });
     render(<ChatPage />);

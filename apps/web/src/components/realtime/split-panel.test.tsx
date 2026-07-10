@@ -6,15 +6,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { establishedEvent, makeRealtime, type RealtimeFake } from '@/test-utils/realtime-mocks';
+
 import { SplitPanel } from './split-panel';
 
-interface MockRealtimeValue {
-  readonly connected: boolean;
-  readonly lastEvent: { type: string; data: unknown } | undefined;
-  readonly transport: 'sse' | 'websocket';
-}
-
-const useRealtimeMock = vi.fn<(opts: unknown) => MockRealtimeValue>();
+const useRealtimeMock = vi.fn<(opts: unknown) => RealtimeFake>();
 
 vi.mock('@bymax-one/nest-realtime/react', () => ({
   useRealtime: (opts: unknown) => useRealtimeMock(opts),
@@ -23,7 +19,7 @@ vi.mock('@bymax-one/nest-realtime/react', () => ({
 describe('SplitPanel', () => {
   it('shows the detected transport and connection status', () => {
     // Scenario: an SSE panel is currently connected.
-    useRealtimeMock.mockReturnValue({ connected: true, lastEvent: undefined, transport: 'sse' });
+    useRealtimeMock.mockReturnValue(makeRealtime({ connected: true }));
     render(
       <SplitPanel
         label="SSE"
@@ -39,11 +35,13 @@ describe('SplitPanel', () => {
   it('reports a fresh nonce when the last event is a lab.both event', () => {
     // Scenario: the panel's own connection observed a `lab.both` payload.
     const onNonce = vi.fn();
-    useRealtimeMock.mockReturnValue({
-      connected: true,
-      lastEvent: { type: 'lab.both', data: { nonce: 'abc123' } },
-      transport: 'websocket',
-    });
+    useRealtimeMock.mockReturnValue(
+      makeRealtime({
+        connected: true,
+        lastEvent: { type: 'lab.both', data: { nonce: 'abc123' } },
+        transport: 'websocket',
+      }),
+    );
     render(
       <SplitPanel
         label="WebSocket"
@@ -57,11 +55,7 @@ describe('SplitPanel', () => {
   it('does not call onNonce for an unrelated event', () => {
     // Scenario: some other reserved event arrives; it is not a nonce carrier.
     const onNonce = vi.fn();
-    useRealtimeMock.mockReturnValue({
-      connected: false,
-      lastEvent: { type: 'connection:established', data: { connectionId: 'c1' } },
-      transport: 'sse',
-    });
+    useRealtimeMock.mockReturnValue(makeRealtime({ lastEvent: establishedEvent('c1') }));
     render(
       <SplitPanel
         label="SSE"

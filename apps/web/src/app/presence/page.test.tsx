@@ -7,19 +7,15 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
+import { makePresence, type PresenceFake } from '@/test-utils/realtime-mocks';
 
 import PresencePage from './page';
-
-interface MockPresenceValue {
-  readonly onlineUserIds: readonly string[];
-  readonly count: number;
-}
 
 interface MockSessionValue {
   readonly traits: { userId: string; tenantId: string; roles: readonly string[] } | null;
 }
 
-const usePresenceMock = vi.fn<() => MockPresenceValue>();
+const usePresenceMock = vi.fn<() => PresenceFake>();
 const useSessionMock = vi.fn<() => MockSessionValue>();
 const rosterMock =
   vi.fn<(tenantId: string) => Promise<{ tenantId: string; online: readonly string[] }>>();
@@ -43,7 +39,7 @@ describe('PresencePage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    usePresenceMock.mockReturnValue({ onlineUserIds: ['bob@acme'], count: 1 });
+    usePresenceMock.mockReturnValue(makePresence({ onlineUserIds: ['bob@acme'], count: 1 }));
     rosterMock.mockResolvedValue({ tenantId: 'acme', online: ['ana@acme'] });
     render(<PresencePage />);
     expect(await screen.findByText('ana@acme')).toBeInTheDocument();
@@ -54,7 +50,7 @@ describe('PresencePage', () => {
   it('renders an empty state when no one is online and there is no session yet', () => {
     // Scenario: the page renders before the session lookup resolves.
     useSessionMock.mockReturnValue({ traits: null });
-    usePresenceMock.mockReturnValue({ onlineUserIds: [], count: 0 });
+    usePresenceMock.mockReturnValue(makePresence());
     render(<PresencePage />);
     expect(screen.getByText('No one online yet')).toBeInTheDocument();
   });
@@ -64,7 +60,7 @@ describe('PresencePage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    usePresenceMock.mockReturnValue({ onlineUserIds: [], count: 0 });
+    usePresenceMock.mockReturnValue(makePresence());
     rosterMock.mockRejectedValue(new ApiError(500, 'internal error'));
     render(<PresencePage />);
     expect(await screen.findByText('internal error')).toBeInTheDocument();
@@ -75,7 +71,7 @@ describe('PresencePage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    usePresenceMock.mockReturnValue({ onlineUserIds: [], count: 0 });
+    usePresenceMock.mockReturnValue(makePresence());
     rosterMock.mockRejectedValue(new Error('network down'));
     render(<PresencePage />);
     expect(await screen.findByText('Failed to load the roster')).toBeInTheDocument();

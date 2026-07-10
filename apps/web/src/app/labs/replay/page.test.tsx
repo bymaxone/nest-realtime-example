@@ -8,13 +8,9 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
+import { makeRealtimeContext, type RealtimeContextFake } from '@/test-utils/realtime-mocks';
 
 import ReplayLabPage from './page';
-
-interface MockContextValue {
-  readonly events: ReadonlyArray<{ type: string; data: unknown; id?: string }>;
-  readonly lastEvent: { type: string; data: unknown; id?: string } | undefined;
-}
 
 interface MockSessionValue {
   readonly traits: { userId: string; tenantId: string; roles: readonly string[] } | null;
@@ -29,7 +25,7 @@ interface MockTimelineView {
   readonly offlineQueued: ReadonlyArray<{ seq: number | undefined; id: string; emittedAt: string }>;
 }
 
-const useRealtimeContextMock = vi.fn<() => MockContextValue>();
+const useRealtimeContextMock = vi.fn<() => RealtimeContextFake>();
 const useSessionMock = vi.fn<() => MockSessionValue>();
 const emitBurstMock = vi.fn<(count: number) => Promise<{ emitted: number }>>();
 const dropMock = vi.fn<() => Promise<{ dropped: number }>>();
@@ -72,10 +68,12 @@ describe('ReplayLabPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({
-      events: [{ type: 'lab.replay', data: { seq: 1 }, id: '1' }],
-      lastEvent: { type: 'lab.replay', data: { seq: 1 }, id: '1' },
-    });
+    useRealtimeContextMock.mockReturnValue(
+      makeRealtimeContext({
+        events: [{ type: 'lab.replay', data: { seq: 1 }, id: '1' }],
+        lastEvent: { type: 'lab.replay', data: { seq: 1 }, id: '1' },
+      }),
+    );
     timelineMock.mockResolvedValue(TIMELINE);
     render(<ReplayLabPage />);
     expect(await screen.findByText('#2 buffer')).toBeInTheDocument();
@@ -88,7 +86,7 @@ describe('ReplayLabPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ events: [], lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     timelineMock.mockResolvedValue(TIMELINE);
     emitBurstMock.mockResolvedValueOnce({ emitted: 15 });
     render(<ReplayLabPage />);
@@ -102,7 +100,7 @@ describe('ReplayLabPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ events: [], lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     timelineMock.mockResolvedValue(TIMELINE);
     dropMock.mockResolvedValueOnce({ dropped: 1 });
     render(<ReplayLabPage />);
@@ -116,7 +114,7 @@ describe('ReplayLabPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ events: [], lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     timelineMock.mockResolvedValue(TIMELINE);
     emitBurstMock.mockRejectedValueOnce(new ApiError(400, 'invalid count'));
     render(<ReplayLabPage />);
@@ -133,7 +131,7 @@ describe('ReplayLabPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ events: [], lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     timelineMock.mockResolvedValue(TIMELINE);
     emitBurstMock.mockRejectedValueOnce(new Error('network down'));
     render(<ReplayLabPage />);
@@ -152,7 +150,7 @@ describe('ReplayLabPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'bob@acme', tenantId: 'acme', roles: ['member'] },
     });
-    useRealtimeContextMock.mockReturnValue({ events: [], lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     timelineMock.mockRejectedValue(new ApiError(403, 'admin role required'));
     render(<ReplayLabPage />);
     await waitFor(() => expect(timelineMock).toHaveBeenCalled());
@@ -162,7 +160,7 @@ describe('ReplayLabPage', () => {
   it('does nothing when there is no session yet', () => {
     // Scenario: the page renders before the session lookup resolves.
     useSessionMock.mockReturnValue({ traits: null });
-    useRealtimeContextMock.mockReturnValue({ events: [], lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     render(<ReplayLabPage />);
     expect(timelineMock).not.toHaveBeenCalled();
   });

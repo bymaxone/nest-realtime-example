@@ -8,12 +8,9 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
+import { makeRealtimeContext, type RealtimeContextFake } from '@/test-utils/realtime-mocks';
 
 import ConnectionsPage from './page';
-
-interface MockContextValue {
-  readonly lastEvent: { type: string } | undefined;
-}
 
 interface MockSessionValue {
   readonly traits: { userId: string; tenantId: string; roles: readonly string[] } | null;
@@ -27,7 +24,7 @@ interface MockConnection {
   readonly connectedAt: string;
 }
 
-const useRealtimeContextMock = vi.fn<() => MockContextValue>();
+const useRealtimeContextMock = vi.fn<() => RealtimeContextFake>();
 const useSessionMock = vi.fn<() => MockSessionValue>();
 
 vi.mock('@bymax-one/nest-realtime/react', () => ({
@@ -69,7 +66,7 @@ describe('ConnectionsPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockResolvedValue({ instance: 'app-a', connections: [] });
     timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
     render(<ConnectionsPage />);
@@ -84,7 +81,7 @@ describe('ConnectionsPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockResolvedValue({ instance: 'app-a', connections: [CONNECTION] });
     timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
     render(<ConnectionsPage />);
@@ -97,7 +94,7 @@ describe('ConnectionsPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockResolvedValue({ instance: 'app-a', connections: [CONNECTION] });
     timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
     disconnectMock.mockResolvedValue({ disconnected: true });
@@ -115,7 +112,7 @@ describe('ConnectionsPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockResolvedValue({ instance: 'app-a', connections: [CONNECTION] });
     timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
     render(<ConnectionsPage />);
@@ -129,7 +126,7 @@ describe('ConnectionsPage', () => {
   it('shows an empty state when there is no session yet', async () => {
     // Scenario: the page renders before the session lookup resolves.
     useSessionMock.mockReturnValue({ traits: null });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockRejectedValue(new Error('network down'));
     render(<ConnectionsPage />);
     expect(await screen.findByText('Failed to load connections')).toBeInTheDocument();
@@ -143,7 +140,7 @@ describe('ConnectionsPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'bob@acme', tenantId: 'acme', roles: ['member'] },
     });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockRejectedValue(new ApiError(403, 'admin role required'));
     timelineMock.mockRejectedValue(new ApiError(403, 'admin role required'));
     render(<ConnectionsPage />);
@@ -159,7 +156,9 @@ describe('ConnectionsPage', () => {
     listMock.mockResolvedValue({ instance: 'app-a', connections: [CONNECTION] });
     timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
     disconnectMock.mockRejectedValue(new ApiError(404, 'connection not found'));
-    useRealtimeContextMock.mockReturnValue({ lastEvent: { type: 'connection:established' } });
+    useRealtimeContextMock.mockReturnValue(
+      makeRealtimeContext({ lastEvent: { type: 'connection:established' } }),
+    );
     render(<ConnectionsPage />);
     await screen.findByText('ana@acme');
     const user = userEvent.setup();
@@ -173,7 +172,7 @@ describe('ConnectionsPage', () => {
     useSessionMock.mockReturnValue({
       traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
     });
-    useRealtimeContextMock.mockReturnValue({ lastEvent: undefined });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
     listMock.mockResolvedValue({ instance: 'app-a', connections: [CONNECTION] });
     timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
     disconnectMock.mockRejectedValue(new Error('network down'));
