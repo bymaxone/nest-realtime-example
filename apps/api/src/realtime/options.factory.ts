@@ -40,6 +40,9 @@ import type { AppConfig } from '../config/env.loader';
  *   the library's single-instance `InMemoryPubSub`.
  * @param presence - Optional presence storage answering "who is online?" across
  *   instances; when unset, presence-dependent features stay disabled.
+ * @param wsRedisClient - Optional ioredis client for the WebSocket transport's
+ *   `@socket.io/redis-adapter`; wired only under the Redis pub/sub driver so a
+ *   single-instance WebSocket run never installs the adapter.
  * @returns The options passed to `BymaxRealtimeModule`.
  */
 export function buildRealtimeOptions(
@@ -49,6 +52,7 @@ export function buildRealtimeOptions(
   offlineQueue?: IOfflineQueueStorage,
   pubsub?: IRealtimePubSub,
   presence?: IPresenceStorage,
+  wsRedisClient?: unknown,
 ): BymaxRealtimeModuleOptions {
   const base: BymaxRealtimeModuleOptions = {
     transport: config.realtime.transport,
@@ -68,7 +72,7 @@ export function buildRealtimeOptions(
       cacheTtlMs: config.reauth.cacheTtlMs,
     },
   };
-  const websocket = buildWebsocketOptions(config);
+  const websocket = buildWebsocketOptions(config, wsRedisClient);
   const options = websocket ? { ...base, websocket } : base;
   const withHooks = hooks ? { ...options, hooks } : options;
   const withQueue = offlineQueue ? { ...withHooks, offlineQueue } : withHooks;
@@ -86,12 +90,21 @@ export function buildRealtimeOptions(
  * policy (distinct from the app-level HTTP CORS), the payload cap, the ping
  * keepalive cadence and its timeout, and the per-user FIFO connection limit.
  *
+ * Under the Redis pub/sub driver (the cluster profile) it also wires the WebSocket
+ * `redisAdapter.pubClient` from the shared ioredis client, enabling cross-instance
+ * WebSocket fan-out through `@socket.io/redis-adapter`; the memory driver leaves it
+ * unset so a single-instance run never installs the adapter.
+ *
  * @param config - The frozen application configuration.
+ * @param wsRedisClient - The ioredis client for the Redis adapter, or `undefined`.
  * @returns The WebSocket options block, or `undefined` for the SSE-only profile.
  */
-function buildWebsocketOptions(config: AppConfig): WebSocketOptions | undefined {
+function buildWebsocketOptions(
+  config: AppConfig,
+  wsRedisClient?: unknown,
+): WebSocketOptions | undefined {
   if (config.realtime.transport === 'sse') return undefined;
-  return {
+  const base: WebSocketOptions = {
     namespace: config.realtime.wsNamespace,
     cors: { origin: config.webOrigin, credentials: true },
     maxHttpBufferSize: config.realtime.wsMaxBufferBytes,
@@ -100,4 +113,6 @@ function buildWebsocketOptions(config: AppConfig): WebSocketOptions | undefined 
     maxConnectionsPerUser: config.realtime.maxConnectionsPerUser,
     emitConnectionEvent: config.realtime.emitConnectionEvent,
   };
+  if (config.pubsubDriver !== 'redis' || wsRedisClient === undefined) return base;
+  return { ...base, redisAdapter: { pubClient: wsRedisClient } };
 }

@@ -122,6 +122,69 @@ describe('buildRealtimeOptions', () => {
   });
 
   /**
+   * WebSocket Redis adapter under the cluster profile.
+   *
+   * Under the Redis pub/sub driver the shared ioredis client must be wired as the
+   * WebSocket `redisAdapter.pubClient`, so `@socket.io/redis-adapter` fans WebSocket
+   * messages across instances.
+   */
+  it('wires the websocket redis adapter under the redis pub/sub driver', () => {
+    const redisClient = { id: 'shared-ioredis' };
+    const config = buildTestConfig({ realtime: { transport: 'websocket' }, pubsubDriver: 'redis' });
+
+    const options = buildRealtimeOptions(
+      config,
+      authenticator,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      redisClient,
+    );
+
+    expect(options.websocket?.redisAdapter).toEqual({ pubClient: redisClient });
+  });
+
+  /**
+   * No adapter without a client, even under the redis driver.
+   *
+   * When no client is supplied the adapter must stay unset so the transport never
+   * receives a half-configured adapter block.
+   */
+  it('omits the websocket redis adapter when no client is supplied', () => {
+    const config = buildTestConfig({ realtime: { transport: 'websocket' }, pubsubDriver: 'redis' });
+
+    const options = buildRealtimeOptions(config, authenticator);
+
+    expect(options.websocket).not.toHaveProperty('redisAdapter');
+  });
+
+  /**
+   * No adapter under the memory driver, even with a client available.
+   *
+   * A single-instance WebSocket run (memory driver) must never install the Redis
+   * adapter, so the block stays free of `redisAdapter` even when a client is passed.
+   */
+  it('omits the websocket redis adapter under the memory pub/sub driver', () => {
+    const config = buildTestConfig({
+      realtime: { transport: 'websocket' },
+      pubsubDriver: 'memory',
+    });
+
+    const options = buildRealtimeOptions(
+      config,
+      authenticator,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { id: 'shared-ioredis' },
+    );
+
+    expect(options.websocket).not.toHaveProperty('redisAdapter');
+  });
+
+  /**
    * Reauthentication policy.
    *
    * The reauth interval, failure mode and positive-cache TTL must all be sourced

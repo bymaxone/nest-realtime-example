@@ -11,7 +11,7 @@
 
 ## 1. Progress dashboard
 
-> **Progress:** 6 / 11 phases complete (55%) · 36 / 60 tasks
+> **Progress:** 6 / 11 phases complete (55%) · 37 / 60 tasks
 > **Active phase:** phase 06
 > **Blockers:** none
 
@@ -23,7 +23,7 @@
 | 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | ✅ Done        | 6/6      | L    | 2026-07-09   |
 | 04  | replay-and-offline     | `tasks/phase-04-replay-and-offline.md`     | ✅ Done        | 5/5      | M    | 2026-07-09   |
 | 05  | scaling-cluster        | `tasks/phase-05-scaling-cluster.md`        | ✅ Done        | 6/6      | L    | 2026-07-10   |
-| 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | 🔄 In Progress | 2/6      | L    | 2026-07-10   |
+| 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | 🔄 In Progress | 3/6      | L    | 2026-07-10   |
 | 07  | both-composite         | `tasks/phase-07-both-composite.md`         | 📋 ToDo        | 0/4      | S    | 2026-07-06   |
 | 08  | web-frontend           | `tasks/phase-08-web-frontend.md`           | 📋 ToDo        | 0/6      | L    | 2026-07-06   |
 | 09  | testing-quality        | `tasks/phase-09-testing-quality.md`        | 📋 ToDo        | 0/5      | L    | 2026-07-06   |

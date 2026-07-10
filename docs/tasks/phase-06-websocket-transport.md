@@ -1,6 +1,6 @@
 # Phase 06: websocket-transport
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 06)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.5, §15
 
@@ -26,7 +26,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 | --- | ----------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 6.1 | Branch + WS profile boot (IoAdapter namespace, bearer auth) | ✅     | P0       | L    | Phase 05   |
 | 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | ✅     | P0       | M    | 6.1        |
-| 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | 📋     | P0       | M    | 6.1        |
+| 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | ✅     | P0       | M    | 6.1        |
 | 6.4 | Payload limits, WS CORS, error event, onError hook          | 📋     | P1       | M    | 6.1        |
 | 6.5 | WS e2e suite + transport parity proof                       | 📋     | P0       | M    | 6.2-6.4    |
 | 6.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 6.1-6.5    |
@@ -170,7 +170,7 @@ Completion Protocol: standard steps.
 
 ### Task 6.3: Redis adapter, adapter-aware revocation and sticky sessions
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 6.1
@@ -181,10 +181,10 @@ WS horizontal scaling: `websocket.redisAdapter.pubClient` wired from the shared 
 
 #### Acceptance criteria
 
-- [ ] Options factory provides `redisAdapter: { pubClient }` when Redis is enabled.
-- [ ] nginx conf: WS location with upgrade headers + `ip_hash` upstream; comment block explains the polling-handshake affinity requirement and the `transports: ['websocket']` alternative.
-- [ ] Cluster suite additions: chat message from a client on app-a reaches a room member on app-b; revoking a WS connection cross-instance closes it (adapter-aware path).
-- [ ] Matrix rows 42, 43, 44 satisfied.
+- [x] Options factory provides `redisAdapter: { pubClient }` when Redis is enabled (the `redis` pub/sub driver).
+- [x] nginx conf: the Socket.IO transport location (`/socket.io/`) carries upgrade headers + an `ip_hash` upstream; a comment block explains the polling-handshake affinity requirement, the honest "Session ID unknown" failure mode without it, and the `transports: ['websocket']` alternative.
+- [x] Cluster suite additions: chat message from a client on app-a reaches a room member on app-b; revoking a WS connection cross-instance closes it (adapter-aware path); plus a WS handshake through nginx.
+- [x] Matrix rows 42, 43, 44 satisfied.
 
 #### Files to create / modify
 
@@ -414,3 +414,4 @@ Completion Protocol: standard steps + phase completion line.
 
 - 6.1 ✅ 2026-07-10 WS profile boots on the config-driven `/live` namespace via the library's `RealtimeIoAdapter` (patch-extended to honor `websocket.namespace`), bearer handshake auth, ws-connect e2e (established traits, missing-token and wrong-namespace rejections)
 - 6.2 ✅ 2026-07-10 Incident chat via a config-namespaced `@SubscribeMessage('chat.message')` gateway (library has no `@Subscribe`), gated off under SSE (no-op proof), authenticated-identity fan-out with room isolation and malformed-frame survivability; fixed a stale `/health` assertion missing the `pubsub` field
+- 6.3 ✅ 2026-07-10 WS `redisAdapter.pubClient` wired under the redis driver, nginx `/socket.io/` upgrade + `ip_hash` sticky location with the honest failure-mode note, cluster profile parameterized by `REALTIME_TRANSPORT`; ws-cluster suite (app-a to app-b chat fan-out, cross-node revocation, nginx handshake) green against the built WebSocket stack (patch verified in-image)

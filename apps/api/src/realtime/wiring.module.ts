@@ -85,6 +85,7 @@ const BOOT_TRANSPORT = envSchema.shape.REALTIME_TRANSPORT.parse(process.env.REAL
           createOfflineQueue(config, redis),
           pubsub,
           presence,
+          redis,
         );
       },
     }),
