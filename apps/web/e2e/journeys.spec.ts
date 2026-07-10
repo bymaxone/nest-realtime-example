@@ -78,7 +78,9 @@ test.describe('page journeys', { tag: '@smoke' }, () => {
     await loginAsAna(page);
     await page.goto('/labs/connection');
     await expect(page.getByText('Not connected. Click Connect to open a stream.')).toBeVisible();
-    await page.getByRole('button', { name: 'Connect' }).click();
+    // Exact match: the connection badge button is named "disconnected", which the
+    // default substring match would also select, tripping strict mode.
+    await page.getByRole('button', { name: 'Connect', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Kill my stream' })).toBeEnabled();
   });
 
