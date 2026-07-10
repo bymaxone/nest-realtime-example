@@ -36,8 +36,7 @@ import { AuthModule } from '../auth/auth.module';
 import { REDIS_CLIENT } from '../auth/auth.tokens';
 import { CompositeAuthenticator } from '../auth/composite.authenticator';
 import { APP_CONFIG } from '../config/config.tokens';
-import type { AppConfig } from '../config/env.loader';
-import { envSchema } from '../config/env.schema';
+import { type AppConfig, resolveBootTransport } from '../config/env.loader';
 import { CompositeLifecycleHooks } from '../lifecycle/lifecycle-hooks';
 import { LifecycleModule } from '../lifecycle/lifecycle.module';
 
@@ -51,7 +50,7 @@ import { REALTIME_PRESENCE, REALTIME_PUBSUB_BUS } from './realtime.tokens';
  * provider registration and must equal the transport the async factory later
  * derives from `APP_CONFIG`; both read the same `REALTIME_TRANSPORT` variable.
  */
-const BOOT_TRANSPORT = envSchema.shape.REALTIME_TRANSPORT.parse(process.env.REALTIME_TRANSPORT);
+const BOOT_TRANSPORT = resolveBootTransport();
 
 /** Wires the library for the configured transport and exports its providers. */
 @Module({

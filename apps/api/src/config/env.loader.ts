@@ -2,11 +2,13 @@
  * @fileoverview Single reader and validator of the api process environment.
  * @layer config
  *
- * This module is the only place in the api that reads `process.env`. It validates
- * the raw environment against the schema, aggregates every violation into one
- * fail-fast error that names the offending variables without ever echoing their
- * values, maps the flat variables into a grouped typed shape, and returns it
- * deeply frozen so no later code can mutate the configuration.
+ * This module is the only place in the api that reads `process.env`. `loadEnv`
+ * validates the raw environment against the schema, aggregates every violation into
+ * one fail-fast error that names the offending variables without ever echoing their
+ * values, maps the flat variables into a grouped typed shape, and returns it deeply
+ * frozen so no later code can mutate the configuration. `resolveBootTransport` is
+ * the one synchronous reader the module tree needs before DI resolves, to gate the
+ * transport-specific providers at module-definition time.
  */
 
 import type { TransportMode } from '@bymax-one/nest-realtime/shared';
@@ -123,4 +125,21 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error(formatIssues(result.error.issues));
   }
   return freezeConfig(mapEnv(result.data));
+}
+
+/**
+ * Resolve the boot transport synchronously from the environment.
+ *
+ * The module tree needs the transport before DI resolves, to gate which transport
+ * providers register at module-definition time, which {@link loadEnv} cannot supply
+ * because it runs as a provider. This reads only `REALTIME_TRANSPORT`, applying the
+ * same schema default; an invalid value falls back to the default here and is
+ * reported by {@link loadEnv} through its aggregated, value-free error at DI time,
+ * so the hint never fails the boot with a value-echoing message of its own.
+ *
+ * @returns The configured transport mode, or the default when it is unset or invalid.
+ */
+export function resolveBootTransport(): TransportMode {
+  const result = envSchema.shape.REALTIME_TRANSPORT.safeParse(process.env.REALTIME_TRANSPORT);
+  return result.success ? result.data : 'sse';
 }

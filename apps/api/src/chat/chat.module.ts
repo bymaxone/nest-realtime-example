@@ -14,9 +14,10 @@
 import type { TransportMode } from '@bymax-one/nest-realtime/shared';
 import { Module, type Provider } from '@nestjs/common';
 
-import { envSchema } from '../config/env.schema';
+import { resolveBootTransport } from '../config/env.loader';
 import { LifecycleModule } from '../lifecycle/lifecycle.module';
 
+import { ChatRateLimiter } from './chat-rate-limiter';
 import { ChatGateway } from './chat.gateway';
 
 /**
@@ -27,11 +28,11 @@ import { ChatGateway } from './chat.gateway';
  * @returns The providers to register (the gateway, or an empty list under SSE).
  */
 export function chatGatewayProviders(transport: TransportMode): Provider[] {
-  return transport === 'sse' ? [] : [ChatGateway];
+  return transport === 'sse' ? [] : [ChatGateway, ChatRateLimiter];
 }
 
-/** The boot transport, parsed from the environment before DI resolves. */
-const BOOT_TRANSPORT = envSchema.shape.REALTIME_TRANSPORT.parse(process.env.REALTIME_TRANSPORT);
+/** The boot transport, resolved from the environment before DI resolves. */
+const BOOT_TRANSPORT = resolveBootTransport();
 
 /** Wires the incident-chat gateway for the WebSocket and composite profiles. */
 @Module({

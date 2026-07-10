@@ -14,6 +14,7 @@ import type { ConnectionRegistry, RealtimeService } from '@bymax-one/nest-realti
 import type { Socket } from 'socket.io';
 
 import { ChatGateway } from '../../src/chat/chat.gateway';
+import type { ChatRateLimiter } from '../../src/chat/chat-rate-limiter';
 import type { CompositeLifecycleHooks } from '../../src/lifecycle/lifecycle-hooks';
 import type { RoomMembershipTracker } from '../../src/lifecycle/room-membership.tracker';
 
@@ -26,21 +27,28 @@ function buildGateway(): {
   get: jest.Mock;
   roomsFor: jest.Mock;
   onError: jest.Mock;
+  tryConsume: jest.Mock;
+  release: jest.Mock;
 } {
   const emitToRoom = jest.fn().mockResolvedValue(undefined);
   const get = jest.fn();
   const roomsFor = jest.fn();
   const onError = jest.fn().mockResolvedValue(undefined);
+  const tryConsume = jest.fn().mockReturnValue(true);
+  const release = jest.fn();
   const realtime = { emitToRoom } as unknown as RealtimeService;
   const registry = { get } as unknown as ConnectionRegistry;
   const membership = { roomsFor } as unknown as RoomMembershipTracker;
   const hooks = { onError } as unknown as CompositeLifecycleHooks;
+  const rateLimiter = { tryConsume, release } as unknown as ChatRateLimiter;
   return {
-    gateway: new ChatGateway(realtime, registry, membership, hooks),
+    gateway: new ChatGateway(realtime, registry, membership, hooks, rateLimiter),
     emitToRoom,
     get,
     roomsFor,
     onError,
+    tryConsume,
+    release,
   };
 }
 
@@ -131,6 +139,38 @@ describe('ChatGateway', () => {
     await gateway.onChatMessage(socket, { roomId: ROOM_ID, body: 'hello' });
 
     expect(emitToRoom).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Rate-limited message dropped.
+   *
+   * A message from a connection over its rate cap must be dropped before any work,
+   * so a flooding client cannot fan messages out or even reach the registry lookup.
+   */
+  it('drops a message from a rate-limited connection', async () => {
+    const { gateway, emitToRoom, get, tryConsume } = buildGateway();
+    tryConsume.mockReturnValue(false);
+
+    await gateway.onChatMessage(socket, { roomId: ROOM_ID, body: 'flood' });
+
+    expect(emitToRoom).not.toHaveBeenCalled();
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Rate-limit state released on disconnect.
+   *
+   * When a socket disconnects the gateway must release its rate-limit state so the
+   * limiter never accumulates entries for dead connections.
+   */
+  it('releases rate-limit state on disconnect', () => {
+    const { gateway, release } = buildGateway();
+    const { socket: double, fire } = socketWithCapturedDisconnect();
+    gateway.handleConnection(double);
+
+    fire('io client disconnect', undefined);
+
+    expect(release).toHaveBeenCalledWith('sock-1');
   });
 
   /**

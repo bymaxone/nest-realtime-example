@@ -37,6 +37,7 @@ import { CompositeLifecycleHooks } from '../lifecycle/lifecycle-hooks';
 import { RoomMembershipTracker } from '../lifecycle/room-membership.tracker';
 import { ROOM_EVENT_NAMES } from '../rooms/room-events';
 
+import { ChatRateLimiter } from './chat-rate-limiter';
 import { chatMessageSchema } from './dto/chat-message.dto';
 
 /**
@@ -77,12 +78,14 @@ export class ChatGateway implements OnGatewayConnection {
    *   sender belongs to the target room.
    * @param hooks - The library lifecycle hooks, used to surface a WebSocket payload
    *   overflow into the audit feed as an error entry.
+   * @param rateLimiter - Per-connection rate limiter that caps incoming chat volume.
    */
   constructor(
     private readonly realtime: RealtimeService,
     private readonly registry: ConnectionRegistry,
     private readonly membership: RoomMembershipTracker,
     private readonly hooks: CompositeLifecycleHooks,
+    private readonly rateLimiter: ChatRateLimiter,
   ) {}
 
   /**
@@ -90,12 +93,14 @@ export class ChatGateway implements OnGatewayConnection {
    *
    * Socket.IO closes a connection whose frame exceeds `maxHttpBufferSize` with a
    * "max payload size exceeded" transport error; this records that as a
-   * `REALTIME_PAYLOAD_TOO_LARGE` audit entry through the library hooks.
+   * `REALTIME_PAYLOAD_TOO_LARGE` audit entry through the library hooks. It also
+   * releases the connection's rate-limit state so it never outlives the socket.
    *
    * @param socket - The newly connected socket.
    */
   handleConnection(socket: Socket): void {
     socket.on('disconnect', (reason: string, description?: unknown) => {
+      this.rateLimiter.release(socket.id);
       if (!isPayloadOverflow(reason, description)) return;
       void this.hooks.onError({
         connectionId: socket.id,
@@ -109,14 +114,15 @@ export class ChatGateway implements OnGatewayConnection {
    * Handle a `chat.message` from a joined client and fan it out to its room.
    *
    * Silently drops (never throws, so the gateway cannot be crashed by a client)
-   * when the payload is malformed, the connection is unknown, or the sender is not
-   * a member of the target room.
+   * when the sender exceeds its rate cap, the payload is malformed, the connection
+   * is unknown, or the sender is not a member of the target room.
    *
    * @param socket - The authenticated Socket.IO socket that sent the message.
    * @param payload - The raw client payload, validated before use.
    */
   @SubscribeMessage(ROOM_EVENT_NAMES.CHAT_MESSAGE)
   async onChatMessage(socket: Socket, payload: unknown): Promise<void> {
+    if (!this.rateLimiter.tryConsume(socket.id)) return;
     const parsed = chatMessageSchema.safeParse(payload);
     if (!parsed.success) return;
     const record = this.registry.get(socket.id);

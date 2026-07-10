@@ -11,6 +11,7 @@
 import 'reflect-metadata';
 
 import { ChatGateway } from '../../src/chat/chat.gateway';
+import { ChatRateLimiter } from '../../src/chat/chat-rate-limiter';
 import { chatGatewayProviders, ChatModule } from '../../src/chat/chat.module';
 
 describe('chatGatewayProviders', () => {
@@ -28,21 +29,21 @@ describe('chatGatewayProviders', () => {
   /**
    * WebSocket profile.
    *
-   * The websocket profile must register the gateway so client-to-server chat is
-   * handled.
+   * The websocket profile must register the gateway and its rate limiter so
+   * client-to-server chat is handled and throttled.
    */
-  it('registers the chat gateway for the websocket profile', () => {
-    expect(chatGatewayProviders('websocket')).toEqual([ChatGateway]);
+  it('registers the chat gateway and rate limiter for the websocket profile', () => {
+    expect(chatGatewayProviders('websocket')).toEqual([ChatGateway, ChatRateLimiter]);
   });
 
   /**
    * Composite profile.
    *
    * The `both` profile also serves WebSocket clients, so it must register the
-   * gateway.
+   * gateway and its rate limiter.
    */
-  it('registers the chat gateway for the both profile', () => {
-    expect(chatGatewayProviders('both')).toEqual([ChatGateway]);
+  it('registers the chat gateway and rate limiter for the both profile', () => {
+    expect(chatGatewayProviders('both')).toEqual([ChatGateway, ChatRateLimiter]);
   });
 });
 

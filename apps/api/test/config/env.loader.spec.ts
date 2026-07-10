@@ -7,7 +7,7 @@
  * variable without echoing its value, and deep immutability of the result.
  */
 
-import { type AppConfig, loadEnv } from '../../src/config/env.loader';
+import { type AppConfig, loadEnv, resolveBootTransport } from '../../src/config/env.loader';
 
 describe('loadEnv', () => {
   it('applies every documented default for a bare environment', () => {
@@ -113,6 +113,24 @@ describe('loadEnv', () => {
   it('rejects a value outside an enum', () => {
     // Scenario: an unknown reauth policy is refused rather than silently defaulted.
     expect(() => loadEnv({ REAUTH_ON_FAILURE: 'ignore' })).toThrow(/REAUTH_ON_FAILURE/);
+  });
+
+  it('resolves the boot transport from the environment', () => {
+    // Scenario: the module tree reads the transport hint before DI; a valid value is
+    // returned, and an unset or invalid value falls back to the default so the hint
+    // never fails the boot on its own (loadEnv reports the real error).
+    const original = process.env.REALTIME_TRANSPORT;
+    try {
+      process.env.REALTIME_TRANSPORT = 'websocket';
+      expect(resolveBootTransport()).toBe('websocket');
+      delete process.env.REALTIME_TRANSPORT;
+      expect(resolveBootTransport()).toBe('sse');
+      process.env.REALTIME_TRANSPORT = 'carrier-pigeon';
+      expect(resolveBootTransport()).toBe('sse');
+    } finally {
+      if (original === undefined) delete process.env.REALTIME_TRANSPORT;
+      else process.env.REALTIME_TRANSPORT = original;
+    }
   });
 
   it('returns a deeply frozen configuration', () => {
