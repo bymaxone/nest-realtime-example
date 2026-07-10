@@ -224,7 +224,7 @@ The heavy finale: the WS suite consolidated (connect, chat, limits, parity), the
 
 #### Acceptance criteria
 
-- [x] `pnpm test:e2e:all` script runs, in order: api e2e (http/sse), ws e2e, then instructs/executes cluster (compose up, run alone, down); documented in the README testing section.
+- [x] `pnpm test:e2e:all` script runs, in order: api e2e (HTTP, SSE and WebSocket in one suite), Playwright journeys, then the cluster suite (compose up, run alone, down); documented in the README testing section.
 - [x] Playwright: one journey per §13.2 page (login once, navigate, assert the page's signature interaction) against `pnpm dev` + compose redis; tagged `@smoke`.
 - [x] `ci.yml`: jobs ordered api-unit -> web-unit -> e2e (service redis) -> playwright; cluster behind `workflow_dispatch` (`e2e-cluster` job) until runners prove stable, with the manual trigger documented.
 - [x] All suites green locally in the documented order.
