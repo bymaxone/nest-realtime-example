@@ -1,10 +1,18 @@
 name: CI
 
+# Jobs run in a strict sequential chain so no two test suites ever share a runner
+# (the linked library is reloaded into every worker, so concurrent suites multiply
+# memory): `ci` (static gates + unit + build) gates `e2e` (the in-process HTTP, SSE
+# and WebSocket suites, backed by a Redis service), which gates `playwright` (the
+# browser journeys against a live api + web). The multi-instance `e2e-cluster` suite
+# is the heaviest and least proven on hosted runners, so it is gated to a manual
+# `workflow_dispatch` run rather than every push until runners prove it stable.
 on:
   pull_request:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -65,3 +73,122 @@ jobs:
       # labs' dynamic import.
       - name: Bundle honesty check (web)
         run: pnpm --filter @nest-realtime-example/web run assert:bundle
+
+  e2e:
+    name: e2e (http, sse, ws)
+    needs: ci
+    runs-on: ubuntu-latest
+    # The single-instance e2e suites boot the app in-process and back the offline
+    # queue, tickets, presence and revocation with a real Redis.
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Runs the route-inventory, HTTP-route, SSE-flow and WebSocket-flow suites as
+      # one Jest project on a single worker; the config already pins maxWorkers to 1.
+      - name: E2E (HTTP, SSE, WebSocket)
+        run: pnpm --filter @nest-realtime-example/api run test:e2e
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          REDIS_URL: redis://localhost:6379
+
+  playwright:
+    name: playwright journeys
+    needs: e2e
+    runs-on: ubuntu-latest
+    # The journeys drive the live api (tickets and presence need Redis) plus the
+    # web app; Playwright's webServer boots both and waits for their health.
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @nest-realtime-example/web exec playwright install --with-deps chromium
+
+      - name: Playwright journeys
+        run: pnpm --filter @nest-realtime-example/web run test:e2e
+        env:
+          REDIS_URL: redis://localhost:6379
+
+  e2e-cluster:
+    name: e2e cluster (manual)
+    needs: ci
+    # The multi-instance suite drives a docker-compose stack (two api instances +
+    # nginx + Redis) and is the heaviest, least proven suite on hosted runners, so
+    # it runs only on a deliberate manual dispatch, never on every push.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Each script brings its compose stack up, runs the suite alone, and always
+      # tears it down; the SSE and WebSocket cluster runs never overlap.
+      - name: Cluster e2e (SSE)
+        run: pnpm run test:e2e:cluster
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Cluster e2e (WebSocket)
+        run: pnpm run test:e2e:cluster:ws
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096

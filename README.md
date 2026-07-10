@@ -125,6 +125,34 @@ pnpm install
 
 When the library publishes, this becomes a one-line change per app: replace the `file:` specifier with `^0.1.0` and refresh the lockfile.
 
+## Testing
+
+Both apps are held to 100% unit coverage (line, branch, function and statement), pinned in `apps/api/jest.config.ts` and `apps/web/vitest.config.ts` so the threshold cannot silently regress. Every HTTP route is proven under test by a route-inventory suite ([`apps/api/test/e2e/route-inventory.e2e-spec.ts`](apps/api/test/e2e/route-inventory.e2e-spec.ts)) that boots the app, reads the registered route table, and fails on any route missing from the typed manifest, on any manifest entry whose route was removed, on any guarded route that does not reject an anonymous caller with 401, and on any validated route that does not reject a malformed body with 400.
+
+### Suites and the order they run in
+
+The suites are memory-sensitive: the linked library is reloaded into every Jest/Vitest worker, so two suites sharing a machine multiply memory. They therefore run **one at a time**, in this order, and the multi-instance cluster suite always runs **alone**:
+
+| Step                | Command                                                 | What it covers                                                                                             |
+| ------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Unit (api)          | `pnpm --filter @nest-realtime-example/api test`         | Jest unit suite, coverage pinned at 100%.                                                                  |
+| Unit (web)          | `pnpm --filter @nest-realtime-example/web test`         | Vitest unit suite, coverage pinned at 100%.                                                                |
+| E2E (HTTP, SSE, WS) | `pnpm --filter @nest-realtime-example/api run test:e2e` | Route inventory plus the SSE (`eventsource`) and WebSocket (`socket.io-client`) flow suites, in-process.   |
+| Playwright journeys | `pnpm --filter @nest-realtime-example/web run test:e2e` | One browser journey per dashboard page against a live api + web (self-booted by Playwright's `webServer`). |
+| Cluster (SSE)       | `pnpm run test:e2e:cluster`                             | The `cluster` compose profile (two api instances + nginx), cross-instance fan-out and revocation.          |
+| Cluster (WebSocket) | `pnpm run test:e2e:cluster:ws`                          | The same, with both instances serving Socket.IO over the Redis adapter.                                    |
+
+`pnpm test:e2e:all` runs the end-to-end half of that flow in order (api e2e, then Playwright, then the cluster suite alone), bringing Redis up first and always tearing the compose stack down afterwards. Every suite needs Redis; start it with `docker compose up -d redis`. The cluster suites additionally need ports 3001, 3002 and 8080 free.
+
+### CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the same order as a sequential job chain, so no two suites ever share a runner:
+
+- **`ci`** — install, typecheck, lint, format check, both unit suites, build, and the bundle-honesty check.
+- **`e2e`** (needs `ci`) — the HTTP/SSE/WebSocket suites against a `redis:7` service container.
+- **`playwright`** (needs `e2e`) — the browser journeys, with a `redis:7` service container.
+- **`e2e-cluster`** — the heaviest suite; gated to a manual `workflow_dispatch` run (never on push) until hosted runners prove it stable.
+
 ## License
 
 Released under the [MIT License](LICENSE). This is an example application: it is not published to npm and is not intended for production deployment as-is.

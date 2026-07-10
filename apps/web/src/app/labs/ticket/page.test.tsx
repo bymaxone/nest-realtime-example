@@ -8,15 +8,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
+import { makeRealtime, type RealtimeFake } from '@/test-utils/realtime-mocks';
 
 import TicketLabPage from './page';
 
-interface MockRealtimeValue {
-  readonly connected: boolean;
-  readonly transport: 'sse' | 'websocket';
-}
-
-const useRealtimeMock = vi.fn<(opts: unknown) => MockRealtimeValue>();
+const useRealtimeMock = vi.fn<(opts: unknown) => RealtimeFake>();
 const issueTicketMock = vi.fn<() => Promise<{ ticket: string }>>();
 
 vi.mock('@bymax-one/nest-realtime/react', () => ({
@@ -31,7 +27,7 @@ vi.mock('@/lib/api-client', () => ({
 describe('TicketLabPage', () => {
   it('fetches an initial ticket on mount and connects with it', async () => {
     // Scenario: the page mints a ticket and mounts the connection with it in the URL.
-    useRealtimeMock.mockReturnValue({ connected: true, transport: 'sse' });
+    useRealtimeMock.mockReturnValue(makeRealtime({ connected: true }));
     issueTicketMock.mockResolvedValueOnce({ ticket: 'ticket-1' });
     render(<TicketLabPage />);
     await waitFor(() => expect(screen.getByText('tickets fetched: 1')).toBeInTheDocument());
@@ -41,7 +37,7 @@ describe('TicketLabPage', () => {
 
   it('mints a fresh ticket on each reconnect click, proving the one-shot flow', async () => {
     // Scenario: reconnecting always fetches a brand-new ticket rather than reusing one.
-    useRealtimeMock.mockReturnValue({ connected: false, transport: 'sse' });
+    useRealtimeMock.mockReturnValue(makeRealtime());
     issueTicketMock
       .mockResolvedValueOnce({ ticket: 'ticket-1' })
       .mockResolvedValueOnce({ ticket: 'ticket-2' });
@@ -54,7 +50,7 @@ describe('TicketLabPage', () => {
 
   it('shows an error when the ticket endpoint fails', async () => {
     // Scenario: the caller has no valid session, so the ticket endpoint rejects.
-    useRealtimeMock.mockReturnValue({ connected: false, transport: 'sse' });
+    useRealtimeMock.mockReturnValue(makeRealtime());
     issueTicketMock.mockRejectedValueOnce(new ApiError(401, 'unauthorized'));
     render(<TicketLabPage />);
     expect(await screen.findByText('unauthorized')).toBeInTheDocument();
@@ -62,7 +58,7 @@ describe('TicketLabPage', () => {
 
   it('shows a generic message for a non-api ticket failure', async () => {
     // Scenario: an unexpected non-ApiError rejection (e.g. a network failure).
-    useRealtimeMock.mockReturnValue({ connected: false, transport: 'sse' });
+    useRealtimeMock.mockReturnValue(makeRealtime());
     issueTicketMock.mockRejectedValueOnce(new Error('network down'));
     render(<TicketLabPage />);
     expect(await screen.findByText('Failed to fetch a ticket')).toBeInTheDocument();

@@ -7,12 +7,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Topbar } from './topbar';
+import { makeRealtimeConnection, type RealtimeConnectionFake } from '@/test-utils/realtime-mocks';
 
-interface MockConnectionValue {
-  readonly connected: boolean;
-  readonly reconnect: () => void;
-}
+import { Topbar } from './topbar';
 
 interface MockSessionValue {
   readonly status: 'loading' | 'authenticated' | 'anonymous';
@@ -20,7 +17,7 @@ interface MockSessionValue {
   readonly logout: () => void;
 }
 
-const useRealtimeConnectionMock = vi.fn<() => MockConnectionValue>();
+const useRealtimeConnectionMock = vi.fn<() => RealtimeConnectionFake>();
 const useSessionMock = vi.fn<() => MockSessionValue>();
 
 vi.mock('@bymax-one/nest-realtime/react', () => ({
@@ -34,7 +31,7 @@ vi.mock('@/lib/session-context', () => ({
 describe('Topbar', () => {
   it('shows the log-in link and the wordmark when anonymous', () => {
     // Scenario: no session yet; the shell offers a way to log in.
-    useRealtimeConnectionMock.mockReturnValue({ connected: false, reconnect: vi.fn() });
+    useRealtimeConnectionMock.mockReturnValue(makeRealtimeConnection());
     useSessionMock.mockReturnValue({ status: 'anonymous', traits: null, logout: vi.fn() });
     render(<Topbar onMenuOpen={vi.fn()} />);
     expect(screen.getByText('nest-realtime-example')).toBeInTheDocument();
@@ -43,7 +40,7 @@ describe('Topbar', () => {
 
   it('shows the user id and a working logout button when authenticated', async () => {
     // Scenario: an authenticated session shows its user id and can log out.
-    useRealtimeConnectionMock.mockReturnValue({ connected: true, reconnect: vi.fn() });
+    useRealtimeConnectionMock.mockReturnValue(makeRealtimeConnection({ connected: true }));
     const logout = vi.fn();
     useSessionMock.mockReturnValue({
       status: 'authenticated',
@@ -59,7 +56,7 @@ describe('Topbar', () => {
 
   it('opens the mobile menu via the hamburger button', async () => {
     // Scenario: the hamburger button delegates to the shell's open handler.
-    useRealtimeConnectionMock.mockReturnValue({ connected: false, reconnect: vi.fn() });
+    useRealtimeConnectionMock.mockReturnValue(makeRealtimeConnection());
     useSessionMock.mockReturnValue({ status: 'loading', traits: null, logout: vi.fn() });
     const onMenuOpen = vi.fn();
     render(<Topbar onMenuOpen={onMenuOpen} />);

@@ -159,4 +159,21 @@ describe('Rooms (e2e)', () => {
     await sleep(200);
     expect(gilTenant.includes(3)).toBe(false);
   });
+
+  /**
+   * Self room listing.
+   *
+   * GET /rooms/mine returns the rooms one of the caller's own connections belongs
+   * to, so the UI can render the caller's current memberships. ana joined the
+   * incident room in setup and never left it, so it must appear here.
+   */
+  it('lists the caller rooms for a connection via GET /rooms/mine', async () => {
+    const response = await request(app.getHttpServer())
+      .get(`/api/rooms/mine?connectionId=${anaId}`)
+      .set('Cookie', anaCookie)
+      .expect(200);
+
+    expect(response.body.connectionId).toBe(anaId);
+    expect(response.body.rooms).toContain(ROOM);
+  });
 });

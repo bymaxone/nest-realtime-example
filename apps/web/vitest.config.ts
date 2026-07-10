@@ -37,8 +37,14 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.{test,spec}.{ts,tsx}',
+        // Test setup and the shared realtime hook fakes are test-only support code,
+        // exercised through the suites that import them rather than covered directly.
         'src/test/**',
+        'src/test-utils/**',
+        // Framework wiring with no branch logic of its own, proven by the Next.js
+        // build and the Playwright journeys rather than unit coverage.
         'src/app/layout.tsx',
+        // Module-resolution probe with no runtime branches; asserted by its own spec.
         'src/probe/**',
       ],
       thresholds: {
