@@ -81,10 +81,13 @@ function send(app: INestApplication, method: HttpMethod, path: string): Test {
   return dispatch[method](probePath(path));
 }
 
+/** Deadline (ms) for an anonymous request to a guarded route to be rejected, so a streaming route cannot hang the suite. */
+const ANONYMOUS_REJECTION_DEADLINE_MS = 5_000;
+
 describe('Route inventory (e2e)', () => {
   let app: INestApplication;
   let adminCookie: string;
-  const guarded = E2E_MANIFEST.filter((entry) => entry.guarded && !entry.streaming);
+  const guarded = E2E_MANIFEST.filter((entry) => entry.guarded);
   const validated = E2E_MANIFEST.filter((entry) => entry.validated);
 
   beforeAll(async () => {
@@ -133,10 +136,13 @@ describe('Route inventory (e2e)', () => {
    *
    * A request with no session cookie must be refused by the guard (401) before any
    * handler or validation pipe runs, proving every guarded route is actually
-   * protected rather than merely declared so in the manifest.
+   * protected rather than merely declared so in the manifest. Streaming (SSE)
+   * routes are included: the authenticator rejects an anonymous caller before the
+   * stream opens, so the response is a plain 401. The request deadline keeps a
+   * misbehaving streaming route from hanging the suite instead of failing.
    */
   it.each(guarded)('refuses anonymous $method $path with 401', async ({ method, path }) => {
-    await send(app, method, path).expect(401);
+    await send(app, method, path).timeout(ANONYMOUS_REJECTION_DEADLINE_MS).expect(401);
   });
 
   /**

@@ -24,14 +24,20 @@ docker compose up -d redis
 # `up -d` returns before Redis can accept connections; wait for a PONG so the
 # first suite does not fail on a cold start.
 echo "==> Waiting for Redis to accept connections"
+ready=0
 i=0
 while [ "$i" -lt 30 ]; do
   if docker compose exec -T redis redis-cli ping 2>/dev/null | grep -q PONG; then
+    ready=1
     break
   fi
   i=$((i + 1))
   sleep 1
 done
+if [ "$ready" -ne 1 ]; then
+  echo "ERROR: Redis did not answer PING within 30s" >&2
+  exit 1
+fi
 
 echo "==> [1/3] api e2e (HTTP, SSE, WebSocket)"
 pnpm --filter @nest-realtime-example/api run test:e2e
