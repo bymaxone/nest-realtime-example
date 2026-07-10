@@ -24,6 +24,8 @@ const MAX_WS_BUFFER_BYTES = 10485760;
 const MAX_REAUTH_INTERVAL_SECONDS = 86400;
 const MAX_REAUTH_CACHE_TTL_MS = 3600000;
 const MIN_SESSION_SECRET_LENGTH = 16;
+const MAX_OFFLINE_QUEUE_TTL_SECONDS = 604800;
+const MAX_OFFLINE_QUEUE_MAX_PER_USER = 100000;
 
 /** A URL that must use the `redis:` or `rediss:` scheme. */
 const REDIS_URL_PATTERN = /^rediss?:\/\/.+/u;
@@ -86,6 +88,26 @@ export const envSchema = z.object({
     .regex(REDIS_URL_PATTERN, 'must be a redis:// or rediss:// URL')
     .default('redis://localhost:6379'),
   PUBSUB_DRIVER: z.enum(['memory', 'redis']).default('memory'),
+  // Gates the Redis-backed offline queue. Off by default so an SSE-only boot
+  // without Redis stays fully functional; the replay and offline labs enable it.
+  OFFLINE_QUEUE_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  // Seconds a user's offline queue survives inactivity before Redis expires it.
+  OFFLINE_QUEUE_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_OFFLINE_QUEUE_TTL_SECONDS)
+    .default(3600),
+  // Newest-N cap per user; older queued events are trimmed on append.
+  OFFLINE_QUEUE_MAX_PER_USER: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_OFFLINE_QUEUE_MAX_PER_USER)
+    .default(500),
   SESSION_SECRET: z
     .string()
     .min(MIN_SESSION_SECRET_LENGTH, 'must be at least 16 characters')

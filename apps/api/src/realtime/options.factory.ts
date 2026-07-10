@@ -14,6 +14,7 @@ import type {
   BymaxRealtimeModuleOptions,
   IConnectionAuthenticator,
   IConnectionLifecycleHooks,
+  IOfflineQueueStorage,
 } from '@bymax-one/nest-realtime';
 
 import { APP_SERVICE_NAME, APP_VERSION } from '../app.constants';
@@ -26,12 +27,15 @@ import type { AppConfig } from '../config/env.loader';
  * @param authenticator - The connection authenticator resolved through DI.
  * @param hooks - Optional lifecycle hooks (the composite that fans out to the
  *   audit ring, the connection event log and the decorator handlers).
+ * @param offlineQueue - Optional durable offline queue; when present, the library
+ *   persists events for users with no live connection and drains them on reconnect.
  * @returns The options passed to `BymaxRealtimeModule`.
  */
 export function buildRealtimeOptions(
   config: AppConfig,
   authenticator: IConnectionAuthenticator,
   hooks?: IConnectionLifecycleHooks,
+  offlineQueue?: IOfflineQueueStorage,
 ): BymaxRealtimeModuleOptions {
   const options: BymaxRealtimeModuleOptions = {
     transport: config.realtime.transport,
@@ -51,5 +55,6 @@ export function buildRealtimeOptions(
       cacheTtlMs: config.reauth.cacheTtlMs,
     },
   };
-  return hooks ? { ...options, hooks } : options;
+  const withHooks = hooks ? { ...options, hooks } : options;
+  return offlineQueue ? { ...withHooks, offlineQueue } : withHooks;
 }

@@ -14,6 +14,7 @@ export interface ConfigOverrides {
   readonly instanceName?: string;
   readonly realtime?: Partial<AppConfig['realtime']>;
   readonly reauth?: Partial<AppConfig['reauth']>;
+  readonly offlineQueue?: Partial<AppConfig['offlineQueue']>;
   readonly redisUrl?: string;
   readonly pubsubDriver?: AppConfig['pubsubDriver'];
   readonly sessionSecret?: string;
@@ -44,11 +45,18 @@ export function buildTestConfig(overrides: ConfigOverrides = {}): AppConfig {
     cacheTtlMs: 10000,
     ...overrides.reauth,
   };
+  const offlineQueue: AppConfig['offlineQueue'] = {
+    enabled: false,
+    ttlSeconds: 3600,
+    maxPerUser: 500,
+    ...overrides.offlineQueue,
+  };
   return Object.freeze({
     port: overrides.port ?? 3001,
     instanceName: overrides.instanceName ?? 'app-a',
     realtime: Object.freeze(realtime),
     reauth: Object.freeze(reauth),
+    offlineQueue: Object.freeze(offlineQueue),
     redisUrl: overrides.redisUrl ?? 'redis://localhost:6379',
     pubsubDriver: overrides.pubsubDriver ?? 'memory',
     sessionSecret: overrides.sessionSecret ?? 'test-session-secret-0123456789',
