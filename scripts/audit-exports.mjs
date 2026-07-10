@@ -140,8 +140,16 @@ function isReferenced(symbol) {
       { cwd: REPO_ROOT, stdio: 'pipe' },
     );
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    // grep exits 1 when there are no matches: a genuine "not referenced".
+    if (error.status === 1) {
+      return false;
+    }
+    // Exit 2 (grep error) or ENOENT (grep missing from PATH) are real failures;
+    // surfacing them avoids a misleading cascade of unused-export reports.
+    throw new Error(`grep failed while searching for "${symbol}": ${error.message}`, {
+      cause: error,
+    });
   }
 }
 

@@ -155,10 +155,7 @@ HMAC-signed HttpOnly session cookie. Three fixed identities span two tenants:
 
 ## Reproducible journeys
 
-Every journey below was executed against a fresh single-instance stack (`docker compose up -d redis`
-
-- the API on `:3001` with the `.env.example` values) and the **real observed output is quoted**. Copy
-  the blocks verbatim. SSE streams are read with `curl -N` (unbuffered); `Ctrl-C` ends a stream.
+Every journey below was executed against a fresh single-instance stack (`docker compose up -d redis`, the API on `:3001` with the `.env.example` values) and the **real observed output is quoted**. Copy the blocks verbatim. SSE streams are read with `curl -N` (unbuffered); `Ctrl-C` ends a stream.
 
 ### 1. First connection and a live emit (rows 10, 19, 21, 30)
 
