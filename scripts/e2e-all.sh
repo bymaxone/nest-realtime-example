@@ -21,6 +21,18 @@ trap cleanup EXIT INT TERM
 echo "==> Ensuring Redis is up"
 docker compose up -d redis
 
+# `up -d` returns before Redis can accept connections; wait for a PONG so the
+# first suite does not fail on a cold start.
+echo "==> Waiting for Redis to accept connections"
+i=0
+while [ "$i" -lt 30 ]; do
+  if docker compose exec -T redis redis-cli ping 2>/dev/null | grep -q PONG; then
+    break
+  fi
+  i=$((i + 1))
+  sleep 1
+done
+
 echo "==> [1/3] api e2e (HTTP, SSE, WebSocket)"
 pnpm --filter @nest-realtime-example/api run test:e2e
 
