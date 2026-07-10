@@ -1,6 +1,6 @@
 # Phase 10: docs-audit-hardening
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 5 tasks · **Last updated**: 2026-07-06
+> **Status**: 🔄 In Progress · **Progress**: 1 / 5 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 10)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §7, §8.1, §18
 
@@ -23,7 +23,7 @@ The finish line: the repo must read as the canonical reference and prove its own
 
 | ID   | Task                                                | Status | Priority | Size | Depends on |
 | ---- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 10.1 | Branch + full README with reproducible journeys     | 📋     | P0       | M    | Phase 09   |
+| 10.1 | Branch + full README with reproducible journeys     | ✅     | P0       | M    | Phase 09   |
 | 10.2 | Export-usage + coverage-matrix audit (75 rows)      | 📋     | P0       | M    | 10.1       |
 | 10.3 | Stryker mutation baseline + hardening (api)         | 📋     | P0       | L    | 10.2       |
 | 10.4 | CI finalization + npm-switch procedure              | 📋     | P1       | S    | 10.2       |
@@ -33,7 +33,7 @@ The finish line: the repo must read as the canonical reference and prove its own
 
 ### Task 10.1: Full README with reproducible journeys
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 09
@@ -44,10 +44,10 @@ Complete the README into the repo's front door: badges (CI now; CodeQL/Scorecard
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-10-docs-audit-hardening` created with `git switch -c`.
-- [ ] README sections: mission, architecture diagram, quick start (dev + cluster), demo users table, journeys (first connection, two-tenant isolation, ticket, reconnect+replay, offline drain, eviction, revocation single+cross-instance, chat, both split-screen), page map, testing (the ordered flow), proxy/capacity notes, docs table, license.
-- [ ] Every journey executed on a fresh clone; each step's expected output quoted.
-- [ ] Migration section (phase 07) integrated coherently.
+- [x] Branch `feat/phase-10-docs-audit-hardening` created with `git switch -c`.
+- [x] README sections: mission, architecture diagram, quick start (dev + cluster), demo users table, journeys (first connection, two-tenant isolation, ticket, reconnect+replay, offline drain, eviction, revocation single+cross-instance, chat, both split-screen), page map, testing (the ordered flow), proxy/capacity notes, docs table, license.
+- [x] Every journey executed on a live stack; each step's observed output quoted.
+- [x] Migration section (the SSE-to-WebSocket story) integrated coherently.
 
 #### Files to create / modify
 
@@ -334,3 +334,5 @@ Completion Protocol: standard steps + the final phase-completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 10.1 ✅ 2026-07-10 Wrote the full house-style README with badges and the nine journeys quoted from real stack output; added the offline-queue env to `.env.example`.

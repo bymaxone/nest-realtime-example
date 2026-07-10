@@ -11,23 +11,23 @@
 
 ## 1. Progress dashboard
 
-> **Progress:** 9 / 11 phases complete (82%) · 55 / 60 tasks
-> **Active phase:** phase 09 (👀 in review)
+> **Progress:** 10 / 11 phases complete (91%) · 56 / 60 tasks
+> **Active phase:** phase 10 (🔄 in progress)
 > **Blockers:** none
 
-| #   | Phase                  | Tasks file                                 | Status    | Progress | Size | Last updated |
-| --- | ---------------------- | ------------------------------------------ | --------- | -------- | ---- | ------------ |
-| 00  | repo-foundation        | `tasks/phase-00-repo-foundation.md`        | ✅ Done   | 6/6      | M    | 2026-07-09   |
-| 01  | infra-and-library-link | `tasks/phase-01-infra-and-library-link.md` | ✅ Done   | 5/5      | M    | 2026-07-09   |
-| 02  | sse-foundation         | `tasks/phase-02-sse-foundation.md`         | ✅ Done   | 6/6      | L    | 2026-07-09   |
-| 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | ✅ Done   | 6/6      | L    | 2026-07-09   |
-| 04  | replay-and-offline     | `tasks/phase-04-replay-and-offline.md`     | ✅ Done   | 5/5      | M    | 2026-07-09   |
-| 05  | scaling-cluster        | `tasks/phase-05-scaling-cluster.md`        | ✅ Done   | 6/6      | L    | 2026-07-10   |
-| 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | ✅ Done   | 6/6      | L    | 2026-07-10   |
-| 07  | both-composite         | `tasks/phase-07-both-composite.md`         | ✅ Done   | 4/4      | S    | 2026-07-10   |
-| 08  | web-frontend           | `tasks/phase-08-web-frontend.md`           | ✅ Done   | 6/6      | L    | 2026-07-10   |
-| 09  | testing-quality        | `tasks/phase-09-testing-quality.md`        | 👀 Review | 5/5      | L    | 2026-07-10   |
-| 10  | docs-audit-hardening   | `tasks/phase-10-docs-audit-hardening.md`   | 📋 ToDo   | 0/5      | M    | 2026-07-06   |
+| #   | Phase                  | Tasks file                                 | Status         | Progress | Size | Last updated |
+| --- | ---------------------- | ------------------------------------------ | -------------- | -------- | ---- | ------------ |
+| 00  | repo-foundation        | `tasks/phase-00-repo-foundation.md`        | ✅ Done        | 6/6      | M    | 2026-07-09   |
+| 01  | infra-and-library-link | `tasks/phase-01-infra-and-library-link.md` | ✅ Done        | 5/5      | M    | 2026-07-09   |
+| 02  | sse-foundation         | `tasks/phase-02-sse-foundation.md`         | ✅ Done        | 6/6      | L    | 2026-07-09   |
+| 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | ✅ Done        | 6/6      | L    | 2026-07-09   |
+| 04  | replay-and-offline     | `tasks/phase-04-replay-and-offline.md`     | ✅ Done        | 5/5      | M    | 2026-07-09   |
+| 05  | scaling-cluster        | `tasks/phase-05-scaling-cluster.md`        | ✅ Done        | 6/6      | L    | 2026-07-10   |
+| 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | ✅ Done        | 6/6      | L    | 2026-07-10   |
+| 07  | both-composite         | `tasks/phase-07-both-composite.md`         | ✅ Done        | 4/4      | S    | 2026-07-10   |
+| 08  | web-frontend           | `tasks/phase-08-web-frontend.md`           | ✅ Done        | 6/6      | L    | 2026-07-10   |
+| 09  | testing-quality        | `tasks/phase-09-testing-quality.md`        | ✅ Done        | 5/5      | L    | 2026-07-10   |
+| 10  | docs-audit-hardening   | `tasks/phase-10-docs-audit-hardening.md`   | 🔄 In Progress | 1/5      | M    | 2026-07-10   |
 
 ### External precondition
 
