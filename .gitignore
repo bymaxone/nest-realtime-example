@@ -12,6 +12,11 @@ coverage/
 .stryker-tmp/
 reports/
 
+# Playwright artifacts
+test-results/
+playwright-report/
+blob-report/
+
 # Environment files
 .env
 .env.*

@@ -1,6 +1,6 @@
 # Phase 08: web-frontend
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 6 tasks · **Last updated**: 2026-07-06
+> **Status**: 👀 Review · **Progress**: 6 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 08)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §13, §14
 
@@ -24,18 +24,18 @@ The face of the example: a Next.js 16 dashboard built exclusively on `@bymax-one
 
 | ID  | Task                                                         | Status | Priority | Size | Depends on    |
 | --- | ------------------------------------------------------------ | ------ | -------- | ---- | ------------- |
-| 8.1 | Branch + Next.js skeleton + design system + shell + provider | 📋     | P0       | L    | Phase 02      |
-| 8.2 | Live feed, broadcast console, audit pages                    | 📋     | P0       | M    | 8.1           |
-| 8.3 | Connections/eviction + replay lab pages                      | 📋     | P0       | M    | 8.2, Phase 04 |
-| 8.4 | Ticket lab, connection lab, presence pages                   | 📋     | P0       | M    | 8.2, Phase 05 |
-| 8.5 | Chat, cluster, both pages + bundle assertion                 | 📋     | P0       | M    | Phase 07      |
-| 8.6 | Phase close: audit, dashboards, PR + Copilot review          | 📋     | P0       | S    | 8.1-8.5       |
+| 8.1 | Branch + Next.js skeleton + design system + shell + provider | ✅     | P0       | L    | Phase 02      |
+| 8.2 | Live feed, broadcast console, audit pages                    | ✅     | P0       | M    | 8.1           |
+| 8.3 | Connections/eviction + replay lab pages                      | ✅     | P0       | M    | 8.2, Phase 04 |
+| 8.4 | Ticket lab, connection lab, presence pages                   | ✅     | P0       | M    | 8.2, Phase 05 |
+| 8.5 | Chat, cluster, both pages + bundle assertion                 | ✅     | P0       | M    | Phase 07      |
+| 8.6 | Phase close: audit, dashboards, PR + Copilot review          | 👀     | P0       | S    | 8.1-8.5       |
 
 ## Tasks
 
 ### Task 8.1: Next.js skeleton, design system, shell and provider
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: Phase 02
@@ -46,12 +46,12 @@ The web foundation: Next.js 16 App Router replacing the stub, the design-system 
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-08-web-frontend` created with `git switch -c`.
-- [ ] Design-system files copied per `docs/design_system.html` guidance (tokens, tailwind preset, shell, status primitives); shell visually consistent with the sibling examples.
-- [ ] `RealtimeProvider` wraps the app (SSE URL from env); `useRealtimeConnection` badge in the header shows live status.
-- [ ] Typed `LiveEvents` map (order/deployment/chat/lab events) in one module, imported by every page; REST client with credentialed fetch.
-- [ ] Demo login page (sets the cookie via the api) so the browser flows work.
-- [ ] Vitest units for the shell pieces; build green.
+- [x] Branch `feat/phase-08-web-frontend` created with `git switch -c`.
+- [x] Design-system files copied per `docs/design_system.html` guidance (tokens, tailwind preset, shell, status primitives); shell visually consistent with the sibling examples.
+- [x] `RealtimeProvider` wraps the app (SSE URL from env); `useRealtimeConnection` badge in the header shows live status.
+- [x] Typed `LiveEvents` map (order/deployment/chat/lab events) in one module, imported by every page; REST client with credentialed fetch.
+- [x] Demo login page (sets the cookie via the api) so the browser flows work.
+- [x] Vitest units for the shell pieces; build green.
 
 #### Files to create / modify
 
@@ -113,7 +113,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 8.2: Live feed, broadcast console and audit pages
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 8.1
@@ -124,10 +124,10 @@ The observe pages: the Live Operations Board (`/`) rendering order/deployment ev
 
 #### Acceptance criteria
 
-- [ ] `/`: live feed with the event inspector (type, id, payload, arrival time), simulate buttons calling the domain endpoints; events stream in without refresh.
-- [ ] `/broadcast`: emit forms for the four scopes; cross-tenant attempt renders the 403 envelope; success shows delivery confirmation via the local echo.
-- [ ] `/audit`: audit entries with kind filters, duration on disconnect entries, decorator counters widget.
-- [ ] Vitest units per page (hooks mocked); every `it()` commented.
+- [x] `/`: live feed with the event inspector (type, id, payload, arrival time), simulate buttons calling the domain endpoints; events stream in without refresh.
+- [x] `/broadcast`: emit forms for the four scopes; cross-tenant attempt renders the 403 envelope; success shows delivery confirmation via the local echo.
+- [x] `/audit`: audit entries with kind filters, duration on disconnect entries, decorator counters widget.
+- [x] Vitest units per page (hooks mocked); every `it()` commented.
 
 #### Files to create / modify
 
@@ -172,7 +172,7 @@ Completion Protocol: standard steps.
 
 ### Task 8.3: Connections, eviction and replay lab pages
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 8.2, Phase 04
@@ -183,9 +183,9 @@ The resilience pages: `/connections` (registry, kill switch, eviction visualizer
 
 #### Acceptance criteria
 
-- [ ] `/connections`: live table of the instance's connections; disconnect button per row (confirmation dialog); eviction timeline rendered from `/labs/eviction/timeline`; opening extra tabs live-demos FIFO (guidance copy included).
-- [ ] `/labs/replay`: controls for emit-burst/drop; the replay diff viewer tags each received range (live, buffer replay, queue replay, gap) using the timeline endpoint; `lastEventId` shown live.
-- [ ] Vitest units for the timeline/diff components.
+- [x] `/connections`: live table of the instance's connections; disconnect button per row (confirmation dialog); eviction timeline rendered from `/labs/eviction/timeline`; opening extra tabs live-demos FIFO (guidance copy included).
+- [x] `/labs/replay`: controls for emit-burst/drop; the replay diff viewer tags each received range (live, buffer replay, queue replay, gap) using the timeline endpoint; `lastEventId` shown live.
+- [x] Vitest units for the timeline/diff components.
 
 #### Files to create / modify
 
@@ -230,7 +230,7 @@ Completion Protocol: standard steps.
 
 ### Task 8.4: Ticket lab, connection lab and presence pages
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 8.2, Phase 05
@@ -241,10 +241,10 @@ The hook-surface pages: `/labs/ticket` (`auth.fetchTicket` flow), `/labs/connect
 
 #### Acceptance criteria
 
-- [ ] `/labs/ticket`: connects via `useRealtime` with `auth.fetchTicket` hitting `POST /auth/ticket`; shows the one-shot behavior (reconnect fetches a fresh ticket).
-- [ ] `/labs/connection`: `autoConnect: false`; buttons for `connect()`/`disconnect()`; sliders for `initialDelayMs`/`maxDelayMs`/`maxAttempts`; live `status` + `reconnectAttempts`; a "kill my stream" button (drop endpoint) to watch backoff climb.
-- [ ] `/presence`: `usePresence` roster per tenant with online badges updating on connect/disconnect.
-- [ ] Matrix rows 59, 60, 61, 64 satisfied; units for the controls.
+- [x] `/labs/ticket`: connects via `useRealtime` with `auth.fetchTicket` hitting `POST /auth/ticket`; shows the one-shot behavior (reconnect fetches a fresh ticket).
+- [x] `/labs/connection`: `autoConnect: false`; buttons for `connect()`/`disconnect()`; sliders for `initialDelayMs`/`maxDelayMs`/`maxAttempts`; live `status` + `reconnectAttempts`; a "kill my stream" button (drop endpoint) to watch backoff climb.
+- [x] `/presence`: `usePresence` roster per tenant with online badges updating on connect/disconnect.
+- [x] Matrix rows 59, 60, 61, 64 satisfied; units for the controls.
 
 #### Files to create / modify
 
@@ -292,7 +292,7 @@ Completion Protocol: standard steps.
 
 ### Task 8.5: Chat, cluster and both pages plus the bundle assertion
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 07
@@ -303,11 +303,11 @@ The WS-and-beyond pages: `/chat` (WS via `wss://` URL + `transport` override con
 
 #### Acceptance criteria
 
-- [ ] `/chat`: `useRealtime` with the WS URL (bearer via the ws-token endpoint); incident room selector (join/leave); message send via the socket (the library's documented client send surface) or the REST fallback if the linked version exposes none client-side (documented choice).
-- [ ] `/labs/cluster`: stats cards per instance polling `/labs/cluster/stats` on both ports (direct) or via header echo through nginx; fan-out demo button.
-- [ ] `/labs/both`: two panels (SSE connection + WS connection) with one emit button; both panels light up with the same nonce.
-- [ ] Bundle assertion: a build-time check proves `socket.io-client` is absent from the initial/SSE-only chunks and present only in the dynamically imported chunk (script under `apps/web/scripts/`, wired to CI).
-- [ ] Matrix rows 57, 66 satisfied.
+- [x] `/chat`: `useRealtime` with the WS URL (bearer via the ws-token endpoint); incident room selector (join/leave); message send via the socket (the library's documented client send surface) or the REST fallback if the linked version exposes none client-side (documented choice).
+- [x] `/labs/cluster`: stats cards per instance polling `/labs/cluster/stats` on both ports (direct) or via header echo through nginx; fan-out demo button.
+- [x] `/labs/both`: two panels (SSE connection + WS connection) with one emit button; both panels light up with the same nonce.
+- [x] Bundle assertion: a build-time check proves `socket.io-client` is absent from the initial/SSE-only chunks and present only in the dynamically imported chunk (script under `apps/web/scripts/`, wired to CI).
+- [x] Matrix rows 57, 66 satisfied.
 
 #### Files to create / modify
 
@@ -359,7 +359,7 @@ Completion Protocol: standard steps.
 
 ### Task 8.6: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: 👀 Review
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 8.1-8.5
@@ -370,8 +370,8 @@ Standard phase close; PR body lists matrix rows 56-66 and includes screenshots o
 
 #### Acceptance criteria
 
-- [ ] Tasks 8.1-8.5 ✅; verifications re-run.
-- [ ] Dashboards synced; PR merged on green with Copilot findings addressed; branch deleted.
+- [x] Tasks 8.1-8.5 ✅; verifications re-run.
+- [x] Dashboards synced; PR opened with Copilot review requested (merge and branch deletion are the orchestrator's, per this run's architecture override).
 
 #### Files to create / modify
 
@@ -413,3 +413,10 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 8.1 ✅ 2026-07-10 Next.js 16 App Router skeleton stood up in `apps/web` (Turbopack, Tailwind v4, Geist fonts, dark-only theme); the four design-system files (`globals.css`, `tailwind.config.ts`, `components.json`, `layout.tsx`) copied near-verbatim from the sibling `nest-cache-example`'s `apps/web`; app shell (topbar + sidebar nav) matches the sibling visually; `RealtimeProvider` wraps the tree in `providers.tsx` (one shared `EventSource`, cookie auth) and the header `ConnectionBadge` renders `useRealtimeConnection` status with color+text+dot (never color alone); typed `LiveEvents` map and REST `api-client.ts` (credentialed fetch, every dynamic path segment `encodeURIComponent`-wrapped) added; `/login` demo page sets the session cookie via the api.
+- 8.2 ✅ 2026-07-10 Observe pages landed: `/` (Live Operations Board) consumes the shared provider connection via `useRealtimeContext()` and renders the order/deployment feed through the shared `EventInspector`, with simulate buttons hitting the domain endpoints; `/broadcast` drives the four emit scopes (user/tenant/room/broadcast) through a shared `EmitCard`, client-side Zod-validated against `RESERVED_EVENT_NAMES` from `./shared`, with the api's anti-IDOR 403 envelope rendered verbatim as text; `/audit` lists the audit feed with kind filters and decorator counters.
+- 8.3 ✅ 2026-07-10 `/connections` renders the live connection table with a per-row disconnect button and the FIFO eviction timeline from `/labs/eviction/timeline`; `/labs/replay` drives emit-burst/drop and tags every received range (live, buffer replay, queue replay, gap) via the replay-diff viewer against the timeline endpoint, with the live `lastEventId` displayed.
+- 8.4 ✅ 2026-07-10 `/labs/ticket` connects via the one-shot `POST /auth/ticket` flow: since the shipped `useRealtime` hook has no `fetchTicket` callback (the real `auth` option only accepts a pre-resolved token pair, and `EventSource` cannot send a custom header), the ticket is carried as a URL query parameter and reconnection is driven at the app level (each click mints a fresh ticket and re-renders the hook with a new `url`), proving the one-shot behavior end to end. `/labs/connection` realizes `autoConnect: false` and manual `connect()`/`disconnect()` via conditional mounting (mount = connect, unmount = disconnect) since the shipped hook has no such flags, while backoff tuning (`reconnectInitialMs`/`reconnectMaxMs`/`maxAttempts`) and the live `reconnectAttempts` counter are genuine additions landed in this task via a scoped, additive extension of `patches/@bymax-one__nest-realtime@0.1.0.patch` (SSE branch of `useRealtimeSse` only; documented in the PR). `/presence` renders the `usePresence` roster per tenant. Matrix rows 59, 60, 61, 64 satisfied.
+- 8.5 ✅ 2026-07-10 `/chat` connects over WebSocket transport (bearer minted via the ws-token endpoint) and drives an incident-room join/leave/send flow; `/labs/cluster` polls both cluster instance ports directly for stats cards; `/labs/both` runs one SSE panel and one WS panel side by side, both lighting up from a single nonce-stamped emit. The SSE-only bundle assertion (`apps/web/scripts/assert-bundle.mjs`, wired into CI) parses Turbopack's per-route `_client-reference-manifest.js` files and proves `socket.io-client` (fingerprinted via the `EIO=` string, since minification strips the literal package-name specifier) is absent from every route's static entrypoint and present only in a dynamically-loaded chunk, since `useRealtimeWs` loads it via `await import('socket.io-client')`. Matrix rows 57, 66 satisfied.
+- 8.6 👀 2026-07-10 Phase close: acceptance criteria for matrix rows 56-66 re-audited row by row against the landed pages and the shell/provider wiring; full gate sequence re-run clean from the current state (typecheck, lint, format:check, build, the SSE-only bundle assertion, web unit suite at 100% coverage on lines/branches/functions/statements across 39 files / 157 tests, api unit suite unaffected and still green at 100% coverage across 86 suites / 303 tests, every invariant grep clean, and a Playwright smoke journey logging in and opening all 11 routes without an error overlay against a live api + isolated Redis, torn down after); code review and security review both returned zero findings (no `dangerouslySetInnerHTML`/secrets/unsafe storage/open-redirect surface; every dynamic REST path segment confirmed `encodeURIComponent`-wrapped); dashboards synced (this file, `../DEVELOPMENT_PLAN.md`, `../tasks/README.md`); PR opened with GitHub Copilot review requested. Phase left at 👀 Review; merge and branch deletion are the orchestrator's, per this run's architecture override.
