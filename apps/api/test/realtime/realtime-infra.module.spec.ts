@@ -12,6 +12,8 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { REDIS_CLIENT } from '../../src/auth/auth.tokens';
 import { APP_CONFIG } from '../../src/config/config.tokens';
 import { ConfigModule } from '../../src/config/config.module';
+import { ClusterStatsService } from '../../src/connections/cluster-stats.service';
+import { CountingRealtimePubSub } from '../../src/realtime/counting-pubsub';
 import { RealtimeInfraModule } from '../../src/realtime/realtime-infra.module';
 import { RedisRealtimePubSub } from '../../src/realtime/redis-realtime-pubsub';
 import { REALTIME_PUBSUB, REALTIME_PUBSUB_BUS } from '../../src/realtime/realtime.tokens';
@@ -33,15 +35,16 @@ describe('RealtimeInfraModule', () => {
   /**
    * Redis driver wiring.
    *
-   * Under the redis driver both tokens must resolve to the same RedisRealtimePubSub
-   * singleton, so the wiring, probe and counters observe one shared bus.
+   * Under the redis driver the concrete driver and the counting bus (which wraps
+   * it) must both resolve, and the stats service must be shared, so the probe reads
+   * the driver while the library consumes the measured bus.
    */
-  it('exposes one shared RedisRealtimePubSub through both tokens', async () => {
+  it('exposes the driver, the counting bus wrapping it, and the stats service', async () => {
     const moduleRef = await compile(buildTestConfig({ pubsubDriver: 'redis' }));
 
-    const pubsub = moduleRef.get(REALTIME_PUBSUB);
-    expect(pubsub).toBeInstanceOf(RedisRealtimePubSub);
-    expect(moduleRef.get(REALTIME_PUBSUB_BUS)).toBe(pubsub);
+    expect(moduleRef.get(REALTIME_PUBSUB)).toBeInstanceOf(RedisRealtimePubSub);
+    expect(moduleRef.get(REALTIME_PUBSUB_BUS)).toBeInstanceOf(CountingRealtimePubSub);
+    expect(moduleRef.get(ClusterStatsService)).toBeInstanceOf(ClusterStatsService);
 
     await moduleRef.close();
   });
@@ -49,10 +52,10 @@ describe('RealtimeInfraModule', () => {
   /**
    * Memory driver wiring.
    *
-   * The default memory driver must leave both tokens undefined so the library uses
-   * its InMemoryPubSub and the boot needs no live Redis.
+   * The default memory driver must leave both pub/sub tokens undefined so the
+   * library uses its InMemoryPubSub and the boot needs no live Redis.
    */
-  it('leaves both tokens undefined under the memory driver', async () => {
+  it('leaves both pub/sub tokens undefined under the memory driver', async () => {
     const moduleRef = await compile(buildTestConfig({ pubsubDriver: 'memory' }));
 
     expect(moduleRef.get(REALTIME_PUBSUB, { optional: true })).toBeUndefined();

@@ -1,6 +1,6 @@
 # Phase 05: scaling-cluster
 
-> **Status**: 🔄 In Progress · **Progress**: 2 / 6 tasks · **Last updated**: 2026-07-09
+> **Status**: 🔄 In Progress · **Progress**: 3 / 6 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 05)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §15, §12.8
 
@@ -26,7 +26,7 @@ Single-instance SSE works. This phase makes it horizontal: `RedisRealtimePubSub`
 | --- | -------------------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 5.1 | Branch + RedisRealtimePubSub implementation                    | ✅     | P0       | M    | Phase 04   |
 | 5.2 | nginx SSE-safe config + cluster compose profile                | ✅     | P0       | M    | 5.1        |
-| 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | 📋     | P0       | L    | 5.2        |
+| 5.3 | Cluster lab: delivery/publish counters + loop-prevention proof | ✅     | P0       | L    | 5.2        |
 | 5.4 | Cross-instance revocation + degradation lab                    | 📋     | P0       | M    | 5.3        |
 | 5.5 | RedisPresenceStorage                                           | 📋     | P1       | S    | 5.1        |
 | 5.6 | Phase close: audit, dashboards, PR + Copilot review            | 📋     | P0       | S    | 5.1-5.5    |
@@ -165,7 +165,7 @@ Completion Protocol: standard steps.
 
 ### Task 5.3: Cluster lab with counters and loop-prevention proof
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: L
 - **Depends on**: 5.2
@@ -176,10 +176,10 @@ The phase's flagship: per-instance counters (`published`, `receivedRemote`, `del
 
 #### Acceptance criteria
 
-- [ ] Counter service wraps the pub/sub driver (publish increments; handler increments receivedRemote) and hooks deliveries via the audit registry; `GET /labs/cluster/stats` returns `{ instance, published, receivedRemote, deliveredLocal }`.
-- [ ] Multi-instance e2e (compose cluster): client X on app-a (connect directly to 3001), client Y on app-b (3002), same tenant; `POST /emit/tenant/...` against app-a: X and Y each receive exactly one copy; app-a stats show published=1; app-b shows receivedRemote=1 and published unchanged; a 5-second settle window shows no counter drift (no storm).
-- [ ] The same e2e repeated through nginx (8080) behaves identically.
-- [ ] Matrix rows 38, 39 satisfied.
+- [x] Counter decorator wraps the pub/sub driver (publish increments `published`; the forwarded handler increments `receivedRemote`), `deliveredLocal` is their sum; `GET /labs/cluster/stats` returns `{ instance, published, receivedRemote, deliveredLocal }`.
+- [x] Multi-instance e2e (compose cluster): client X on app-a (3001), client Y on app-b (3002), same tenant; `POST /emit/tenant/acme` against app-a: X and Y each receive exactly one copy; app-a stats show published=1, receivedRemote=0; app-b shows receivedRemote=1, published=0; a 5-second settle window shows no counter drift (no storm).
+- [x] The same e2e repeated through nginx (8080) behaves identically (one publish and one remote receive cluster-wide).
+- [x] Matrix rows 38, 39 satisfied.
 
 #### Files to create / modify
 
@@ -413,3 +413,4 @@ Completion Protocol: standard steps + phase completion line.
 
 - 5.1 ✅ 2026-07-09 RedisRealtimePubSub (origin stamp + self-filter, duplicate subscriber, availability flag) selected by PUBSUB_DRIVER=redis via RealtimeInfraModule; full units at 100%.
 - 5.2 ✅ 2026-07-09 nginx SSE-safe proxy + cluster compose profile (app-a/app-b/nginx); extended the pnpm patch to add the explicit @Inject(forwardRef(() => SseTransport)) the RealtimePubSubSubscriber needs, without which cross-instance delivery 500s in-image; smoke proved fan-out app-a to app-b.
+- 5.3 ✅ 2026-07-09 Cluster stats counters + CountingRealtimePubSub decorator + GET /labs/cluster/stats; cluster e2e (jest.e2e-cluster, runs alone) proves exactly-once fan-out and no re-publish storm direct and via nginx (app-a published=1/received=0, app-b published=0/received=1, no 5s drift). Matrix rows 38, 39.
