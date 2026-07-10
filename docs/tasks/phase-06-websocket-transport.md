@@ -1,6 +1,6 @@
 # Phase 06: websocket-transport
 
-> **Status**: 🔄 In Progress · **Progress**: 4 / 6 tasks · **Last updated**: 2026-07-10
+> **Status**: 🔄 In Progress · **Progress**: 5 / 6 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 06)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.5, §15
 
@@ -28,7 +28,7 @@ The WebSocket half of the dual-transport promise: the same application boots wit
 | 6.2 | Incident chat: @Subscribe handlers + no-op-under-SSE proof  | ✅     | P0       | M    | 6.1        |
 | 6.3 | Redis adapter + adapter-aware revocation + sticky sessions  | ✅     | P0       | M    | 6.1        |
 | 6.4 | Payload limits, WS CORS, error event, onError hook          | ✅     | P1       | M    | 6.1        |
-| 6.5 | WS e2e suite + transport parity proof                       | 📋     | P0       | M    | 6.2-6.4    |
+| 6.5 | WS e2e suite + transport parity proof                       | ✅     | P0       | M    | 6.2-6.4    |
 | 6.6 | Phase close: audit, dashboards, PR + Copilot review         | 📋     | P0       | S    | 6.1-6.5    |
 
 ## Tasks
@@ -299,7 +299,7 @@ Completion Protocol: standard steps.
 
 ### Task 6.5: Transport parity proof
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 6.2-6.4
@@ -310,9 +310,9 @@ The dual-transport thesis, executable: the emit/isolation e2e assertions from ph
 
 #### Acceptance criteria
 
-- [ ] A shared parity spec module parameterized by transport runs: tenant isolation, user emit, room emit, broadcast, connection-established traits; executed once under `sse` (eventsource) and once under `websocket` (socket.io-client).
-- [ ] A grep-style meta assertion: `src/` contains no `if (transport === ...)` branching in application services (the only transport switch lives in env/config wiring).
-- [ ] Matrix row 5 completed end to end; parity documented in the README section stub.
+- [x] A shared parity spec module (`parity.suite.ts`) parameterized by transport runs: tenant isolation, user emit, room emit, broadcast, connection-established traits; executed once under `sse` (eventsource) and once under `websocket` (socket.io-client).
+- [x] A meta assertion (`test/unit/no-transport-branching.spec.ts`) walks `src/` and confines transport-literal comparisons to the wiring/config layer and the transport-aware auth dispatch; no application service branches on the transport.
+- [x] Matrix row 5 completed end to end; parity documented in the README `Transport parity` section.
 
 #### Files to create / modify
 
@@ -416,3 +416,4 @@ Completion Protocol: standard steps + phase completion line.
 - 6.2 ✅ 2026-07-10 Incident chat via a config-namespaced `@SubscribeMessage('chat.message')` gateway (library has no `@Subscribe`), gated off under SSE (no-op proof), authenticated-identity fan-out with room isolation and malformed-frame survivability; fixed a stale `/health` assertion missing the `pubsub` field
 - 6.3 ✅ 2026-07-10 WS `redisAdapter.pubClient` wired under the redis driver, nginx `/socket.io/` upgrade + `ip_hash` sticky location with the honest failure-mode note, cluster profile parameterized by `REALTIME_TRANSPORT`; ws-cluster suite (app-a to app-b chat fan-out, cross-node revocation, nginx handshake) green against the built WebSocket stack (patch verified in-image)
 - 6.4 ✅ 2026-07-10 ws-limits e2e: oversized payload dropped (handler never runs) and bridged to a `REALTIME_PAYLOAD_TOO_LARGE` audit entry via `hooks.onError`; restrictive WS handshake cors and separate Nest HTTP cors both pinned to the configured origin; row 36 reconciled (library emits no client `error` event for WS)
+- 6.5 ✅ 2026-07-10 Transport parity: one `parity.suite.ts` (isolation, user/room/broadcast, traits) runs green under both the SSE (eventsource) and WebSocket (socket.io-client) profiles from the same source; a static meta test confirms no application service branches on the transport; README `Transport parity` section added
