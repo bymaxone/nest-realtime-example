@@ -63,6 +63,7 @@ import { WsTokenService } from './ws-token.service';
     WsTokenService,
     RevalidationStatsService,
     CompositeAuthenticator,
+    REDIS_CLIENT,
     REVOCATION_STORE,
   ],
 })

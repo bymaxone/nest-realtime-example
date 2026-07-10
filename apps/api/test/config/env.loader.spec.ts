@@ -26,6 +26,9 @@ describe('loadEnv', () => {
     expect(config.reauth.intervalSeconds).toBe(15);
     expect(config.reauth.onFailure).toBe('disconnect');
     expect(config.reauth.cacheTtlMs).toBe(10000);
+    expect(config.offlineQueue.enabled).toBe(false);
+    expect(config.offlineQueue.ttlSeconds).toBe(3600);
+    expect(config.offlineQueue.maxPerUser).toBe(500);
     expect(config.redisUrl).toBe('redis://localhost:6379');
     expect(config.pubsubDriver).toBe('memory');
     expect(config.webOrigin).toBe('http://localhost:3000');
@@ -42,6 +45,9 @@ describe('loadEnv', () => {
       PUBSUB_DRIVER: 'redis',
       REAUTH_ON_FAILURE: 'event',
       REAUTH_CACHE_TTL_MS: '0',
+      OFFLINE_QUEUE_ENABLED: 'true',
+      OFFLINE_QUEUE_TTL_SECONDS: '120',
+      OFFLINE_QUEUE_MAX_PER_USER: '25',
     });
     expect(config.port).toBe(3002);
     expect(config.instanceName).toBe('app-b');
@@ -50,6 +56,9 @@ describe('loadEnv', () => {
     expect(config.pubsubDriver).toBe('redis');
     expect(config.reauth.onFailure).toBe('event');
     expect(config.reauth.cacheTtlMs).toBe(0);
+    expect(config.offlineQueue.enabled).toBe(true);
+    expect(config.offlineQueue.ttlSeconds).toBe(120);
+    expect(config.offlineQueue.maxPerUser).toBe(25);
   });
 
   it('aggregates every violation into one error that never echoes values', () => {
@@ -107,6 +116,7 @@ describe('loadEnv', () => {
     expect(Object.isFrozen(config)).toBe(true);
     expect(Object.isFrozen(config.realtime)).toBe(true);
     expect(Object.isFrozen(config.reauth)).toBe(true);
+    expect(Object.isFrozen(config.offlineQueue)).toBe(true);
     expect(() => {
       (config as { port: number }).port = 9999;
     }).toThrow(TypeError);

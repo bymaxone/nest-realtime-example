@@ -6,7 +6,11 @@
  * Mocks: a stub authenticator and hooks object.
  */
 
-import type { IConnectionAuthenticator, IConnectionLifecycleHooks } from '@bymax-one/nest-realtime';
+import type {
+  IConnectionAuthenticator,
+  IConnectionLifecycleHooks,
+  IOfflineQueueStorage,
+} from '@bymax-one/nest-realtime';
 
 import { APP_SERVICE_NAME, APP_VERSION } from '../../src/app.constants';
 import { buildRealtimeOptions } from '../../src/realtime/options.factory';
@@ -101,5 +105,36 @@ describe('buildRealtimeOptions', () => {
     const hooks: IConnectionLifecycleHooks = { onConnect: () => undefined };
 
     expect(buildRealtimeOptions(buildTestConfig(), authenticator, hooks).hooks).toBe(hooks);
+  });
+
+  /**
+   * Offline queue omitted by default.
+   *
+   * With no offline queue the options must omit the property so the library keeps
+   * its no-queue default (exactOptionalPropertyTypes forbids an explicit undefined).
+   */
+  it('omits the offline queue when none is provided', () => {
+    expect(buildRealtimeOptions(buildTestConfig(), authenticator)).not.toHaveProperty(
+      'offlineQueue',
+    );
+  });
+
+  /**
+   * Offline queue wired when provided.
+   *
+   * When a durable queue is supplied it must be attached verbatim so the library
+   * persists events for disconnected users.
+   */
+  it('attaches the offline queue when provided', () => {
+    const offlineQueue: IOfflineQueueStorage = {
+      append: () => Promise.resolve(),
+      retrieveSince: () => Promise.resolve([]),
+      acknowledge: () => Promise.resolve(),
+    };
+
+    const options = buildRealtimeOptions(buildTestConfig(), authenticator, undefined, offlineQueue);
+
+    expect(options.offlineQueue).toBe(offlineQueue);
+    expect(options).not.toHaveProperty('hooks');
   });
 });

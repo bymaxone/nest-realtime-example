@@ -1,6 +1,6 @@
 # Phase 04: replay-and-offline
 
-> **Status**: 📋 ToDo · **Progress**: 0 / 5 tasks · **Last updated**: 2026-07-06
+> **Status**: 👀 Review · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-09
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 04)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §12.4
 
@@ -23,17 +23,17 @@ SSE's superpower is recovery: the browser reconnects with `Last-Event-ID` and th
 
 | ID  | Task                                                       | Status | Priority | Size | Depends on |
 | --- | ---------------------------------------------------------- | ------ | -------- | ---- | ---------- |
-| 4.1 | Branch + replay lab (drop, Last-Event-ID, buffer cap)      | 📋     | P0       | M    | Phase 03   |
-| 4.2 | RedisOfflineQueue (IOfflineQueueStorage) + retention units | 📋     | P0       | M    | 4.1        |
-| 4.3 | Buffer-miss fallback + id-ordering spec                    | 📋     | P0       | M    | 4.2        |
-| 4.4 | Offline drain lab + e2e                                    | 📋     | P0       | M    | 4.2        |
-| 4.5 | Phase close: audit, dashboards, PR + Copilot review        | 📋     | P0       | S    | 4.1-4.4    |
+| 4.1 | Branch + replay lab (drop, Last-Event-ID, buffer cap)      | ✅     | P0       | M    | Phase 03   |
+| 4.2 | RedisOfflineQueue (IOfflineQueueStorage) + retention units | ✅     | P0       | M    | 4.1        |
+| 4.3 | Buffer-miss fallback + id-ordering spec                    | ✅     | P0       | M    | 4.2        |
+| 4.4 | Offline drain lab + e2e                                    | ✅     | P0       | M    | 4.2        |
+| 4.5 | Phase close: audit, dashboards, PR + Copilot review        | ✅     | P0       | S    | 4.1-4.4    |
 
 ## Tasks
 
 ### Task 4.1: Replay lab with drop endpoint and buffer-cap proof
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: Phase 03
@@ -44,11 +44,11 @@ SSE's superpower is recovery: the browser reconnects with `Last-Event-ID` and th
 
 #### Acceptance criteria
 
-- [ ] Branch `feat/phase-04-replay-and-offline` created with `git switch -c`.
-- [ ] `POST /labs/replay/emit-burst { count }` emits numbered events to the caller's user; `POST /labs/replay/drop` closes the caller's connection.
-- [ ] E2E (in-buffer): connect, burst 5, drop, reconnect with the captured `Last-Event-ID`; the 5 events replay in order before any live event.
-- [ ] E2E (cap): burst 15 while connected, drop after event 15, reconnect with the id of event 3: only events beyond the buffer window arrive (oldest evicted), demonstrating the cap honestly.
-- [ ] Timeline endpoint `GET /labs/replay/timeline` distinguishes live, replayed and evicted ranges.
+- [x] Branch `feat/phase-04-replay-and-offline` created with `git switch -c`.
+- [x] `POST /labs/replay/emit-burst { count }` emits numbered events to the caller's user; `POST /labs/replay/drop` closes the caller's connection.
+- [x] E2E (in-buffer): connect, burst 5, drop, reconnect with the captured `Last-Event-ID`; the 5 events replay in order before any live event.
+- [x] E2E (cap): burst 15 while connected, drop after event 15, reconnect with the id of event 3: only events beyond the buffer window arrive (oldest evicted), demonstrating the cap honestly.
+- [x] Timeline endpoint `GET /labs/replay/timeline` distinguishes live, replayed and evicted ranges.
 
 #### Files to create / modify
 
@@ -98,7 +98,7 @@ docs/DEVELOPMENT_PLAN.md §1; Completion log; Conventional commit, no attributio
 
 ### Task 4.2: RedisOfflineQueue implementing IOfflineQueueStorage
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 4.1
@@ -109,10 +109,10 @@ The consumer-side storage the library defines: sorted-set backed queue with TTL 
 
 #### Acceptance criteria
 
-- [ ] `RedisOfflineQueue` implements `append`, `retrieveSince(userId, sinceId, limit)`, `acknowledge(userId, upToId)` per the library contract; keys `realtime:offline:{userId}`.
-- [ ] Retention: `EX` TTL from config; `maxPerUser` trims oldest on append.
-- [ ] Wired into the options factory (`offlineQueue`) behind a config flag.
-- [ ] Unit specs (mocked ioredis): append/retrieve ordering, since-filtering by string comparison, limit, ack purge, TTL set, trim behavior.
+- [x] `RedisOfflineQueue` implements `append`, `retrieveSince(userId, sinceId, limit)`, `acknowledge(userId, upToId)` per the library contract; keys `realtime:offline:{userId}`.
+- [x] Retention: `EX` TTL from config; `maxPerUser` trims oldest on append.
+- [x] Wired into the options factory (`offlineQueue`) behind a config flag.
+- [x] Unit specs (mocked ioredis): append/retrieve ordering, since-filtering by string comparison, limit, ack purge, TTL set, trim behavior.
 
 #### Files to create / modify
 
@@ -160,7 +160,7 @@ Completion Protocol: standard steps.
 
 ### Task 4.3: Buffer-miss fallback and id-ordering guard
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 4.2
@@ -171,10 +171,10 @@ The gap story: a `Last-Event-ID` older than the in-memory window falls back to t
 
 #### Acceptance criteria
 
-- [ ] E2E: burst 15 (buffer 10) with the offline queue enabled; reconnect from event 1's id: events 2-15 arrive (queue covered the gap the buffer lost); timeline marks the source of each range (buffer vs queue).
-- [ ] E2E (no queue profile): same gap with `offlineQueue` disabled: only the buffer window replays; the loss is explicit in the timeline (unrecoverable gap).
-- [ ] Ordering spec: captured event ids across bursts are fixed-width and strictly lexicographically increasing; a shuffled sample sorted as strings equals the emission order.
-- [ ] Matrix rows 25, 27, 28, 75 satisfied.
+- [x] E2E: burst 15 (buffer 10) with the offline queue enabled; reconnect from event 1's id: events 2-15 arrive (queue covered the gap the buffer lost); timeline marks the source of each range (buffer vs queue).
+- [x] E2E (no queue profile): same gap with `offlineQueue` disabled: only the buffer window replays; the loss is explicit in the timeline (unrecoverable gap).
+- [x] Ordering spec: captured event ids across bursts are fixed-width and strictly lexicographically increasing; a shuffled sample sorted as strings equals the emission order.
+- [x] Matrix rows 25, 27, 28, 75 satisfied.
 
 #### Files to create / modify
 
@@ -220,7 +220,7 @@ Completion Protocol: standard steps.
 
 ### Task 4.4: Offline drain lab
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: M
 - **Depends on**: 4.2
@@ -231,10 +231,10 @@ Events emitted while a user has zero connections are queued; the next connect dr
 
 #### Acceptance criteria
 
-- [ ] `POST /labs/offline/emit { userId, count }` emits to a disconnected user; Redis queue grows.
-- [ ] E2E: emit 5 while offline; connect; the 5 arrive (per the library's documented drain convention for fresh connections); `POST /labs/offline/ack { upToId }` purges; TTL and trim proven at the unit level (4.2) and referenced here.
-- [ ] `GET /labs/offline/peek?userId=` shows the queue for the visualizer.
-- [ ] Matrix row 26 satisfied.
+- [x] `POST /labs/offline/emit { userId, count }` emits to a disconnected user; Redis queue grows.
+- [x] E2E: emit 5 while offline; connect; the 5 arrive (per the library's documented drain convention for fresh connections); `POST /labs/offline/ack { upToId }` purges; TTL and trim proven at the unit level (4.2) and referenced here.
+- [x] `GET /labs/offline/peek?userId=` shows the queue for the visualizer.
+- [x] Matrix row 26 satisfied.
 
 #### Files to create / modify
 
@@ -280,7 +280,7 @@ Completion Protocol: standard steps.
 
 ### Task 4.5: Phase close: audit, dashboards, PR with Copilot review
 
-- **Status**: 📋 ToDo
+- **Status**: ✅ Done
 - **Priority**: P0
 - **Size**: S
 - **Depends on**: 4.1-4.4
@@ -291,7 +291,7 @@ Standard phase close; PR body lists matrix rows 23-28, 75.
 
 #### Acceptance criteria
 
-- [ ] Tasks 4.1-4.4 ✅, verifications re-run sequentially.
+- [x] Tasks 4.1-4.4 ✅, verifications re-run sequentially.
 - [ ] Dashboards synced; PR merged on green with Copilot findings addressed; branch deleted.
 
 #### Files to create / modify
@@ -334,3 +334,9 @@ Completion Protocol: standard steps + phase completion line.
 ## Completion log
 
 <!-- append: - N.M ✅ YYYY-MM-DD one-line summary -->
+
+- 4.1 ✅ 2026-07-09 Replay lab (emit-burst, drop, timeline) with in-buffer replay and honest buffer-cap e2e.
+- 4.2 ✅ 2026-07-09 RedisOfflineQueue over sorted sets with TTL + maxPerUser trim, wired behind a config flag, unit-proven.
+- 4.3 ✅ 2026-07-09 Buffer-miss fallback e2e (queue-on covers the gap, queue-off leaves it unrecoverable) and the lexicographic id-ordering spec.
+- 4.4 ✅ 2026-07-09 Offline drain lab: emit while offline, drain in order on reconnect, auto-acknowledge, peek and manual ack.
+- 4.5 👀 2026-07-09 Acceptance audit (rows 23-28, 75), dashboards synced, PR opened with Copilot review requested.

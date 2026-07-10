@@ -32,12 +32,20 @@ interface ReauthConfig {
   readonly cacheTtlMs: number;
 }
 
+/** Redis-backed offline-queue tunables sourced from the environment. */
+interface OfflineQueueConfig {
+  readonly enabled: boolean;
+  readonly ttlSeconds: number;
+  readonly maxPerUser: number;
+}
+
 /** The immutable, typed configuration the rest of the api consumes. */
 export interface AppConfig {
   readonly port: number;
   readonly instanceName: string;
   readonly realtime: RealtimeConfig;
   readonly reauth: ReauthConfig;
+  readonly offlineQueue: OfflineQueueConfig;
   readonly redisUrl: string;
   readonly pubsubDriver: 'memory' | 'redis';
   readonly sessionSecret: string;
@@ -80,6 +88,11 @@ function mapEnv(env: RawEnv): AppConfig {
       onFailure: env.REAUTH_ON_FAILURE,
       cacheTtlMs: env.REAUTH_CACHE_TTL_MS,
     },
+    offlineQueue: {
+      enabled: env.OFFLINE_QUEUE_ENABLED,
+      ttlSeconds: env.OFFLINE_QUEUE_TTL_SECONDS,
+      maxPerUser: env.OFFLINE_QUEUE_MAX_PER_USER,
+    },
     redisUrl: env.REDIS_URL,
     pubsubDriver: env.PUBSUB_DRIVER,
     sessionSecret: env.SESSION_SECRET,
@@ -91,6 +104,7 @@ function mapEnv(env: RawEnv): AppConfig {
 function freezeConfig(config: AppConfig): AppConfig {
   Object.freeze(config.realtime);
   Object.freeze(config.reauth);
+  Object.freeze(config.offlineQueue);
   return Object.freeze(config);
 }
 
