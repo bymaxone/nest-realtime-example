@@ -18,8 +18,8 @@
 | 07    | `phase-07-both-composite.md`         | 4/4       | ✅     | `both` mode split-screen proof + migration journey                                                                       |
 | 08    | `phase-08-web-frontend.md`           | 6/6       | ✅     | Next.js 16 + design system + every page on `./react` hooks + bundle assertion                                            |
 | 09    | `phase-09-testing-quality.md`        | 5/5       | ✅     | 100% unit both apps, E2E every flow (HTTP/SSE/WS/cluster), Playwright                                                    |
-| 10    | `phase-10-docs-audit-hardening.md`   | 3/5       | 🔄     | README journeys, export-usage + matrix audit, Stryker, CI finalization                                                   |
-|       | **Total**                            | **58/60** | 🔄     |                                                                                                                          |
+| 10    | `phase-10-docs-audit-hardening.md`   | 5/5       | ✅     | README journeys, export-usage + matrix audit, Stryker, CI finalization                                                   |
+|       | **Total**                            | **60/60** | ✅     |                                                                                                                          |
 
 ## Task-file anatomy
 

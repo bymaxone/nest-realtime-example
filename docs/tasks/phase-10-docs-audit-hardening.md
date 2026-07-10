@@ -1,6 +1,6 @@
 # Phase 10: docs-audit-hardening
 
-> **Status**: 🔄 In Progress · **Progress**: 3 / 5 tasks · **Last updated**: 2026-07-10
+> **Status**: ✅ Done · **Progress**: 5 / 5 tasks · **Last updated**: 2026-07-10
 > **Source roadmap**: [`../DEVELOPMENT_PLAN.md`](../DEVELOPMENT_PLAN.md) §5 (Phase 10)
 > **Source spec**: [`../TECHNICAL_SPECIFICATION.md`](../TECHNICAL_SPECIFICATION.md) §7, §8.1, §18
 
@@ -25,9 +25,9 @@ The finish line: the repo must read as the canonical reference and prove its own
 | ---- | --------------------------------------------------- | ------ | -------- | ---- | ---------- |
 | 10.1 | Branch + full README with reproducible journeys     | ✅     | P0       | M    | Phase 09   |
 | 10.2 | Export-usage + coverage-matrix audit (75 rows)      | ✅     | P0       | M    | 10.1       |
-| 10.3 | Stryker mutation baseline + hardening (api)         | 📋     | P0       | L    | 10.2       |
+| 10.3 | Stryker mutation baseline + hardening (api)         | ✅     | P0       | L    | 10.2       |
 | 10.4 | CI finalization + npm-switch procedure              | ✅     | P1       | S    | 10.2       |
-| 10.5 | Phase close: audit, dashboards, PR + Copilot review | 📋     | P0       | S    | 10.1-10.4  |
+| 10.5 | Phase close: audit, dashboards, PR + Copilot review | ✅     | P0       | S    | 10.1-10.4  |
 
 ## Tasks
 
@@ -338,3 +338,5 @@ Completion Protocol: standard steps + the final phase-completion line.
 - 10.1 ✅ 2026-07-10 Wrote the full house-style README with badges and the nine journeys quoted from real stack output; added the offline-queue env to `.env.example`.
 - 10.4 ✅ 2026-07-10 Froze the four CI job ids/names as contractual (with a note in ci.yml), added the export-audit step, and wrote docs/NPM_SWITCH.md documenting the unpublished-library switch procedure, the pnpm patch workaround, and the branch-protection required checks.
 - 10.2 ✅ 2026-07-10 Committed the 75/75 coverage audit and the `audit:exports` sweep (wired into CI); strengthened matrix row 8 with a real `GET /connections/introspection` endpoint injecting the library Symbol DI tokens, and typed option/reserved-name usages so only 10 exports remain justified exceptions.
+- 10.3 ✅ 2026-07-10 Added the Stryker config (break 95, api scope) and survivor-killing assertions (session, env loader, domain, emit, rooms); api mutation score hardened to 99.71, no thresholds weakened and no mutants ignored.
+- 10.5 ✅ 2026-07-10 Phase close: audited the definition of done (75/75 matrix, mutation 99.71, README journeys), flipped Phase 09 and Phase 10 to Done and the dashboards to 11/11 phases and 60/60 tasks; roadmap complete.

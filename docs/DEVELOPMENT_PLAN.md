@@ -1,7 +1,7 @@
 # nest-realtime-example: Development Plan
 
-> **Status:** 🔄 In execution
-> **Last updated:** 2026-07-06
+> **Status:** ✅ Complete
+> **Last updated:** 2026-07-10
 > **Source spec:** [TECHNICAL_SPECIFICATION.md](./TECHNICAL_SPECIFICATION.md) (v1.0.0; §7 Feature Coverage Matrix is the contract this plan implements)
 > **Scope:** build the canonical reference implementation of `@bymax-one/nest-realtime`, exercising every library feature and path, with sibling-grade quality gates.
 
@@ -11,23 +11,23 @@
 
 ## 1. Progress dashboard
 
-> **Progress:** 10 / 11 phases complete (91%) · 58 / 60 tasks
-> **Active phase:** phase 10 (🔄 in progress)
+> **Progress:** 11 / 11 phases complete (100%) · 60 / 60 tasks
+> **Active phase:** none (roadmap complete)
 > **Blockers:** none
 
-| #   | Phase                  | Tasks file                                 | Status         | Progress | Size | Last updated |
-| --- | ---------------------- | ------------------------------------------ | -------------- | -------- | ---- | ------------ |
-| 00  | repo-foundation        | `tasks/phase-00-repo-foundation.md`        | ✅ Done        | 6/6      | M    | 2026-07-09   |
-| 01  | infra-and-library-link | `tasks/phase-01-infra-and-library-link.md` | ✅ Done        | 5/5      | M    | 2026-07-09   |
-| 02  | sse-foundation         | `tasks/phase-02-sse-foundation.md`         | ✅ Done        | 6/6      | L    | 2026-07-09   |
-| 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | ✅ Done        | 6/6      | L    | 2026-07-09   |
-| 04  | replay-and-offline     | `tasks/phase-04-replay-and-offline.md`     | ✅ Done        | 5/5      | M    | 2026-07-09   |
-| 05  | scaling-cluster        | `tasks/phase-05-scaling-cluster.md`        | ✅ Done        | 6/6      | L    | 2026-07-10   |
-| 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | ✅ Done        | 6/6      | L    | 2026-07-10   |
-| 07  | both-composite         | `tasks/phase-07-both-composite.md`         | ✅ Done        | 4/4      | S    | 2026-07-10   |
-| 08  | web-frontend           | `tasks/phase-08-web-frontend.md`           | ✅ Done        | 6/6      | L    | 2026-07-10   |
-| 09  | testing-quality        | `tasks/phase-09-testing-quality.md`        | ✅ Done        | 5/5      | L    | 2026-07-10   |
-| 10  | docs-audit-hardening   | `tasks/phase-10-docs-audit-hardening.md`   | 🔄 In Progress | 3/5      | M    | 2026-07-10   |
+| #   | Phase                  | Tasks file                                 | Status  | Progress | Size | Last updated |
+| --- | ---------------------- | ------------------------------------------ | ------- | -------- | ---- | ------------ |
+| 00  | repo-foundation        | `tasks/phase-00-repo-foundation.md`        | ✅ Done | 6/6      | M    | 2026-07-09   |
+| 01  | infra-and-library-link | `tasks/phase-01-infra-and-library-link.md` | ✅ Done | 5/5      | M    | 2026-07-09   |
+| 02  | sse-foundation         | `tasks/phase-02-sse-foundation.md`         | ✅ Done | 6/6      | L    | 2026-07-09   |
+| 03  | auth-policies-rooms    | `tasks/phase-03-auth-policies-rooms.md`    | ✅ Done | 6/6      | L    | 2026-07-09   |
+| 04  | replay-and-offline     | `tasks/phase-04-replay-and-offline.md`     | ✅ Done | 5/5      | M    | 2026-07-09   |
+| 05  | scaling-cluster        | `tasks/phase-05-scaling-cluster.md`        | ✅ Done | 6/6      | L    | 2026-07-10   |
+| 06  | websocket-transport    | `tasks/phase-06-websocket-transport.md`    | ✅ Done | 6/6      | L    | 2026-07-10   |
+| 07  | both-composite         | `tasks/phase-07-both-composite.md`         | ✅ Done | 4/4      | S    | 2026-07-10   |
+| 08  | web-frontend           | `tasks/phase-08-web-frontend.md`           | ✅ Done | 6/6      | L    | 2026-07-10   |
+| 09  | testing-quality        | `tasks/phase-09-testing-quality.md`        | ✅ Done | 5/5      | L    | 2026-07-10   |
+| 10  | docs-audit-hardening   | `tasks/phase-10-docs-audit-hardening.md`   | ✅ Done | 5/5      | M    | 2026-07-10   |
 
 ### External precondition
 
