@@ -11,6 +11,7 @@
  */
 
 import type { ConnectionEventMeta } from '@bymax-one/nest-realtime';
+import { Logger } from '@nestjs/common';
 import type { ModuleRef } from '@nestjs/core';
 
 import { PresenceTracker } from '../../src/presence/presence.tracker';
@@ -259,5 +260,26 @@ describe('PresenceTracker', () => {
 
     await expect(tracker.onConnect(meta())).resolves.toBeUndefined();
     await expect(tracker.onDisconnect(meta())).resolves.toBeUndefined();
+  });
+
+  /**
+   * A rejection that is not an Error still reports a readable reason.
+   *
+   * A driver is free to reject with a string, and reading `.message` off one
+   * would log an empty reason, hiding why the roster went stale. The value is
+   * narrowed before its message is read, so the log keeps its diagnostic value.
+   */
+  it('logs a readable reason when a hook rejects with a non-Error', async () => {
+    const warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const presence = { addConnection: jest.fn().mockRejectedValue('redis went away') };
+    const tracker = new PresenceTracker(
+      presence as unknown as RedisPresenceStorage,
+      moduleRefWith(jest.fn()),
+    );
+
+    await expect(tracker.onConnect(meta())).resolves.toBeUndefined();
+
+    expect(warn).toHaveBeenCalledWith('presence onConnect skipped: redis went away');
+    warn.mockRestore();
   });
 });

@@ -45,4 +45,17 @@ describe('Card', () => {
     );
     expect(accented.container.querySelector('[aria-hidden="true"]')).not.toBeNull();
   });
+
+  it('anchors the accent hairline to the header itself', () => {
+    // Scenario: the hairline is absolutely positioned, so the header has to be a
+    // positioning context of its own. Without it a header rendered outside a Card
+    // would stretch the line across whatever positioned ancestor is above it.
+    const { container } = render(
+      <CardHeader accent>
+        <CardTitle>Anchored</CardTitle>
+      </CardHeader>,
+    );
+
+    expect(container.firstElementChild).toHaveClass('relative');
+  });
 });

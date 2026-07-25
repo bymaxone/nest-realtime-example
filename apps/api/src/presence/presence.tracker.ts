@@ -109,12 +109,17 @@ export class PresenceTracker implements IConnectionLifecycleHooks, OnApplication
    * once the shared Redis client has already been released. Presence is a
    * best-effort mirror, so a storage outage must degrade the roster rather than
    * break the connection it is describing.
+   *
+   * A rejection value is not guaranteed to be an `Error`, so it is narrowed
+   * before its message is read: a driver that rejects with a string would
+   * otherwise log an empty reason and hide why the roster went stale.
    */
   private async tolerate(hook: string, run: () => Promise<void>): Promise<void> {
     try {
       await run();
     } catch (error) {
-      this.logger.warn(`presence ${hook} skipped: ${(error as Error).message}`);
+      const reason = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`presence ${hook} skipped: ${reason}`);
     }
   }
 }

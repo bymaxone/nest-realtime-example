@@ -32,10 +32,18 @@ export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
   readonly accent?: boolean;
 }
 
-/** Card header region: holds the title and description. */
+/**
+ * Card header region: holds the title and description.
+ *
+ * The header establishes its own positioning context so the accent hairline
+ * anchors to the header rather than to whatever positioned ancestor happens to
+ * be above it. Inside a `Card` the two coincide — the header is the first child,
+ * so its top edge is the card's — but a header rendered on its own would
+ * otherwise stretch the hairline across the nearest positioned ancestor.
+ */
 export function CardHeader({ className, accent = false, children, ...props }: CardHeaderProps) {
   return (
-    <div className={cn('flex flex-col space-y-1.5 p-6', className)} {...props}>
+    <div className={cn('relative flex flex-col space-y-1.5 p-6', className)} {...props}>
       {accent ? (
         <span
           aria-hidden="true"
