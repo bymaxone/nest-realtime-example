@@ -176,6 +176,43 @@ describe('RedisPresenceStorage', () => {
   });
 
   /**
+   * Discarded cleanup transaction on the final disconnect.
+   *
+   * A `MULTI` that resolves to `null` ran none of its queued writes. Accepting
+   * that as success would leave the departed user in the tenant and global
+   * indexes with an empty connection set, so the roster would keep reporting a
+   * ghost. The cleanup is idempotent and must be reissued directly instead.
+   */
+  it('still clears the indexes when the cleanup transaction is discarded', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    // The removal transaction succeeds; the cleanup that follows is discarded.
+    redis.nullNextTransaction(1);
+
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(0);
+
+    expect(await presence.listOnlineByTenant('acme')).toEqual([]);
+    expect(await presence.countOnline()).toBe(0);
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+  });
+
+  /**
+   * Discarded cleanup for a connection that never carried a tenant.
+   *
+   * The direct reissue must skip the tenant index exactly as the transaction
+   * would have, so a tenantless user is cleaned up without touching a tenant key
+   * that was never written.
+   */
+  it('clears a tenantless user when the cleanup transaction is discarded', async () => {
+    await presence.setOnline('ghost', 'c1');
+    redis.nullNextTransaction(1);
+
+    expect(await presence.removeConnection('ghost', 'c1')).toBe(0);
+
+    expect(await presence.countOnline()).toBe(0);
+    expect(await presence.isOnline('ghost')).toBe(false);
+  });
+
+  /**
    * Null transaction result on disconnect.
    *
    * The same fallback on the removal path: with no trailing `scard` the remaining

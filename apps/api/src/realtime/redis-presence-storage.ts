@@ -206,13 +206,36 @@ export class RedisPresenceStorage implements IPresenceStorage {
     const remaining = await this.liveCount(results, userId);
     if (remaining > 0) return remaining;
 
+    await this.clearUserIndexes(userId);
+    return 0;
+  }
+
+  /**
+   * Drop a departed user from the tenant and global indexes.
+   *
+   * ioredis resolves `exec()` to `null` when a `MULTI` is discarded, and none of
+   * its queued writes ran. Accepting that as success would leave the user in the
+   * indexes with an empty connection set — a ghost the tenant roster keeps
+   * reporting online after their last stream closed. Every command here is
+   * idempotent, so a discarded transaction is simply reissued directly rather
+   * than surfaced as a failure the caller could not act on anyway.
+   *
+   * @param userId - The user whose last connection just closed.
+   * @throws When any Redis command in the transaction reports an error.
+   */
+  private async clearUserIndexes(userId: string): Promise<void> {
     const tenantId = await this.client.get(this.userTenantKey(userId));
     const cleanup = this.client.multi();
     cleanup.srem(GLOBAL_ONLINE_KEY, userId);
     cleanup.del(this.userTenantKey(userId));
     if (tenantId !== null) cleanup.srem(this.tenantKey(tenantId), userId);
-    throwOnTransactionError(await cleanup.exec());
-    return 0;
+    const results = await cleanup.exec();
+    throwOnTransactionError(results);
+    if (results !== null) return;
+
+    await this.client.srem(GLOBAL_ONLINE_KEY, userId);
+    await this.client.del(this.userTenantKey(userId));
+    if (tenantId !== null) await this.client.srem(this.tenantKey(tenantId), userId);
   }
 
   /**
