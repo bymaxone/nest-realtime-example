@@ -249,6 +249,43 @@ describe('OfflineLabPage', () => {
     await waitFor(() => expect(emitMock).toHaveBeenCalledWith('bob@acme', 12));
   });
 
+  it('falls back to the smallest burst when the field is left empty', async () => {
+    // Scenario: an empty field parses to NaN, which would reach the endpoint as an
+    // invalid count and be rejected. It resolves to the minimum instead, so the
+    // request stays valid, and clearing still leaves the field genuinely empty to
+    // retype rather than snapping back.
+    useSessionMock.mockReturnValue(ADMIN);
+    peekMock.mockResolvedValue({ userId: 'bob@acme', events: [] });
+    emitMock.mockResolvedValue({ emitted: 1 });
+    render(<OfflineLabPage />);
+    await screen.findByText('Queue is empty');
+
+    const size = screen.getByLabelText('Burst size');
+    await userEvent.clear(size);
+    expect(size).toHaveValue(null);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Enqueue while offline' }));
+
+    await waitFor(() => expect(emitMock).toHaveBeenCalledWith('bob@acme', 1));
+  });
+
+  it('trims a burst size driven past the control bounds', async () => {
+    // Scenario: a number input can be driven above its max, so the size is clamped
+    // to the range the lab endpoint accepts rather than rejected server-side.
+    useSessionMock.mockReturnValue(ADMIN);
+    peekMock.mockResolvedValue({ userId: 'bob@acme', events: [] });
+    emitMock.mockResolvedValue({ emitted: 50 });
+    render(<OfflineLabPage />);
+    await screen.findByText('Queue is empty');
+
+    const size = screen.getByLabelText('Burst size');
+    await userEvent.clear(size);
+    await userEvent.type(size, '999');
+    await userEvent.click(screen.getByRole('button', { name: 'Enqueue while offline' }));
+
+    await waitFor(() => expect(emitMock).toHaveBeenCalledWith('bob@acme', 50));
+  });
+
   it('re-reads the queue when the target user changes', async () => {
     // Scenario: switching target must not show the previous user's queue.
     useSessionMock.mockReturnValue(ADMIN);

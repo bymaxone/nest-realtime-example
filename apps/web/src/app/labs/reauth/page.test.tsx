@@ -205,6 +205,41 @@ describe('ReauthLabPage', () => {
     await waitFor(() => expect(revokeMock).toHaveBeenCalledWith('bob@acme'));
   });
 
+  it('refuses to act on a blank target instead of calling the endpoint', async () => {
+    // Scenario: an operator clears the field. An empty id would build
+    // `/auth/revoke/`, a different route from `/auth/revoke/:userId`, so the page
+    // says what is missing rather than issuing a request that cannot succeed.
+    useSessionMock.mockReturnValue(ADMIN);
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
+    statsMock.mockResolvedValue({ revalidations: [] });
+    render(<ReauthLabPage />);
+    await screen.findByText('No revalidation observed yet');
+
+    await userEvent.clear(screen.getByLabelText('Target user'));
+    await userEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+
+    expect(await screen.findByText('Enter a user id to revoke or restore.')).toBeInTheDocument();
+    expect(revokeMock).not.toHaveBeenCalled();
+  });
+
+  it('trims whitespace around the target before revoking', async () => {
+    // Scenario: a pasted id can carry surrounding spaces, which would be encoded
+    // into the path and miss the user entirely.
+    useSessionMock.mockReturnValue(ADMIN);
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
+    statsMock.mockResolvedValue({ revalidations: [] });
+    revokeMock.mockResolvedValue({ userId: 'bob@acme', revoked: true });
+    render(<ReauthLabPage />);
+    await screen.findByText('No revalidation observed yet');
+
+    const field = screen.getByLabelText('Target user');
+    await userEvent.clear(field);
+    await userEvent.type(field, '  bob@acme  ');
+    await userEvent.click(screen.getByRole('button', { name: 'Revoke sessions' }));
+
+    await waitFor(() => expect(revokeMock).toHaveBeenCalledWith('bob@acme'));
+  });
+
   it('renders without a session before the identity lookup resolves', async () => {
     // Scenario: the first paint has no traits yet, so the target stays empty.
     useSessionMock.mockReturnValue({ traits: null });

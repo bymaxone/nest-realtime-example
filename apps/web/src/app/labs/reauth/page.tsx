@@ -68,8 +68,16 @@ function useReauthLab(): ReauthLabState {
   }, [load]);
 
   const act = (action: 'revoke' | 'restore'): void => {
+    // An operator can clear the field, and an empty id would build
+    // `/auth/revoke/` — a different route from `/auth/revoke/:userId` — so the
+    // request is refused here rather than sent as a confusing server error.
+    const userId = targetUserId.trim();
+    if (userId === '') {
+      setStatus('Enter a user id to revoke or restore.');
+      return;
+    }
     const call = action === 'revoke' ? reauthLabApi.revoke : reauthLabApi.restore;
-    call(targetUserId)
+    call(userId)
       .then((ack) =>
         setStatus(
           ack.revoked

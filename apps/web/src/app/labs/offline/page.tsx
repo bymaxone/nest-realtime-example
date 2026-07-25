@@ -27,12 +27,38 @@ import { Input, Label } from '@/components/ui/input';
 import { ApiError, offlineLabApi, type OfflineQueuedView } from '@/lib/api-client';
 import { useSession } from '@/lib/session-context';
 
+/** Smallest burst the lab endpoint accepts. */
+const MIN_BURST = 1;
+
+/** Largest burst this control offers, within what the lab endpoint accepts. */
+const MAX_BURST = 50;
+
+/**
+ * Resolve what the burst field currently means as a request parameter.
+ *
+ * The field is held as raw text so it can be cleared and retyped — clamping the
+ * state on every keystroke would snap the value back mid-edit and make the next
+ * character append to it. The text is instead read at the point of use: an empty
+ * or unparseable field falls back to the smallest burst, and a value driven past
+ * the control's bounds is trimmed into range, so the endpoint is never sent a
+ * count it would reject.
+ *
+ * @param text - The field's raw contents.
+ * @returns A whole burst size between {@link MIN_BURST} and {@link MAX_BURST}.
+ */
+function readBurstSize(text: string): number {
+  const parsed = Number.parseInt(text, 10);
+  if (!Number.isFinite(parsed)) return MIN_BURST;
+  return Math.min(MAX_BURST, Math.max(MIN_BURST, parsed));
+}
+
 /** Everything the offline lab page's JSX needs. */
 interface OfflineLabState {
   readonly targetUserId: string;
   readonly setTargetUserId: (value: string) => void;
-  readonly count: number;
-  readonly setCount: (value: number) => void;
+  /** Raw contents of the burst field, so it can be cleared and retyped. */
+  readonly countText: string;
+  readonly setCountText: (value: string) => void;
   readonly queued: readonly OfflineQueuedView[];
   /** Id of the newest queued event, the watermark an acknowledge purges up to. */
   readonly newestQueuedId: string | undefined;
@@ -47,7 +73,7 @@ interface OfflineLabState {
 function useOfflineLab(): OfflineLabState {
   const { traits } = useSession();
   const [targetUserId, setTargetUserId] = useState('bob@acme');
-  const [count, setCount] = useState(5);
+  const [countText, setCountText] = useState('5');
   const [queued, setQueued] = useState<readonly OfflineQueuedView[]>([]);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -65,7 +91,7 @@ function useOfflineLab(): OfflineLabState {
 
   const enqueue = (): void => {
     offlineLabApi
-      .emit(targetUserId, count)
+      .emit(targetUserId, readBurstSize(countText))
       .then((result) => {
         setStatus(
           `enqueued ${result.emitted} ${result.emitted === 1 ? 'event' : 'events'} for ${targetUserId}`,
@@ -92,8 +118,8 @@ function useOfflineLab(): OfflineLabState {
   return {
     targetUserId,
     setTargetUserId,
-    count,
-    setCount,
+    countText,
+    setCountText,
     queued,
     newestQueuedId: queued[queued.length - 1]?.id,
     status,
@@ -122,10 +148,10 @@ function QueueControls(lab: OfflineLabState) {
         <Input
           id="offline-count"
           type="number"
-          min={1}
-          max={50}
-          value={lab.count}
-          onChange={(e) => lab.setCount(Number(e.target.value))}
+          min={MIN_BURST}
+          max={MAX_BURST}
+          value={lab.countText}
+          onChange={(e) => lab.setCountText(e.target.value)}
           className="w-24"
         />
       </div>
