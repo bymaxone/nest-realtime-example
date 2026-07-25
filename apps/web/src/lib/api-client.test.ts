@@ -13,7 +13,9 @@ import {
   domainApi,
   emitApi,
   evictionLabApi,
+  offlineLabApi,
   presenceApi,
+  reauthLabApi,
   replayLabApi,
   roomsApi,
 } from './api-client';
@@ -157,5 +159,33 @@ describe('api-client', () => {
     await roomsApi.leave('conn-1', 'incident', '1');
     await roomsApi.mine('conn-1');
     expect(fetchMock).toHaveBeenCalledTimes(10);
+  });
+
+  it('exercises the offline-queue, reauth, and introspection endpoints', async () => {
+    // Scenario: the wrappers backing the offline and reauth labs, plus the wiring
+    // snapshot, all resolve against a stubbed fetch.
+    fetchMock.mockResolvedValue(jsonResponse({}));
+    await offlineLabApi.emit('bob@acme', 5);
+    await offlineLabApi.peek('bob@acme');
+    await offlineLabApi.acknowledge('ev-1');
+    await reauthLabApi.stats();
+    await reauthLabApi.revoke('ana@acme');
+    await reauthLabApi.restore('ana@acme');
+    await connectionsApi.introspection();
+    await connectionsApi.disconnect('c1');
+    expect(fetchMock).toHaveBeenCalledTimes(8);
+  });
+
+  it('issues a DELETE for a revocation restore', async () => {
+    // Scenario: clearing a revocation marker is a DELETE, not another POST, so the
+    // method has to reach the api unchanged.
+    fetchMock.mockResolvedValue(jsonResponse({ userId: 'ana@acme', revoked: false }));
+
+    await reauthLabApi.restore('ana@acme');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/revoke/ana%40acme'),
+      expect.objectContaining({ method: 'DELETE' }),
+    );
   });
 });

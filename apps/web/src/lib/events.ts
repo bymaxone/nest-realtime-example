@@ -17,7 +17,11 @@
  * subscribe to each of them explicitly.
  */
 
-import type { PublicConnectionMeta } from '@bymax-one/nest-realtime/shared';
+import {
+  PRESENCE_EVENT_NAMES,
+  RESERVED_EVENT_NAMES,
+  type PublicConnectionMeta,
+} from '@bymax-one/nest-realtime/shared';
 
 /** Payload of an `order.*` lifecycle event. */
 export interface OrderEventPayload {
@@ -48,6 +52,11 @@ export interface LabReplayPayload {
 /** Payload of a `lab.both` split-screen demonstration event. */
 export interface LabBothPayload {
   readonly nonce: string;
+}
+
+/** Payload of a numbered `lab.offline` event delivered from the durable queue. */
+export interface LabOfflinePayload {
+  readonly seq: number;
 }
 
 /** Payload of the reserved `connection:established` event. */
@@ -87,6 +96,7 @@ export interface LiveEvents {
   'chat.message': ChatMessagePayload;
   'lab.replay': LabReplayPayload;
   'lab.both': LabBothPayload;
+  'lab.offline': LabOfflinePayload;
   'connection:established': ConnectionEstablishedPayload;
   'connection:reauthentication-failed': ReauthFailedPayload;
   'connection:credential-expiring': ReauthFailedPayload;
@@ -112,7 +122,27 @@ export const SSE_APPLICATION_EVENT_NAMES: readonly string[] = [
   'deployment.succeeded',
   'lab.replay',
   'lab.both',
+  'lab.offline',
 ];
+
+/**
+ * The presence transition names, as a set for membership checks.
+ *
+ * The library pre-registers these listeners itself, so they never belong in
+ * {@link SSE_APPLICATION_EVENT_NAMES}; the roster page uses this set to decide
+ * when an observed event should re-read the REST snapshot.
+ */
+export const PRESENCE_EVENT_NAME_SET: ReadonlySet<string> = new Set(
+  Object.values(PRESENCE_EVENT_NAMES),
+);
+
+/**
+ * The reserved event the library emits when a periodic revalidation fails.
+ *
+ * Taken from the library's own catalog rather than retyped, so the reauth lab can
+ * never drift from the name actually sent on the wire.
+ */
+export const REAUTH_FAILED_EVENT_NAME: string = RESERVED_EVENT_NAMES.CONNECTION_REAUTH_FAILED;
 
 /** The minimal shape `EventInspector` renders: a wire event name and its payload. */
 export interface InspectorEntry {

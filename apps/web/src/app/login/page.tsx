@@ -13,7 +13,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Code } from '@/components/ui/code';
 import { ApiError, authApi } from '@/lib/api-client';
 import { useSession } from '@/lib/session-context';
 
@@ -47,27 +48,32 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto max-w-md py-10">
-      <Card className="p-6">
-        <CardTitle>Demo login</CardTitle>
-        <CardDescription>
-          Pick a seeded identity to set the session cookie. Every page then flows through
-          `withCredentials` SSE, `POST /auth/ticket`, and `POST /auth/ws-token` from this session.
-        </CardDescription>
-        <div className="mt-5 flex flex-col gap-2">
-          {DEMO_USERS.map((user) => (
-            <Button
-              key={user.username}
-              variant="outline"
-              disabled={pendingUsername !== null}
-              onClick={() => void loginAs(user.username)}
-              className="justify-between"
-            >
-              <span className="font-mono">{user.username}</span>
-              <span className="text-white/40">{user.tenant}</span>
-            </Button>
-          ))}
-        </div>
-        {error ? <p className="mt-4 text-sm text-(--color-danger)">{error}</p> : null}
+      <Card>
+        <CardHeader accent>
+          <CardTitle>Demo login</CardTitle>
+          <CardDescription>
+            Pick a seeded identity to set the session cookie. Every page then flows through{' '}
+            <Code>withCredentials</Code> SSE, <Code>POST /auth/ticket</Code>, and{' '}
+            <Code>POST /auth/ws-token</Code> from this session.
+          </CardDescription>
+          <div className="mt-5 flex flex-col gap-2">
+            {DEMO_USERS.map((user) => (
+              <Button
+                key={user.username}
+                variant="outline"
+                disabled={pendingUsername !== null}
+                onClick={() => void loginAs(user.username)}
+                className="justify-between"
+              >
+                <span className="font-mono">{user.username}</span>
+                <span className="text-white/40">{user.tenant}</span>
+              </Button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          {error ? <p className="text-sm text-(--color-danger)">{error}</p> : null}
+        </CardContent>
       </Card>
     </div>
   );

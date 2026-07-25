@@ -105,7 +105,7 @@ It follows the Bymax example blueprint and quality bar: **100% test coverage** o
 git clone https://github.com/bymaxone/nest-realtime-example.git
 cd nest-realtime-example
 
-# 1) install workspace deps (the library resolves from a committed vendor tarball + pnpm patch)
+# 1) install workspace deps (the library resolves from a committed vendor tarball)
 pnpm install
 
 # 2) start Redis (backs tickets, the offline queue, presence and cluster pub/sub)
@@ -125,7 +125,7 @@ pnpm dev
 | SSE stream             | <http://localhost:3001/api/events> |
 
 The library is **pre-publish**; both apps consume it from a committed package tarball under
-[`vendor/`](vendor) plus a committed pnpm patch, so a fresh clone and CI resolve identical bytes
+[`vendor/`](vendor), so a fresh clone and CI resolve identical bytes
 without a sibling checkout. See [Library consumption](#library-consumption) for the details and the
 [NPM switch procedure](docs/NPM_SWITCH.md) for moving to the published version once it ships.
 
@@ -253,12 +253,14 @@ curl -s -b admin.txt "$API/labs/offline/peek?userId=bob@acme"                   
 
 ### 7. FIFO eviction (rows 18, 71)
 
-`REALTIME_MAX_CONNECTIONS_PER_USER=2`, so opening a third stream for one user evicts the oldest with
-`REALTIME_TOO_MANY_CONNECTIONS` (never an HTTP 429). Open three streams for `ana@acme`, then:
+`REALTIME_MAX_CONNECTIONS_PER_USER=5`, so opening a sixth stream for one user evicts the oldest with
+`REALTIME_TOO_MANY_CONNECTIONS` (never an HTTP 429). The dashboard shell already holds two streams
+per tab, so a second dashboard tab plus a lab page crosses the cap on its own. From the shell, open
+six streams for `ana@acme`, then:
 
 ```bash
 curl -s -b ana.txt "$API/labs/eviction/timeline?userId=ana@acme"   # admin view of connect/evict times + reason
-curl -s -b ana.txt $API/connections                                # exactly the 2 newest remain live
+curl -s -b ana.txt $API/connections                                # exactly the 5 newest remain live
 ```
 
 ```json
@@ -310,14 +312,14 @@ curl -s -b ana.txt $API/connections/introspection
     "endpoint": "/api/events",
     "heartbeatMs": 10000,
     "replayBufferSize": 10,
-    "maxConnectionsPerUser": 2,
+    "maxConnectionsPerUser": 5,
     "emitConnectionEvent": true
   },
   "providers": {
     "authenticator": "CompositeAuthenticator",
     "hooks": "CompositeLifecycleHooks",
     "pubsub": "InMemoryPubSub",
-    "presence": null
+    "presence": "RedisPresenceStorage"
   }
 }
 ```
@@ -329,19 +331,21 @@ curl -s -b ana.txt $API/connections/introspection
 Every page consumes the library through `@bymax-one/nest-realtime/react` hooks only; the frontend
 never imports the server subpath.
 
-| Route              | Page                                            | Library features                        |
-| ------------------ | ----------------------------------------------- | --------------------------------------- |
-| `/`                | Live Operations Board (orders/deployments feed) | `useRealtime` (SSE), typed events       |
-| `/presence`        | Presence roster per tenant                      | `usePresence`                           |
-| `/chat`            | Incident room chat (WebSocket)                  | `useRealtime` (WS), `@Subscribe`        |
-| `/broadcast`       | Tenant broadcast console                        | auto rooms, anti-IDOR guard             |
-| `/connections`     | Connections + eviction visualizer + kill switch | registry, FIFO eviction, revocation     |
-| `/audit`           | Lifecycle audit feed                            | `hooks.*`, `@OnConnect`/`@OnDisconnect` |
-| `/labs/connection` | Manual connect/disconnect, backoff, attempts    | `reconnect` tuning, manual connect      |
-| `/labs/ticket`     | Ticket auth flow                                | one-shot ticket connect                 |
-| `/labs/replay`     | Reconnect and replay demonstrator               | `Last-Event-ID`, buffer size            |
-| `/labs/cluster`    | Multi-instance counters and revocation          | Redis pub/sub, cross-instance kill      |
-| `/labs/both`       | Split-screen SSE + WS receiving the same emit   | composite `both` transport              |
+| Route              | Page                                              | Library features                         |
+| ------------------ | ------------------------------------------------- | ---------------------------------------- |
+| `/`                | Live Operations Board (orders/deployments feed)   | `useRealtime` (SSE), typed events        |
+| `/presence`        | Presence roster per tenant                        | `usePresence`                            |
+| `/chat`            | Incident room chat (WebSocket)                    | `useRealtime` (WS), `@Subscribe`         |
+| `/broadcast`       | Tenant broadcast console                          | auto rooms, anti-IDOR guard              |
+| `/connections`     | Connections, eviction visualizer, resolved wiring | registry, FIFO eviction, DI tokens       |
+| `/audit`           | Lifecycle audit feed                              | `hooks.*`, `@OnConnect`/`@OnDisconnect`  |
+| `/labs/connection` | Manual connect/disconnect, backoff, attempts      | `reconnect` tuning, manual connect       |
+| `/labs/ticket`     | Ticket auth flow                                  | one-shot ticket connect                  |
+| `/labs/replay`     | Reconnect and replay demonstrator                 | `Last-Event-ID`, buffer size             |
+| `/labs/offline`    | Enqueue for an absent user, inspect, drain        | `RedisOfflineQueue`, gap delivery        |
+| `/labs/reauth`     | Revocation switch and revalidation counters       | reauth policy, `revalidate`, kill switch |
+| `/labs/cluster`    | Multi-instance counters and revocation            | Redis pub/sub, cross-instance kill       |
+| `/labs/both`       | Split-screen SSE + WS receiving the same emit     | composite `both` transport               |
 
 ---
 
@@ -493,12 +497,11 @@ npm would serve), so it is a link to the built package and not a copy of the lib
 committed tarball resolves identically in a working tree, a fresh clone, and CI (which checks out only
 this repository).
 
-A committed **pnpm patch** ([`patches/@bymax-one__nest-realtime@0.1.0.patch`](patches)) fixes four
-defects in `@bymax-one/nest-realtime@0.1.0` that a consumer would otherwise hit: the published build
-was produced without `@swc/core`, so decorator metadata for type-based DI was omitted in the SSE
-controller and the pub/sub subscriber, and the `websocket.namespace` option was declared but never
-wired. The patch is a documented consumer workaround; it is removed once a fixed version is vendored
-or published (the library needs a source-level rebuild with `@swc/core` and a namespace implementation).
+**No pnpm patch is needed.** Earlier vendored builds required one: the dist omitted decorator
+metadata for type-based DI in the SSE controller and the pub/sub subscriber, the
+`websocket.namespace` option was declared but never wired, and the React hooks lacked the
+application-event subscription and reconnect-budget options this dashboard needs. Those are all
+fixed at the source now, so the vendored tarball is used as-is.
 
 To refresh the tarball after changing the sibling library:
 

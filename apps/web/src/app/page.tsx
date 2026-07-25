@@ -15,7 +15,7 @@ import { useState } from 'react';
 
 import { EventInspector } from '@/components/realtime/event-inspector';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ApiError, domainApi } from '@/lib/api-client';
 import { toInspectorEntries } from '@/lib/events';
 
@@ -46,29 +46,33 @@ export default function LiveFeedPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="p-5">
-        <CardTitle>Live Operations Board</CardTitle>
-        <CardDescription>
-          Order and deployment lifecycle events, streamed over the shared SSE connection.
-        </CardDescription>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button onClick={() => void run('orders')}>Simulate order burst</Button>
-          <Button variant="outline" onClick={() => void run('deployments')}>
-            Simulate deployment burst
-          </Button>
-          {status ? <span className="text-xs text-white/50">{status}</span> : null}
-        </div>
+      <Card>
+        <CardHeader accent>
+          <CardTitle>Live Operations Board</CardTitle>
+          <CardDescription>
+            Order and deployment lifecycle events, streamed over the shared SSE connection.
+          </CardDescription>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button onClick={() => void run('orders')}>Simulate order burst</Button>
+            <Button variant="outline" onClick={() => void run('deployments')}>
+              Simulate deployment burst
+            </Button>
+            {status ? <span className="text-xs text-white/50">{status}</span> : null}
+          </div>
+        </CardHeader>
       </Card>
 
-      <Card className="p-5">
-        <CardTitle>Event inspector</CardTitle>
-        <CardDescription>Last 50 events, newest first.</CardDescription>
-        <div className="mt-4">
-          <EventInspector
-            events={toInspectorEntries(events)}
-            emptyTitle="No orders or deployments yet"
-          />
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Event inspector</CardTitle>
+          <CardDescription>Last 50 events, newest first.</CardDescription>
+          <div className="mt-4">
+            <EventInspector
+              events={toInspectorEntries(events)}
+              emptyTitle="No orders or deployments yet"
+            />
+          </div>
+        </CardHeader>
       </Card>
     </div>
   );

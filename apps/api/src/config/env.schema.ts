@@ -57,12 +57,17 @@ export const envSchema = z.object({
     .min(1)
     .max(MAX_REPLAY_BUFFER_SIZE)
     .default(10),
+  // Per-user connection budget. The dashboard shell already holds two streams per
+  // tab (the shared provider feed plus the topbar status badge) and a lab page adds
+  // up to two more (its own stream and a WebSocket), so the default leaves one tab
+  // fully functional while a second tab still crosses the cap and makes FIFO
+  // eviction observable.
   REALTIME_MAX_CONNECTIONS_PER_USER: z.coerce
     .number()
     .int()
     .min(1)
     .max(MAX_CONNECTIONS_PER_USER)
-    .default(2),
+    .default(5),
   REALTIME_EMIT_CONNECTION_EVENT: z
     .enum(['true', 'false'])
     .default('true')

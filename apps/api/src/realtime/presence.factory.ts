@@ -1,11 +1,14 @@
 /**
- * @fileoverview Builds the Redis presence storage from config, or nothing when memory.
+ * @fileoverview Builds the Redis presence storage from the shared client.
  * @layer realtime
  *
- * Presence is a cross-instance concern, so it is enabled on the same gate as the
- * pub/sub bus: under `PUBSUB_DRIVER=redis` the shared ioredis client backs a
- * `RedisPresenceStorage`; in memory mode there is nothing to share, so presence is
- * left off and presence-dependent features stay disabled.
+ * Presence is backed by the same ioredis client the revocation store already
+ * uses, so it is available on every profile rather than only under
+ * `PUBSUB_DRIVER=redis`: a single-instance boot still wants a truthful roster
+ * across a user's own tabs, and gating it on the pub/sub driver left the
+ * presence page permanently empty on the documented development loop. The
+ * storage is instance-agnostic either way, so the cluster profile keeps the
+ * cross-instance roster it needs.
  */
 
 import type { Redis } from 'ioredis';
@@ -15,18 +18,16 @@ import type { AppConfig } from '../config/env.loader';
 import { RedisPresenceStorage } from './redis-presence-storage';
 
 /**
- * Construct the presence storage when the config selects the redis driver.
+ * Construct the presence storage over the shared Redis client.
  *
- * @param config - The frozen application configuration.
+ * The configured instance name is passed as the owning identity, because it is
+ * stable across a restart: that is what lets a rebooted instance reclaim the
+ * connections it left behind when it died.
+ *
  * @param client - The shared ioredis client.
- * @returns A configured {@link RedisPresenceStorage}, or `undefined` for memory mode.
+ * @param config - The frozen application configuration.
+ * @returns A configured {@link RedisPresenceStorage}.
  */
-export function createPresenceStorage(
-  config: AppConfig,
-  client: Redis,
-): RedisPresenceStorage | undefined {
-  if (config.pubsubDriver !== 'redis') {
-    return undefined;
-  }
-  return new RedisPresenceStorage({ client });
+export function createPresenceStorage(client: Redis, config: AppConfig): RedisPresenceStorage {
+  return new RedisPresenceStorage({ client, instanceId: config.instanceName });
 }

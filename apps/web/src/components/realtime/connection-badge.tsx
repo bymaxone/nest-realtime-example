@@ -13,6 +13,7 @@
 
 import { useRealtimeConnection } from '@bymax-one/nest-realtime/react';
 
+import { Button } from '@/components/ui/button';
 import { SSE_EVENTS_URL } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -30,17 +31,21 @@ export function ConnectionBadge() {
   const state = connected ? 'live' : 'down';
 
   return (
-    <button
-      type="button"
+    <Button
+      size="sm"
+      variant="outline"
       onClick={reconnect}
+      aria-label="Connection status. Activate to force a reconnect."
       title="Click to force a reconnect"
-      className="inline-flex items-center gap-2 rounded-full border border-(--glass-border) bg-(--glass-bg) px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-(--glass-bg-hover)"
+      // A fixed width keeps the top bar from reflowing every time the label
+      // swaps between the short and long status word.
+      className="w-[8.5rem] font-mono"
     >
       <span
         aria-hidden="true"
         className={cn('h-2 w-2 shrink-0 rounded-full', STATUS_DOT_CLASS[state])}
       />
-      <span className="font-mono">{connected ? 'live' : 'disconnected'}</span>
-    </button>
+      {connected ? 'live' : 'disconnected'}
+    </Button>
   );
 }

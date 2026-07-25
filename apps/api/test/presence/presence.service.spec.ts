@@ -2,9 +2,8 @@
  * Unit tests for PresenceService.
  *
  * Layer: unit.
- * Goal: the read service delegates to presence storage, or reports an empty roster
- *       when presence is disabled.
- * Mocks: a RedisPresenceStorage double (or undefined for memory mode).
+ * Goal: the read service delegates the tenant roster to presence storage.
+ * Mocks: a RedisPresenceStorage double.
  */
 
 import { PresenceService } from '../../src/presence/presence.service';
@@ -14,8 +13,8 @@ describe('PresenceService', () => {
   /**
    * Delegation.
    *
-   * With presence configured, the service must return the storage's tenant roster
-   * verbatim.
+   * The service must return the storage's tenant roster verbatim, so the REST
+   * mirror and the live event stream never disagree about who is online.
    */
   it('delegates the tenant roster to presence storage', async () => {
     const presence = {
@@ -28,14 +27,15 @@ describe('PresenceService', () => {
   });
 
   /**
-   * Presence disabled.
+   * Empty tenant.
    *
-   * In memory mode (no presence storage) the service must report an empty roster so
-   * the endpoint answers without a Redis dependency.
+   * A tenant with nobody connected must answer with an empty roster rather than
+   * an error, so the presence page renders its empty state.
    */
-  it('returns an empty roster when presence is disabled', async () => {
-    const service = new PresenceService(undefined);
+  it('reports an empty roster for a tenant with no one online', async () => {
+    const presence = { listOnlineByTenant: jest.fn().mockResolvedValue([]) };
+    const service = new PresenceService(presence as unknown as RedisPresenceStorage);
 
-    expect(await service.listOnlineByTenant('acme')).toEqual([]);
+    expect(await service.listOnlineByTenant('globex')).toEqual([]);
   });
 });

@@ -32,6 +32,8 @@ pnpm-debug.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+# Agent tooling: machine-local permissions and launch configs carry absolute paths.
+.claude/
 
 # TypeScript build info
 *.tsbuildinfo

@@ -10,13 +10,23 @@
  */
 
 import type { PublicConnectionMeta } from '@bymax-one/nest-realtime';
-import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 
-import { APP_SERVICE_NAME } from '../app.constants';
 import { AdminGuard } from '../auth/admin.guard';
 import { SessionTraitsParam } from '../auth/session-traits.decorator';
 import { SessionGuard } from '../auth/session.guard';
 import type { SessionTraits } from '../auth/session.types';
+import { APP_CONFIG } from '../config/config.tokens';
+import type { AppConfig } from '../config/env.loader';
 
 import { ConnectionsService } from './connections.service';
 import {
@@ -24,7 +34,13 @@ import {
   type RealtimeWiringSnapshot,
 } from './realtime-introspection.service';
 
-/** The connection listing response, tagged with the reporting instance. */
+/**
+ * The connection listing response, tagged with the reporting instance.
+ *
+ * `instance` is the configured instance name, the same value `/health` reports,
+ * so that under the cluster profile a reader can tell which of the two api
+ * instances served the request.
+ */
 interface ConnectionsResponse {
   readonly instance: string;
   readonly connections: readonly PublicConnectionMeta[];
@@ -43,10 +59,12 @@ export class ConnectionsController {
    *
    * @param connections - The connection introspection and kill-switch service.
    * @param introspection - The resolved realtime wiring introspection service.
+   * @param config - The frozen application configuration, read for the instance name.
    */
   constructor(
     private readonly connections: ConnectionsService,
     private readonly introspection: RealtimeIntrospectionService,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
   /**
@@ -57,7 +75,7 @@ export class ConnectionsController {
   @Get()
   @UseGuards(SessionGuard, AdminGuard)
   list(): ConnectionsResponse {
-    return { instance: APP_SERVICE_NAME, connections: this.connections.list() };
+    return { instance: this.config.instanceName, connections: this.connections.list() };
   }
 
   /**

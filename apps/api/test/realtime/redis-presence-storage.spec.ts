@@ -17,7 +17,7 @@ describe('RedisPresenceStorage', () => {
 
   beforeEach(() => {
     redis = new FakePresenceRedis();
-    presence = new RedisPresenceStorage({ client: asPresenceRedis(redis) });
+    presence = new RedisPresenceStorage({ client: asPresenceRedis(redis), instanceId: 'app-a' });
   });
 
   /**
@@ -89,39 +89,229 @@ describe('RedisPresenceStorage', () => {
   });
 
   /**
-   * setOnline pipeline failure.
+   * Arrival and departure reporting.
    *
-   * A failed pipeline during setOnline must surface as a thrown error so the caller
-   * never assumes presence was recorded.
+   * The announcement in PresenceTracker is driven off these counts, so the first
+   * connection must report exactly 1 and the last removal exactly 0, while the
+   * connections in between report neither. This is what makes the roster
+   * transition announceable exactly once.
    */
-  it('throws when the setOnline pipeline fails', async () => {
-    redis.failNextPipeline();
+  it('reports the live connection count so a caller can spot the transition', async () => {
+    expect(await presence.addConnection('ana@acme', 'c1', 'acme')).toBe(1);
+    expect(await presence.addConnection('ana@acme', 'c2', 'acme')).toBe(2);
 
-    await expect(presence.setOnline('ana@acme', 'c1', 'acme')).rejects.toThrow('pipeline failed');
+    expect(await presence.removeConnection('ana@acme', 'c2')).toBe(1);
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(0);
   });
 
   /**
-   * setOffline cleanup pipeline failure.
+   * Re-adding the same connection id.
    *
-   * A failed cleanup pipeline on the final disconnect must surface as a thrown
-   * error rather than silently leaving stale indexes.
+   * The count is a set cardinality, not an increment, so a duplicated connect for
+   * an id already present must not inflate it and strand the user online.
    */
-  it('throws when the setOffline cleanup pipeline fails', async () => {
+  it('does not inflate the count when the same connection is added twice', async () => {
+    expect(await presence.addConnection('ana@acme', 'c1', 'acme')).toBe(1);
+    expect(await presence.addConnection('ana@acme', 'c1', 'acme')).toBe(1);
+
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(0);
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+  });
+
+  /**
+   * setOnline transaction failure.
+   *
+   * A failed transaction during setOnline must surface as a thrown error so the
+   * caller never assumes presence was recorded.
+   */
+  it('throws when the setOnline transaction fails', async () => {
+    redis.failNextTransaction();
+
+    await expect(presence.setOnline('ana@acme', 'c1', 'acme')).rejects.toThrow(
+      'transaction failed',
+    );
+  });
+
+  /**
+   * setOffline removal transaction failure.
+   *
+   * A failed removal must surface as a thrown error so the caller never treats a
+   * connection as released, and never announces a departure, on a write that did
+   * not land.
+   */
+  it('throws when the setOffline removal transaction fails', async () => {
     await presence.setOnline('ana@acme', 'c1', 'acme');
-    redis.failNextPipeline();
+    redis.failNextTransaction();
 
-    await expect(presence.setOffline('ana@acme', 'c1')).rejects.toThrow('pipeline failed');
+    await expect(presence.setOffline('ana@acme', 'c1')).rejects.toThrow('transaction failed');
   });
 
   /**
-   * Null pipeline result.
+   * setOffline cleanup transaction failure.
    *
-   * ioredis can resolve `pipeline().exec()` to `null`; setOnline must treat that as
-   * no per-command error and resolve rather than throwing on the null result.
+   * A disconnect runs two transactions; a failure in the second (the index
+   * cleanup on the final disconnect) must surface rather than silently leaving
+   * the user stranded in the tenant and global indexes.
    */
-  it('resolves when a pipeline result is null', async () => {
-    redis.nullNextPipeline();
+  it('throws when the setOffline cleanup transaction fails', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    // Let the removal succeed so the armed failure lands on the cleanup after it.
+    redis.failNextTransaction(1);
 
-    await expect(presence.setOnline('ana@acme', 'c1', 'acme')).resolves.toBeUndefined();
+    await expect(presence.setOffline('ana@acme', 'c1')).rejects.toThrow('transaction failed');
+  });
+
+  /**
+   * Discarded connect transaction.
+   *
+   * A `MULTI` resolving to `null` ran none of its queued writes, which would drop
+   * the connection from presence entirely: the user would be missing from the
+   * roster while holding a live stream, and absent from the ownership set too, so
+   * the startup reclaim could not recover it either. The writes are idempotent and
+   * must be reissued, and the count then re-read so the arrival is still reported.
+   */
+  it('still records the connection when the connect transaction is discarded', async () => {
+    redis.nullNextTransaction();
+
+    expect(await presence.addConnection('ana@acme', 'c1', 'acme')).toBe(1);
+
+    expect(await presence.isOnline('ana@acme')).toBe(true);
+    expect(await presence.listOnlineByTenant('acme')).toEqual(['ana@acme']);
+    expect(await presence.countOnline()).toBe(1);
+    // The ownership entry is written too, so a reclaim can still release it.
+    expect(await presence.reclaimOwnConnections()).toBe(1);
+  });
+
+  /**
+   * Discarded connect transaction for a tenantless connection.
+   *
+   * The direct reissue must skip the tenant index exactly as the transaction
+   * would have, so a connection carrying no tenant is recorded without touching
+   * a tenant key it never belonged to.
+   */
+  it('records a tenantless connection when the connect transaction is discarded', async () => {
+    redis.nullNextTransaction();
+
+    expect(await presence.addConnection('ghost', 'c1')).toBe(1);
+
+    expect(await presence.isOnline('ghost')).toBe(true);
+    expect(await presence.countOnline()).toBe(1);
+  });
+
+  /**
+   * Discarded cleanup transaction on the final disconnect.
+   *
+   * A `MULTI` that resolves to `null` ran none of its queued writes. Accepting
+   * that as success would leave the departed user in the tenant and global
+   * indexes with an empty connection set, so the roster would keep reporting a
+   * ghost. The cleanup is idempotent and must be reissued directly instead.
+   */
+  it('still clears the indexes when the cleanup transaction is discarded', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    // The removal transaction succeeds; the cleanup that follows is discarded.
+    redis.nullNextTransaction(1);
+
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(0);
+
+    expect(await presence.listOnlineByTenant('acme')).toEqual([]);
+    expect(await presence.countOnline()).toBe(0);
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+  });
+
+  /**
+   * Discarded cleanup for a connection that never carried a tenant.
+   *
+   * The direct reissue must skip the tenant index exactly as the transaction
+   * would have, so a tenantless user is cleaned up without touching a tenant key
+   * that was never written.
+   */
+  it('clears a tenantless user when the cleanup transaction is discarded', async () => {
+    await presence.setOnline('ghost', 'c1');
+    redis.nullNextTransaction(1);
+
+    expect(await presence.removeConnection('ghost', 'c1')).toBe(0);
+
+    expect(await presence.countOnline()).toBe(0);
+    expect(await presence.isOnline('ghost')).toBe(false);
+  });
+
+  /**
+   * Discarded disconnect transaction.
+   *
+   * A `MULTI` resolving to `null` ran none of its removals, which would keep a
+   * closed stream in the user's set and pin them online until this instance
+   * restarts. The removals are idempotent and must be reissued before the count
+   * is read, so the remaining tally reflects the disconnect that just happened.
+   */
+  it('still releases the connection when the disconnect transaction is discarded', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    await presence.setOnline('ana@acme', 'c2', 'acme');
+    redis.nullNextTransaction();
+
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(1);
+
+    // c1 is gone while c2 keeps the user online, and the ownership set tracks it.
+    expect(await presence.isConnectionOwnedByUser('ana@acme', 'c1')).toBe(false);
+    expect(await presence.isConnectionOwnedByUser('ana@acme', 'c2')).toBe(true);
+    expect(await presence.reclaimOwnConnections()).toBe(1);
+  });
+
+  /**
+   * Discarded disconnect of a user's last connection.
+   *
+   * The reissued removal must also let the departure be recognised: once it lands,
+   * the count is zero and the index cleanup runs, so a discarded transaction does
+   * not leave the user in the roster.
+   */
+  it('recognises the departure when the last disconnect is discarded', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    redis.nullNextTransaction();
+
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(0);
+
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+    expect(await presence.listOnlineByTenant('acme')).toEqual([]);
+    expect(await presence.countOnline()).toBe(0);
+  });
+
+  /**
+   * Crash recovery.
+   *
+   * A process killed without running its shutdown hooks leaves its connection ids
+   * in the user sets, which would report a dead stream as online forever. The
+   * restart must release exactly the connections it owned and clear its own set.
+   */
+  it('releases the connections it owned when reclaiming on boot', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    await presence.setOnline('ana@acme', 'c2', 'acme');
+    expect(await presence.isOnline('ana@acme')).toBe(true);
+
+    expect(await presence.reclaimOwnConnections()).toBe(2);
+
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+    expect(await presence.listOnlineByTenant('acme')).toEqual([]);
+    // The ownership set is cleared, so a second boot has nothing left to release.
+    expect(await presence.reclaimOwnConnections()).toBe(0);
+  });
+
+  /**
+   * Hand-edited ownership entry.
+   *
+   * The ownership set lives in a shared Redis an operator can poke at; a member
+   * that is not a user/connection pair must be skipped rather than mis-parsed into
+   * a `setOffline` for the wrong key. It must also stay out of the count, which
+   * reports released connections in a startup log line, and it must still be
+   * dropped along with the rest of the set.
+   */
+  it('skips an ownership entry that is not a user and connection pair', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    await redis.sadd('presence:instance:app-a', 'hand-edited-garbage');
+
+    expect(await presence.reclaimOwnConnections()).toBe(1);
+
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+    // The whole ownership set is cleared, garbage included, so a second boot
+    // finds nothing left to release.
+    expect(await presence.reclaimOwnConnections()).toBe(0);
   });
 });

@@ -16,8 +16,9 @@ import { useRealtime } from '@bymax-one/nest-realtime/react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
-import { StatusChip } from '@/components/ui/chip';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Chip, StatusChip } from '@/components/ui/chip';
+import { Code } from '@/components/ui/code';
 import { Input, Label } from '@/components/ui/input';
 import { ApiError, authApi, roomsApi } from '@/lib/api-client';
 import { WS_URL } from '@/lib/constants';
@@ -106,10 +107,11 @@ function useChatRoom(): ChatRoomState {
   const [body, setBody] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  const auth = useMemo(() => (wsToken !== null ? { token: wsToken } : undefined), [wsToken]);
   const { connected, events, emit } = useRealtime({
     url: WS_URL,
     transport: 'websocket',
-    ...(wsToken !== null ? { auth: { token: wsToken } } : {}),
+    ...(auth !== undefined ? { auth } : {}),
   });
 
   const connectionId = useMemo(() => findConnectionId(events), [events]);
@@ -153,11 +155,16 @@ function JoinLeaveControl({
   join,
   leave,
 }: Pick<ChatRoomState, 'joinedRoomId' | 'connectionId' | 'join' | 'leave'>) {
+  // The label stays fixed and the room id rides in a chip beside it: interpolating
+  // the id resized the button on every join and leaked a wire identifier into a label.
   if (joinedRoomId && connectionId) {
     return (
-      <Button variant="outline" onClick={() => leave(connectionId)}>
-        Leave {joinedRoomId}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" onClick={() => leave(connectionId)}>
+          Leave room
+        </Button>
+        <Chip className="font-mono">{joinedRoomId}</Chip>
+      </div>
     );
   }
   if (connectionId) {
@@ -184,49 +191,50 @@ function ChatMessageList({ messages }: { readonly messages: readonly ChatMessage
 }
 
 /** Title, live status chip, and the incident-id + join/leave row. */
-function ChatHeader(
+function ChatHeader({ connected }: Pick<ChatRoomState, 'connected'>) {
+  return (
+    // The status chip sits beside the heading on wide screens and above it on
+    // narrow ones, where a fixed row would push it off the card.
+    <div className="flex flex-col-reverse items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="min-w-0">
+        <CardTitle>Incident chat</CardTitle>
+        <CardDescription>
+          WebSocket transport; requires <Code>REALTIME_TRANSPORT=websocket</Code> or{' '}
+          <Code>both</Code>.
+        </CardDescription>
+      </div>
+      <StatusChip className="shrink-0" tone={connected ? 'success' : 'danger'}>
+        {connected ? 'connected' : 'disconnected'}
+      </StatusChip>
+    </div>
+  );
+}
+
+/** The incident-id field and the join/leave control. */
+function RoomControls(
   room: Pick<
     ChatRoomState,
-    | 'connected'
-    | 'incidentId'
-    | 'setIncidentId'
-    | 'joinedRoomId'
-    | 'connectionId'
-    | 'join'
-    | 'leave'
+    'incidentId' | 'setIncidentId' | 'joinedRoomId' | 'connectionId' | 'join' | 'leave'
   >,
 ) {
   return (
-    <>
-      <div className="flex items-center justify-between">
-        <div>
-          <CardTitle>Incident chat</CardTitle>
-          <CardDescription>
-            WebSocket transport; requires `REALTIME_TRANSPORT=websocket` or `both`.
-          </CardDescription>
-        </div>
-        <StatusChip tone={room.connected ? 'success' : 'danger'}>
-          {room.connected ? 'connected' : 'disconnected'}
-        </StatusChip>
-      </div>
-      <div className="mt-4 flex items-end gap-3">
-        <div>
-          <Label htmlFor="incident-id">Incident id</Label>
-          <Input
-            id="incident-id"
-            value={room.incidentId}
-            onChange={(e) => room.setIncidentId(e.target.value)}
-            className="w-32"
-          />
-        </div>
-        <JoinLeaveControl
-          joinedRoomId={room.joinedRoomId}
-          connectionId={room.connectionId}
-          join={room.join}
-          leave={room.leave}
+    <div className="flex items-end gap-3">
+      <div>
+        <Label htmlFor="incident-id">Incident id</Label>
+        <Input
+          id="incident-id"
+          value={room.incidentId}
+          onChange={(e) => room.setIncidentId(e.target.value)}
+          className="w-32"
         />
       </div>
-    </>
+      <JoinLeaveControl
+        joinedRoomId={room.joinedRoomId}
+        connectionId={room.connectionId}
+        join={room.join}
+        leave={room.leave}
+      />
+    </div>
   );
 }
 
@@ -235,25 +243,30 @@ export default function ChatPage() {
   const room = useChatRoom();
 
   return (
-    <Card className="p-5">
-      <ChatHeader {...room} />
-      {room.error ? <p className="mt-2 text-xs text-(--color-danger)">{room.error}</p> : null}
+    <Card>
+      <CardHeader accent>
+        <ChatHeader connected={room.connected} />
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <RoomControls {...room} />
+        {room.error ? <p className="text-xs text-(--color-danger)">{room.error}</p> : null}
 
-      <div className="mt-4 flex h-64 flex-col gap-2 overflow-y-auto rounded-lg border border-(--glass-border) bg-(--glass-bg) p-3">
-        <ChatMessageList messages={room.messages} />
-      </div>
+        <div className="flex h-64 flex-col gap-2 overflow-y-auto rounded-lg border border-(--glass-border) bg-(--glass-bg) p-3">
+          <ChatMessageList messages={room.messages} />
+        </div>
 
-      <div className="mt-3 flex gap-2">
-        <Input
-          value={room.body}
-          onChange={(e) => room.setBody(e.target.value)}
-          placeholder="Message the incident room"
-          disabled={!room.joinedRoomId}
-        />
-        <Button onClick={room.send} disabled={!room.joinedRoomId}>
-          Send
-        </Button>
-      </div>
+        <div className="flex gap-2">
+          <Input
+            value={room.body}
+            onChange={(e) => room.setBody(e.target.value)}
+            placeholder="Message the incident room"
+            disabled={!room.joinedRoomId}
+          />
+          <Button onClick={room.send} disabled={!room.joinedRoomId}>
+            Send
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }

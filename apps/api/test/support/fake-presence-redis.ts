@@ -3,25 +3,28 @@
  * @layer test-support
  *
  * Simulates the set and string surface presence touches (`sadd`, `srem`, `scard`,
- * `smembers`, `sismember`, `set`, `get`, `del`, and a `pipeline()` of those), with
+ * `smembers`, `sismember`, `set`, `get`, `del`, and a `multi()` of those), with
  * real set semantics so the tests exercise the actual multi-tab and tenant-index
- * logic rather than a stub. The cast to `Redis` at each use site is a deliberate
- * partial double, not a laundered type error.
+ * logic rather than a stub. Queued commands return their real results, because the
+ * storage derives the online/offline transition from a `scard` executed inside the
+ * transaction; a double that answered `OK` to everything would hide that contract.
+ * The cast to `Redis` at each use site is a deliberate partial double, not a
+ * laundered type error.
  */
 
 import type { Redis } from 'ioredis';
 
-/** A recorded pipelined command applied in order on `exec`. */
-interface PipelineOp {
-  readonly apply: () => void;
+/** A queued command, applied in order on `exec`. */
+interface TransactionOp {
+  readonly apply: () => Promise<unknown>;
 }
 
-/** Records pipelined set/string commands and applies them atomically on exec. */
-class FakePresencePipeline {
-  private readonly ops: PipelineOp[] = [];
+/** Records queued set/string commands and applies them atomically on exec. */
+class FakePresenceTransaction {
+  private readonly ops: TransactionOp[] = [];
 
   /**
-   * Build a pipeline bound to a fake Redis.
+   * Build a transaction bound to a fake Redis.
    *
    * @param redis - The backing fake client.
    */
@@ -32,10 +35,10 @@ class FakePresencePipeline {
    *
    * @param key - The set key.
    * @param member - The member to add.
-   * @returns This pipeline for chaining.
+   * @returns This transaction for chaining.
    */
   sadd(key: string, member: string): this {
-    this.ops.push({ apply: () => void this.redis.sadd(key, member) });
+    this.ops.push({ apply: () => this.redis.sadd(key, member) });
     return this;
   }
 
@@ -44,10 +47,21 @@ class FakePresencePipeline {
    *
    * @param key - The set key.
    * @param member - The member to remove.
-   * @returns This pipeline for chaining.
+   * @returns This transaction for chaining.
    */
   srem(key: string, member: string): this {
-    this.ops.push({ apply: () => void this.redis.srem(key, member) });
+    this.ops.push({ apply: () => this.redis.srem(key, member) });
+    return this;
+  }
+
+  /**
+   * Queue a set cardinality read.
+   *
+   * @param key - The set key.
+   * @returns This transaction for chaining.
+   */
+  scard(key: string): this {
+    this.ops.push({ apply: () => this.redis.scard(key) });
     return this;
   }
 
@@ -56,10 +70,10 @@ class FakePresencePipeline {
    *
    * @param key - The string key.
    * @param value - The value to store.
-   * @returns This pipeline for chaining.
+   * @returns This transaction for chaining.
    */
   set(key: string, value: string): this {
-    this.ops.push({ apply: () => void this.redis.set(key, value) });
+    this.ops.push({ apply: () => this.redis.set(key, value) });
     return this;
   }
 
@@ -67,10 +81,10 @@ class FakePresencePipeline {
    * Queue a key delete.
    *
    * @param key - The key to delete.
-   * @returns This pipeline for chaining.
+   * @returns This transaction for chaining.
    */
   del(key: string): this {
-    this.ops.push({ apply: () => void this.redis.del(key) });
+    this.ops.push({ apply: () => this.redis.del(key) });
     return this;
   }
 
@@ -80,46 +94,62 @@ class FakePresencePipeline {
    *
    * @returns One `[error, result]` tuple per command, or `null`.
    */
-  exec(): Promise<Array<[Error | null, unknown]> | null> {
+  async exec(): Promise<Array<[Error | null, unknown]> | null> {
     const mode = this.redis.consumeExecMode();
-    if (mode === 'null') return Promise.resolve(null);
-    if (mode === 'fail') return Promise.resolve([[new Error('pipeline failed'), null]]);
-    return Promise.resolve(
-      this.ops.map((op): [Error | null, unknown] => {
-        op.apply();
-        return [null, 'OK'];
-      }),
-    );
+    if (mode === 'null') return null;
+    if (mode === 'fail') return [[new Error('transaction failed'), null]];
+    const results: Array<[Error | null, unknown]> = [];
+    for (const op of this.ops) {
+      results.push([null, await op.apply()]);
+    }
+    return results;
   }
 }
 
-/** How the next pipeline exec should behave. */
+/** How the next transaction exec should behave. */
 type ExecMode = 'ok' | 'fail' | 'null';
 
 /** Minimal in-memory stand-in for an ioredis client with sets and strings. */
 export class FakePresenceRedis {
   private readonly sets = new Map<string, Set<string>>();
   private readonly strings = new Map<string, string>();
-  private nextExecMode: ExecMode = 'ok';
+  private armedExecMode: ExecMode = 'ok';
+  private execsBeforeArmed = 0;
 
-  /** Arm the next `pipeline().exec()` to report an error. */
-  failNextPipeline(): void {
-    this.nextExecMode = 'fail';
-  }
-
-  /** Arm the next `pipeline().exec()` to resolve `null`, as ioredis can. */
-  nullNextPipeline(): void {
-    this.nextExecMode = 'null';
+  /**
+   * Arm a later `multi().exec()` to report an error.
+   *
+   * @param afterSuccesses - How many transactions succeed first. A disconnect runs
+   *   two (the removal, then the index cleanup), so this selects which one fails.
+   */
+  failNextTransaction(afterSuccesses = 0): void {
+    this.armedExecMode = 'fail';
+    this.execsBeforeArmed = afterSuccesses;
   }
 
   /**
-   * Read and clear the one-shot exec mode.
+   * Arm a later `multi().exec()` to resolve `null`, as ioredis can.
+   *
+   * @param afterSuccesses - How many transactions succeed first.
+   */
+  nullNextTransaction(afterSuccesses = 0): void {
+    this.armedExecMode = 'null';
+    this.execsBeforeArmed = afterSuccesses;
+  }
+
+  /**
+   * Read and clear the one-shot exec mode, counting down any armed delay first.
    *
    * @returns The mode the next exec should use.
    */
   consumeExecMode(): ExecMode {
-    const mode = this.nextExecMode;
-    this.nextExecMode = 'ok';
+    if (this.armedExecMode === 'ok') return 'ok';
+    if (this.execsBeforeArmed > 0) {
+      this.execsBeforeArmed -= 1;
+      return 'ok';
+    }
+    const mode = this.armedExecMode;
+    this.armedExecMode = 'ok';
     return mode;
   }
 
@@ -216,12 +246,12 @@ export class FakePresenceRedis {
   }
 
   /**
-   * Open a pipeline for chained set/string commands.
+   * Open a transaction for chained set/string commands.
    *
-   * @returns A fresh pipeline bound to this client.
+   * @returns A fresh transaction bound to this client.
    */
-  pipeline(): FakePresencePipeline {
-    return new FakePresencePipeline(this);
+  multi(): FakePresenceTransaction {
+    return new FakePresenceTransaction(this);
   }
 }
 

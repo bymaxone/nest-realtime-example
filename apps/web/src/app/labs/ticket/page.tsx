@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 
 import { TicketConnection } from '@/components/realtime/ticket-connection';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ApiError, authApi } from '@/lib/api-client';
 
 /** Ticket lab page: one-shot ticket auth flow. */
@@ -43,20 +43,22 @@ export default function TicketLabPage() {
   }, []);
 
   return (
-    <Card className="p-5">
-      <CardTitle>Ticket lab</CardTitle>
-      <CardDescription>
-        Each connect consumes a fresh one-shot ticket (60s TTL, get-and-delete). Reconnecting with
-        the same ticket is rejected by design.
-      </CardDescription>
-      <div className="mt-4 flex items-center gap-3">
-        <Button onClick={() => void fetchTicket()}>Reconnect with a fresh ticket</Button>
-        <span className="text-xs text-white/50">tickets fetched: {fetchCount}</span>
-      </div>
-      {error ? <p className="mt-3 text-xs text-(--color-danger)">{error}</p> : null}
-      <div className="mt-4">
-        {ticket ? <TicketConnection key={fetchCount} ticket={ticket} /> : null}
-      </div>
+    <Card>
+      <CardHeader accent>
+        <CardTitle>Ticket lab</CardTitle>
+        <CardDescription>
+          Each connect consumes a fresh one-shot ticket (60s TTL, get-and-delete). Reconnecting with
+          the same ticket is rejected by design.
+        </CardDescription>
+        <div className="mt-4 flex items-center gap-3">
+          <Button onClick={() => void fetchTicket()}>Reconnect with a fresh ticket</Button>
+          <span className="text-xs text-white/50">tickets fetched: {fetchCount}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {error ? <p className="text-xs text-(--color-danger)">{error}</p> : null}
+        <div>{ticket ? <TicketConnection key={fetchCount} ticket={ticket} /> : null}</div>
+      </CardContent>
     </Card>
   );
 }

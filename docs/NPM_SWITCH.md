@@ -11,26 +11,22 @@ npm view @bymax-one/nest-realtime version
 # today: npm error 404 Not Found (the package does not exist on the registry yet)
 ```
 
-Because it is unpublished, both apps consume it from a committed `pnpm pack` tarball plus a committed pnpm patch:
+Because it is unpublished, both apps consume it from a committed `pnpm pack` tarball:
 
 - `apps/api/package.json` and `apps/web/package.json` depend on
   `"@bymax-one/nest-realtime": "file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz"`.
 - [`vendor/bymax-one-nest-realtime-0.1.0.tgz`](../vendor) is the exact bytes npm would serve.
-- [`patches/@bymax-one__nest-realtime@0.1.0.patch`](../patches) is applied by pnpm at install time
-  (referenced from the root `pnpm-workspace.yaml` / lockfile).
 
 This resolves identically in a working tree, a fresh clone, and CI (which checks out only this repository, never a sibling), so **the switch is documented here rather than executed.**
 
-## The committed pnpm patch (a known consumer workaround)
+## Formerly-patched library defects (now fixed at the source)
 
-`patches/@bymax-one__nest-realtime@0.1.0.patch` fixes four defects a consumer of `@bymax-one/nest-realtime@0.1.0` would otherwise hit. They are all build/wiring defects in the published artifact, not usage errors:
+An earlier vendored build needed a committed pnpm patch. Four consumer-visible defects made it necessary, and all four are fixed in the library source that produced the current tarball, so no patch is applied any more:
 
-1. **Missing decorator metadata on the SSE controller.** The `0.1.0` dist was built without `@swc/core`, so `emitDecoratorMetadata` was dropped and the SSE controller's type-based constructor injection cannot resolve.
-2. **Missing decorator metadata on the pub/sub subscriber.** The same missing-metadata defect on the Redis pub/sub subscriber path.
-3. **Same-cause metadata gaps** across the remaining type-injected providers the build omitted.
-4. **`websocket.namespace` declared but never wired.** The option is part of the public type but the IoAdapter never binds the gateway to it, so a configured namespace has no effect.
-
-The patch is a **temporary consumer workaround**. The real fix is a library-side rebuild with `@swc/core` (restoring decorator metadata) and a namespace implementation in the WebSocket IoAdapter. Once a fixed version is vendored or published, remove the patch (see below) and re-run the full flow.
+1. **Missing decorator metadata on the SSE controller.** The dist was built without decorator metadata, so the SSE controller could not resolve its type-injected handler. The source now injects it by token explicitly.
+2. **Missing decorator metadata on the pub/sub subscriber.** Same cause on the Redis pub/sub subscriber path; also injected by token now.
+3. **`websocket.namespace` declared but never wired.** The option was part of the public type but the IoAdapter never bound the gateway to it. The adapter now overrides `create` and binds the namespace.
+4. **React hooks missing the options this dashboard needs.** The hooks had no way to subscribe to application-level SSE event names and no reconnect budget, and they keyed their connect callback on the `auth` and `events` object identity, which made any consumer passing an inline object reconnect on every render. The hooks now accept `events`, `maxAttempts`, `reconnectInitialMs` and `reconnectMaxMs`, report `reconnectAttempts`, and depend only on stable primitives.
 
 ## Refreshing the vendor tarball (while still pre-publish)
 
@@ -44,7 +40,7 @@ pnpm install
 
 ## Executing the switch (once the library publishes a fixed version)
 
-Do this only after `npm view @bymax-one/nest-realtime version` resolves to a version that already contains the four fixes above (so the pnpm patch is no longer needed).
+Do this only after `npm view @bymax-one/nest-realtime version` resolves to a version that already contains the four fixes above.
 
 1. **Update both manifests** (one line each):
 
@@ -54,9 +50,7 @@ Do this only after `npm view @bymax-one/nest-realtime version` resolves to a ver
    + "@bymax-one/nest-realtime": "^0.1.0",
    ```
 
-2. **Drop the workaround** once the published version carries the fixes: remove
-   `patches/@bymax-one__nest-realtime@0.1.0.patch`, its `patchedDependencies` entry in
-   `pnpm-workspace.yaml`, and the vendored tarball under `vendor/`.
+2. **Drop the vendored tarball** under `vendor/`, which the published version replaces.
 
 3. **Refresh the lockfile and reinstall:**
 
@@ -81,7 +75,7 @@ Do this only after `npm view @bymax-one/nest-realtime version` resolves to a ver
 
 5. **Commit** as `build(deps): consume @bymax-one/nest-realtime from npm` with the lockfile change.
 
-If `npm view` still 404s or the published version lacks the fixes, leave everything as-is: the vendored tarball plus patch is the supported pre-publish state.
+If `npm view` still 404s or the published version lacks the fixes, leave everything as-is: the vendored tarball is the supported pre-publish state.
 
 ## CI contract and branch protection
 

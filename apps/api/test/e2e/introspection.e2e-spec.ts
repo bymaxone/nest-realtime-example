@@ -37,7 +37,8 @@ describe('Realtime introspection route (e2e)', () => {
    * The route reports the transport mode and kind the library selected, a populated
    * SSE block (single-instance boot serves SSE), and the class names of the
    * collaborators the example wired: the composite authenticator and hooks, the
-   * in-memory pub/sub default, and a null presence under the memory profile.
+   * in-memory pub/sub default, and the presence storage, which is provisioned on
+   * every profile so a single instance still has a roster.
    */
   it('reports the resolved realtime wiring to an admin', async () => {
     const response = await request(app.getHttpServer())
@@ -55,7 +56,7 @@ describe('Realtime introspection route (e2e)', () => {
       authenticator: 'CompositeAuthenticator',
       hooks: 'CompositeLifecycleHooks',
       pubsub: 'InMemoryPubSub',
-      presence: null,
+      presence: 'RedisPresenceStorage',
     });
   });
 

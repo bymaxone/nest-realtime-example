@@ -10,7 +10,6 @@
 
 import type { PublicConnectionMeta } from '@bymax-one/nest-realtime';
 
-import { APP_SERVICE_NAME } from '../../src/app.constants';
 import { ConnectionsController } from '../../src/connections/connections.controller';
 import type { ConnectionsService } from '../../src/connections/connections.service';
 import {
@@ -18,6 +17,7 @@ import {
   type RealtimeWiringSnapshot,
 } from '../../src/connections/realtime-introspection.service';
 import type { SessionTraits } from '../../src/auth/session.types';
+import { buildTestConfig } from '../support/config.fixture';
 
 const TRAITS: SessionTraits = { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] };
 const META: PublicConnectionMeta = {
@@ -71,9 +71,10 @@ describe('ConnectionsController', () => {
     const controller = new ConnectionsController(
       { list } as unknown as ConnectionsService,
       introspectionDouble().service,
+      buildTestConfig(),
     );
 
-    expect(controller.list()).toEqual({ instance: APP_SERVICE_NAME, connections: [META] });
+    expect(controller.list()).toEqual({ instance: 'app-a', connections: [META] });
   });
 
   /**
@@ -87,6 +88,7 @@ describe('ConnectionsController', () => {
     const controller = new ConnectionsController(
       { disconnectOwned } as unknown as ConnectionsService,
       introspectionDouble().service,
+      buildTestConfig(),
     );
 
     const ack = await controller.disconnect('c1', TRAITS);
@@ -106,6 +108,7 @@ describe('ConnectionsController', () => {
     const controller = new ConnectionsController(
       { list: jest.fn() } as unknown as ConnectionsService,
       service,
+      buildTestConfig(),
     );
 
     expect(controller.wiring()).toEqual(SNAPSHOT);

@@ -9,6 +9,7 @@
   },
   "packageManager": "pnpm@10.8.1",
   "scripts": {
+    "dev": "pnpm --parallel --filter \"@nest-realtime-example/*\" run dev",
     "typecheck": "pnpm -r --workspace-concurrency=1 run typecheck",
     "lint": "pnpm -r --workspace-concurrency=1 run lint",
     "build": "pnpm -r --workspace-concurrency=1 run build",
