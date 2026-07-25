@@ -34,9 +34,13 @@ describe('FIFO eviction (e2e)', () => {
   let baseUrl: string;
   let cookie: string;
   const savedInterval = process.env.REAUTH_INTERVAL_SECONDS;
+  const savedMaxConnections = process.env.REALTIME_MAX_CONNECTIONS_PER_USER;
 
   beforeAll(async () => {
     process.env.REAUTH_INTERVAL_SECONDS = '3600';
+    // Pinned rather than inherited: this suite is about the eviction boundary, so
+    // it must not silently stop testing it when the shipped default changes.
+    process.env.REALTIME_MAX_CONNECTIONS_PER_USER = '2';
     app = await createApp();
     await app.listen(0);
     baseUrl = `http://127.0.0.1:${(app.getHttpServer().address() as AddressInfo).port}`;
@@ -47,6 +51,8 @@ describe('FIFO eviction (e2e)', () => {
     await app.close();
     if (savedInterval === undefined) delete process.env.REAUTH_INTERVAL_SECONDS;
     else process.env.REAUTH_INTERVAL_SECONDS = savedInterval;
+    if (savedMaxConnections === undefined) delete process.env.REALTIME_MAX_CONNECTIONS_PER_USER;
+    else process.env.REALTIME_MAX_CONNECTIONS_PER_USER = savedMaxConnections;
   });
 
   /** Open an SSE connection and return it with its connection id. */

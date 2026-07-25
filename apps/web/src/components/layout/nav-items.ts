@@ -10,6 +10,7 @@
 
 import {
   Cable,
+  Inbox,
   type LucideIcon,
   MessageSquare,
   Network,
@@ -18,6 +19,7 @@ import {
   RefreshCw,
   ScrollText,
   Server,
+  ShieldOff,
   SplitSquareHorizontal,
   Ticket,
   Users,
@@ -39,6 +41,23 @@ export interface NavGroup {
   readonly group: string;
   /** Entries belonging to this section. */
   readonly items: readonly NavItem[];
+}
+
+/** Human-readable name for a route that has no nav entry of its own. */
+const OFF_NAV_LABELS: Readonly<Record<string, string>> = { '/login': 'Log in' };
+
+/**
+ * Resolve the human-readable name of a route.
+ *
+ * The shell uses it for the page's `h1`, so the heading outline of every route
+ * starts at level one and announces where the reader is.
+ *
+ * @param pathname - The active App Router pathname.
+ * @returns The route's label, falling back to the dashboard's own name.
+ */
+export function navLabelFor(pathname: string): string {
+  const match = NAV_GROUPS.flatMap((group) => group.items).find((item) => item.href === pathname);
+  return match?.label ?? OFF_NAV_LABELS[pathname] ?? 'Dashboard';
 }
 
 /** The grouped nav model: Observe / Real-time / Labs. */
@@ -65,6 +84,8 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Ticket', href: '/labs/ticket', icon: Ticket },
       { label: 'Connection', href: '/labs/connection', icon: Cable },
       { label: 'Replay', href: '/labs/replay', icon: RefreshCw },
+      { label: 'Offline', href: '/labs/offline', icon: Inbox },
+      { label: 'Reauth', href: '/labs/reauth', icon: ShieldOff },
       { label: 'Cluster', href: '/labs/cluster', icon: Server },
       { label: 'Both', href: '/labs/both', icon: SplitSquareHorizontal },
     ],

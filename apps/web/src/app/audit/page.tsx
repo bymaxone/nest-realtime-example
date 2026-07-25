@@ -13,8 +13,9 @@ import { useRealtimeContext } from '@bymax-one/nest-realtime/react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Chip, StatusChip, type ChipTone } from '@/components/ui/chip';
+import { Code } from '@/components/ui/code';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
   ApiError,
@@ -23,6 +24,7 @@ import {
   type AuditKind,
   type DecoratorStats,
 } from '@/lib/api-client';
+import { cn } from '@/lib/utils';
 
 const KIND_FILTERS: readonly AuditKind[] = ['connect', 'disconnect', 'error', 'reauth-failed'];
 
@@ -82,27 +84,41 @@ function useAuditFeed(): AuditFeedState {
   return { kind, setKind, entries, stats, error, reload: () => void load() };
 }
 
-/** The "all" plus per-kind filter chips row. */
+/**
+ * The "all" plus per-kind filter chips row.
+ *
+ * Every option is one `StatusChip` inside a bare button, so the whole row shares
+ * a single height, radius and type scale, and selection is signalled the same
+ * way (a brand ring plus `aria-pressed`) for all of them rather than by a text
+ * colour on one and a ring on the rest.
+ */
 function KindFilterChips({ kind, setKind }: Pick<AuditFeedState, 'kind' | 'setKind'>) {
+  const options: readonly { readonly value: AuditKind | undefined; readonly label: string }[] = [
+    { value: undefined, label: 'all' },
+    ...KIND_FILTERS.map((filter) => ({ value: filter, label: filter })),
+  ];
+
   return (
     <div className="mt-4 flex flex-wrap gap-2">
-      <button
-        type="button"
-        onClick={() => setKind(undefined)}
-        className={kind === undefined ? 'text-brand-500' : 'text-white/50'}
-      >
-        <Chip>all</Chip>
-      </button>
-      {KIND_FILTERS.map((filter) => (
-        <button key={filter} type="button" onClick={() => setKind(filter)}>
-          <StatusChip
-            tone={KIND_TONE[filter]}
-            className={kind === filter ? 'ring-1 ring-brand-500' : ''}
+      {options.map((option) => {
+        const isSelected = kind === option.value;
+        return (
+          <button
+            key={option.label}
+            type="button"
+            aria-pressed={isSelected}
+            onClick={() => setKind(option.value)}
+            className="rounded-md"
           >
-            {filter}
-          </StatusChip>
-        </button>
-      ))}
+            <StatusChip
+              tone={option.value ? KIND_TONE[option.value] : 'neutral'}
+              className={cn('transition-shadow', isSelected && 'ring-1 ring-brand-500')}
+            >
+              {option.label}
+            </StatusChip>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -146,34 +162,40 @@ export default function AuditPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="p-5">
-        <CardTitle>Decorator counters</CardTitle>
-        <CardDescription>
-          Bumped by the app-local `@OnConnect` / `@OnDisconnect` handlers.
-        </CardDescription>
-        <div className="mt-3 flex gap-3">
-          <Chip>connects: {stats?.connects ?? 0}</Chip>
-          <Chip>disconnects: {stats?.disconnects ?? 0}</Chip>
-        </div>
+      <Card>
+        <CardHeader accent>
+          <CardTitle>Decorator counters</CardTitle>
+          <CardDescription>
+            Bumped by the app-local <Code>@OnConnect</Code> / <Code>@OnDisconnect</Code> handlers.
+          </CardDescription>
+          <div className="mt-3 flex gap-3">
+            <Chip>connects: {stats?.connects ?? 0}</Chip>
+            <Chip>disconnects: {stats?.disconnects ?? 0}</Chip>
+          </div>
+        </CardHeader>
       </Card>
 
-      <Card className="p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Audit feed</CardTitle>
-            <CardDescription>
-              Newest first, across connect / disconnect / error / reauth-failed.
-            </CardDescription>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Audit feed</CardTitle>
+              <CardDescription>
+                Newest first, across connect / disconnect / error / reauth-failed.
+              </CardDescription>
+            </div>
+            <Button variant="outline" onClick={reload}>
+              Refresh
+            </Button>
           </div>
-          <Button variant="outline" onClick={reload}>
-            Refresh
-          </Button>
-        </div>
-        <KindFilterChips kind={kind} setKind={setKind} />
-        {error ? <p className="mt-3 text-xs text-(--color-danger)">{error}</p> : null}
-        <div className="mt-4">
-          <AuditEntryList entries={entries} />
-        </div>
+        </CardHeader>
+        <CardContent>
+          <KindFilterChips kind={kind} setKind={setKind} />
+          {error ? <p className="text-xs text-(--color-danger)">{error}</p> : null}
+          <div>
+            <AuditEntryList entries={entries} />
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

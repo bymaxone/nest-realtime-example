@@ -16,7 +16,8 @@ import { useState } from 'react';
 
 import { ManagedConnection } from '@/components/realtime/managed-connection';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Code } from '@/components/ui/code';
 import { Label } from '@/components/ui/input';
 import { ApiError, replayLabApi } from '@/lib/api-client';
 
@@ -161,31 +162,34 @@ export default function ConnectionLabPage() {
   };
 
   return (
-    <Card className="p-5">
-      <CardTitle>Connection lab</CardTitle>
-      <CardDescription>
-        Manual connect/disconnect (`autoConnect: false`) plus reconnect tuning: `initialDelayMs`,
-        `maxDelayMs`, `maxAttempts`.
-      </CardDescription>
+    <Card>
+      <CardHeader accent>
+        <CardTitle>Connection lab</CardTitle>
+        <CardDescription>
+          Manual connect/disconnect (<Code>autoConnect: false</Code>) plus reconnect tuning:{' '}
+          <Code>initialDelayMs</Code>, <Code>maxDelayMs</Code>, <Code>maxAttempts</Code>.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <TuningSliders values={tuning} onChange={setTuning} />
+        <ConnectionControls
+          isMounted={isMounted}
+          onConnect={connect}
+          onDisconnect={() => setIsMounted(false)}
+          onKillStream={() => dropStream(setDropStatus)}
+          dropStatus={dropStatus}
+        />
 
-      <TuningSliders values={tuning} onChange={setTuning} />
-      <ConnectionControls
-        isMounted={isMounted}
-        onConnect={connect}
-        onDisconnect={() => setIsMounted(false)}
-        onKillStream={() => dropStream(setDropStatus)}
-        dropStatus={dropStatus}
-      />
-
-      <div className="mt-5">
-        {isMounted ? (
-          <ManagedConnection key={generation} {...tuning} />
-        ) : (
-          <span className="text-xs text-white/40">
-            Not connected. Click Connect to open a stream.
-          </span>
-        )}
-      </div>
+        <div>
+          {isMounted ? (
+            <ManagedConnection key={generation} {...tuning} />
+          ) : (
+            <span className="text-xs text-white/40">
+              Not connected. Click Connect to open a stream.
+            </span>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }

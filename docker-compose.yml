@@ -7,8 +7,8 @@
 #
 # The `cluster` profile (two api instances behind nginx) demonstrates the
 # multi-instance scaling scenarios. Both api containers run one image built from
-# `docker/api.Dockerfile` (the vendored library tarball and its pnpm patch are in
-# the build context, so `pnpm install` resolves and patches the library in-image),
+# `docker/api.Dockerfile` (the vendored library tarball is in the build context,
+# so `pnpm install` resolves the library in-image),
 # differ only by `INSTANCE_NAME`/`PORT`, share one Redis for pub/sub fan-out, and
 # sit behind an SSE-safe nginx. Bring it up with `docker compose --profile cluster
 # up -d --build` and always tear it down with `docker compose --profile cluster

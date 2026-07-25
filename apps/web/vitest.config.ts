@@ -42,8 +42,10 @@ export default defineConfig({
         'src/test/**',
         'src/test-utils/**',
         // Framework wiring with no branch logic of its own, proven by the Next.js
-        // build and the Playwright journeys rather than unit coverage.
-        'src/app/layout.tsx',
+        // build and the Playwright journeys rather than unit coverage. The route
+        // layouts exist solely to declare each route's `metadata` and return their
+        // children unchanged.
+        'src/app/**/layout.tsx',
         // Module-resolution probe with no runtime branches; asserted by its own spec.
         'src/probe/**',
       ],

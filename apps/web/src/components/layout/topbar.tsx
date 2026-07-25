@@ -14,6 +14,8 @@ import { Menu } from 'lucide-react';
 import Link from 'next/link';
 
 import { ConnectionBadge } from '@/components/realtime/connection-badge';
+import { Button, buttonClasses } from '@/components/ui/button';
+import { Chip } from '@/components/ui/chip';
 import { APP_NAME } from '@/lib/constants';
 import { useSession } from '@/lib/session-context';
 
@@ -40,38 +42,37 @@ function BrandMark() {
           />
         </svg>
       </div>
-      <span className="select-none bg-linear-to-r from-brand-500 to-amber-200 bg-clip-text font-mono text-sm font-bold leading-tight text-transparent">
+      {/* A wordmark that wraps stops being a wordmark, so it never breaks and is
+          dropped entirely on the narrowest screens, where the mark alone identifies us. */}
+      <span className="hidden select-none whitespace-nowrap bg-linear-to-r from-brand-500 to-amber-200 bg-clip-text font-mono text-sm font-bold leading-tight text-transparent sm:inline">
         {APP_NAME}
       </span>
     </div>
   );
 }
 
-/** The authenticated user id + logout button, or a log-in link when anonymous. */
+/**
+ * The authenticated user id + logout button, or a log-in link when anonymous.
+ *
+ * Rendered at every width: hiding it below the `md` breakpoint left a phone with
+ * no way to sign in or out at all. The identity chip is dropped on the narrowest
+ * screens, where the control that matters is the action, not the label.
+ */
 function SessionControl() {
   const { status, traits, logout } = useSession();
 
   if (status === 'authenticated' && traits) {
     return (
-      <div className="hidden items-center gap-2 md:flex">
-        <span className="inline-flex items-center rounded-md border border-white/10 bg-white/4 px-2 py-1 font-mono text-xs text-white/70">
-          {traits.userId}
-        </span>
-        <button
-          type="button"
-          onClick={() => void logout()}
-          className="rounded-full border border-(--glass-border) bg-(--glass-bg) px-3 py-1.5 text-xs text-white/70 transition-colors hover:bg-(--glass-bg-hover)"
-        >
+      <div className="flex items-center gap-2">
+        <Chip className="hidden font-mono sm:inline-flex">{traits.userId}</Chip>
+        <Button size="sm" variant="outline" onClick={() => void logout()}>
           Log out
-        </button>
+        </Button>
       </div>
     );
   }
   return (
-    <Link
-      href="/login"
-      className="hidden rounded-full bg-linear-to-r from-brand-500 to-brand-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm md:inline-flex"
-    >
+    <Link href="/login" className={buttonClasses({ size: 'sm' })}>
       Log in
     </Link>
   );

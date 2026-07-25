@@ -5,7 +5,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/lib/api-error';
 import { makeRealtimeContext, type RealtimeContextFake } from '@/test-utils/realtime-mocks';
@@ -39,11 +39,13 @@ const listMock =
   vi.fn<() => Promise<{ instance: string; connections: readonly MockConnection[] }>>();
 const disconnectMock = vi.fn<(id: string) => Promise<{ disconnected: true }>>();
 const timelineMock = vi.fn<(userId: string) => Promise<{ userId: string; timeline: unknown[] }>>();
+const introspectionMock = vi.fn<() => Promise<unknown>>();
 
 vi.mock('@/lib/api-client', () => ({
   ApiError,
   connectionsApi: {
     list: () => listMock(),
+    introspection: () => introspectionMock(),
     disconnect: (id: string) => disconnectMock(id),
   },
   evictionLabApi: {
@@ -59,7 +61,64 @@ const CONNECTION = {
   connectedAt: '2026-01-01T00:00:00.000Z',
 };
 
+/** The resolved wiring snapshot as the admin-only introspection route reports it. */
+const WIRING = {
+  instanceId: 'inst-1234abcd',
+  transport: 'sse',
+  transportKind: 'sse',
+  sse: {
+    endpoint: '/api/events',
+    heartbeatMs: 10000,
+    replayBufferSize: 10,
+    maxConnectionsPerUser: 5,
+    emitConnectionEvent: true,
+  },
+  providers: {
+    authenticator: 'CompositeAuthenticator',
+    hooks: 'CompositeLifecycleHooks',
+    pubsub: 'InMemoryPubSub',
+    presence: 'RedisPresenceStorage',
+  },
+};
+
 describe('ConnectionsPage', () => {
+  beforeEach(() => {
+    // Every test renders the wiring card; the cases that assert on it override this.
+    introspectionMock.mockResolvedValue(WIRING);
+  });
+
+  it('renders the wiring the library resolved at boot', async () => {
+    // Scenario: the card answers what the module actually used, read back through
+    // the library's own exported DI tokens.
+    useSessionMock.mockReturnValue({
+      traits: { userId: 'ana@acme', tenantId: 'acme', roles: ['admin'] },
+    });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
+    listMock.mockResolvedValue({ instance: 'app-a', connections: [] });
+    timelineMock.mockResolvedValue({ userId: 'ana@acme', timeline: [] });
+    render(<ConnectionsPage />);
+
+    expect(await screen.findByText('RedisPresenceStorage')).toBeInTheDocument();
+    expect(screen.getByText('CompositeAuthenticator')).toBeInTheDocument();
+    expect(screen.getByText('transport: sse')).toBeInTheDocument();
+    expect(screen.getByText('10000 ms')).toBeInTheDocument();
+  });
+
+  it('explains the wiring card is admin-only when introspection is refused', async () => {
+    // Scenario: the snapshot reveals resolved wiring, so a member session cannot
+    // read it; the card must say so rather than render blank.
+    useSessionMock.mockReturnValue({
+      traits: { userId: 'bob@acme', tenantId: 'acme', roles: ['member'] },
+    });
+    useRealtimeContextMock.mockReturnValue(makeRealtimeContext());
+    introspectionMock.mockRejectedValue(new ApiError(403, 'admin role required'));
+    listMock.mockResolvedValue({ instance: 'app-a', connections: [] });
+    timelineMock.mockResolvedValue({ userId: 'bob@acme', timeline: [] });
+    render(<ConnectionsPage />);
+
+    expect(await screen.findByText('Wiring snapshot unavailable')).toBeInTheDocument();
+  });
+
   it('polls the connections list again after the interval elapses', async () => {
     // Scenario: the list stays fresh via a fixed poll interval, not only on mount.
     vi.useFakeTimers({ shouldAdvanceTime: true });

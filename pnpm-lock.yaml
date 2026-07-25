@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  '@bymax-one/nest-realtime@0.1.0':
-    hash: af644c1c148addcb14fc842dad272b8f1aa0bffa35dea6da5dc6be6a26f0ae54
-    path: patches/@bymax-one__nest-realtime@0.1.0.patch
-
 importers:
 
   .:
@@ -57,7 +52,7 @@ importers:
     dependencies:
       '@bymax-one/nest-realtime':
         specifier: file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz
-        version: file:vendor/bymax-one-nest-realtime-0.1.0.tgz(patch_hash=af644c1c148addcb14fc842dad272b8f1aa0bffa35dea6da5dc6be6a26f0ae54)(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)(@nestjs/platform-socket.io@11.1.28)(@nestjs/websockets@11.1.28)(@socket.io/redis-adapter@8.3.0(socket.io-adapter@2.5.8))(ioredis@5.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)(socket.io-client@4.8.3)(socket.io@4.8.3)
+        version: file:vendor/bymax-one-nest-realtime-0.1.0.tgz(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)(@nestjs/platform-socket.io@11.1.28)(@nestjs/websockets@11.1.28)(@socket.io/redis-adapter@8.3.0(socket.io-adapter@2.5.8))(ioredis@5.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)(socket.io-client@4.8.3)(socket.io@4.8.3)
       '@nestjs/common':
         specifier: ^11.0.0
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -142,7 +137,7 @@ importers:
     dependencies:
       '@bymax-one/nest-realtime':
         specifier: file:../../vendor/bymax-one-nest-realtime-0.1.0.tgz
-        version: file:vendor/bymax-one-nest-realtime-0.1.0.tgz(patch_hash=af644c1c148addcb14fc842dad272b8f1aa0bffa35dea6da5dc6be6a26f0ae54)(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)(@nestjs/platform-socket.io@11.1.28)(@nestjs/websockets@11.1.28)(@socket.io/redis-adapter@8.3.0(socket.io-adapter@2.5.8))(ioredis@5.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)(socket.io-client@4.8.3)(socket.io@4.8.3)
+        version: file:vendor/bymax-one-nest-realtime-0.1.0.tgz(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)(@nestjs/platform-socket.io@11.1.28)(@nestjs/websockets@11.1.28)(@socket.io/redis-adapter@8.3.0(socket.io-adapter@2.5.8))(ioredis@5.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)(socket.io-client@4.8.3)(socket.io@4.8.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -500,7 +495,7 @@ packages:
     hasBin: true
 
   '@bymax-one/nest-realtime@file:vendor/bymax-one-nest-realtime-0.1.0.tgz':
-    resolution: {integrity: sha512-JdU3Z1YA/Rtl44HqFw1xjwQrjzvOB/IS/N4TefvxLfb50UuWzAEQAX20AeQ8leLvKF5A06r0fUdBI2XhaWMu6A==, tarball: file:vendor/bymax-one-nest-realtime-0.1.0.tgz}
+    resolution: {integrity: sha512-D6/ofruV6m148BFnpywvLOgyXnZq141C0LTEVVpgfX0417WzHcOQOQ90rMjibnNqBGYV5fE5jBx/QdIRaGx66w==, tarball: file:vendor/bymax-one-nest-realtime-0.1.0.tgz}
     version: 0.1.0
     engines: {node: '>=24.0.0'}
     peerDependencies:
@@ -4795,7 +4790,7 @@ snapshots:
     dependencies:
       css-tree: 3.2.1
 
-  '@bymax-one/nest-realtime@file:vendor/bymax-one-nest-realtime-0.1.0.tgz(patch_hash=af644c1c148addcb14fc842dad272b8f1aa0bffa35dea6da5dc6be6a26f0ae54)(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)(@nestjs/platform-socket.io@11.1.28)(@nestjs/websockets@11.1.28)(@socket.io/redis-adapter@8.3.0(socket.io-adapter@2.5.8))(ioredis@5.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)(socket.io-client@4.8.3)(socket.io@4.8.3)':
+  '@bymax-one/nest-realtime@file:vendor/bymax-one-nest-realtime-0.1.0.tgz(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.28)(@nestjs/platform-socket.io@11.1.28)(@nestjs/websockets@11.1.28)(@socket.io/redis-adapter@8.3.0(socket.io-adapter@2.5.8))(ioredis@5.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)(socket.io-client@4.8.3)(socket.io@4.8.3)':
     dependencies:
       '@nestjs/common': 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.28(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.28)(@nestjs/websockets@11.1.28)(reflect-metadata@0.2.2)(rxjs@7.8.2)

@@ -13,7 +13,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { SplitPanel } from '@/components/realtime/split-panel';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Code } from '@/components/ui/code';
 import { ApiError, authApi, emitApi } from '@/lib/api-client';
 import { SSE_EVENTS_URL, WS_URL } from '@/lib/constants';
 import { useSession } from '@/lib/session-context';
@@ -103,29 +104,34 @@ export default function BothLabPage() {
   const matched = lab.sseNonce !== null && lab.sseNonce === lab.wsNonce;
 
   return (
-    <Card className="p-5">
-      <CardTitle>Both-mode lab</CardTitle>
-      <CardDescription>
-        One emit, both transports. Requires the api booted with `REALTIME_TRANSPORT=both`.
-      </CardDescription>
-      <div className="mt-4 flex items-center gap-3">
-        <Button onClick={lab.emitBoth}>Emit to both</Button>
-        {lab.status ? <span className="text-xs text-white/50">{lab.status}</span> : null}
-      </div>
-      <TransportPanels
-        wsToken={lab.wsToken}
-        onSseNonce={lab.onSseNonce}
-        onWsNonce={lab.onWsNonce}
-      />
-      <div className="mt-4 text-sm">
-        {matched ? (
-          <span className="text-(--color-success)">
-            nonce match: both panels received {lab.sseNonce}
-          </span>
-        ) : (
-          <span className="text-white/40">waiting for a matching nonce on both panels</span>
-        )}
-      </div>
+    <Card>
+      <CardHeader accent>
+        <CardTitle>Both-mode lab</CardTitle>
+        <CardDescription>
+          One emit, both transports. Requires the api booted with{' '}
+          <Code>REALTIME_TRANSPORT=both</Code>.
+        </CardDescription>
+        <div className="mt-4 flex items-center gap-3">
+          <Button onClick={lab.emitBoth}>Emit to both</Button>
+          {lab.status ? <span className="text-xs text-white/50">{lab.status}</span> : null}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <TransportPanels
+          wsToken={lab.wsToken}
+          onSseNonce={lab.onSseNonce}
+          onWsNonce={lab.onWsNonce}
+        />
+        <div className="text-sm">
+          {matched ? (
+            <span className="text-(--color-success)">
+              nonce match: both panels received {lab.sseNonce}
+            </span>
+          ) : (
+            <span className="text-white/40">waiting for a matching nonce on both panels</span>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }

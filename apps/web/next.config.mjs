@@ -76,7 +76,10 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              // React's development build uses eval() for its debugging features
+              // (rebuilding stack frames across environments). Production never
+              // does, so the allowance is scoped to the dev server only.
+              `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data:",
               "font-src 'self'",

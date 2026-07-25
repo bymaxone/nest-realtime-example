@@ -359,7 +359,7 @@ The switch from (a) to (b) is a single-line diff per app plus a lockfile refresh
 | `REALTIME_SSE_ENDPOINT`             | `/api/events`            | Proves endpoint configurability                   |
 | `REALTIME_HEARTBEAT_MS`             | `10000`                  | Dev-friendly heartbeat                            |
 | `REALTIME_REPLAY_BUFFER_SIZE`       | `10`                     | Small to make replay labs observable              |
-| `REALTIME_MAX_CONNECTIONS_PER_USER` | `2`                      | Small to make eviction observable                 |
+| `REALTIME_MAX_CONNECTIONS_PER_USER` | `5`                      | One tab works; a second tab trips FIFO eviction   |
 | `REALTIME_EMIT_CONNECTION_EVENT`    | `true`                   | Toggle for matrix row 20                          |
 | `REALTIME_WS_NAMESPACE`             | `/live`                  | Config-driven namespace                           |
 | `REALTIME_WS_MAX_BUFFER_BYTES`      | `16384`                  | Small to trigger payload lab                      |

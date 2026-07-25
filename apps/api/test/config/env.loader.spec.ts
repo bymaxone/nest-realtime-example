@@ -19,7 +19,7 @@ describe('loadEnv', () => {
     expect(config.realtime.sseEndpoint).toBe('/api/events');
     expect(config.realtime.heartbeatMs).toBe(10000);
     expect(config.realtime.replayBufferSize).toBe(10);
-    expect(config.realtime.maxConnectionsPerUser).toBe(2);
+    expect(config.realtime.maxConnectionsPerUser).toBe(5);
     expect(config.realtime.emitConnectionEvent).toBe(true);
     expect(config.realtime.wsNamespace).toBe('/live');
     expect(config.realtime.wsMaxBufferBytes).toBe(16384);

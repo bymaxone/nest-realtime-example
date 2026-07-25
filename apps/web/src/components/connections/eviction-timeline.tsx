@@ -13,6 +13,16 @@ import type { EvictionTimelineEntry } from '@/lib/api-client';
 
 const EVICTION_REASON = 'REALTIME_TOO_MANY_CONNECTIONS';
 
+/**
+ * Newest entries rendered at once.
+ *
+ * The server retains hundreds of records, and a reconnect storm can fill that
+ * history in seconds; rendering all of it produced a page tens of thousands of
+ * pixels tall. The recent tail is what the lab is about, so older entries are
+ * summarised rather than drawn.
+ */
+const VISIBLE_LIMIT = 25;
+
 /** Props for {@link EvictionTimeline}. */
 export interface EvictionTimelineProps {
   readonly timeline: readonly EvictionTimelineEntry[];
@@ -28,9 +38,17 @@ export function EvictionTimeline({ timeline }: EvictionTimelineProps) {
     );
   }
 
+  const hiddenCount = Math.max(0, timeline.length - VISIBLE_LIMIT);
+  const visible = timeline.slice(-VISIBLE_LIMIT);
+
   return (
     <ol className="flex flex-col gap-2">
-      {timeline.map((entry) => (
+      {hiddenCount > 0 ? (
+        <li className="px-1 pb-1 text-xs text-white/40">
+          {hiddenCount} older {hiddenCount === 1 ? 'connection' : 'connections'} not shown.
+        </li>
+      ) : null}
+      {visible.map((entry) => (
         <li
           key={entry.connectionId}
           className="flex items-center justify-between rounded-lg border border-(--glass-border) bg-(--glass-bg) p-3 text-xs"

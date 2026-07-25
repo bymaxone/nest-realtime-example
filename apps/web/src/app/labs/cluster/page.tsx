@@ -14,7 +14,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Code } from '@/components/ui/code';
 import { ApiError, domainApi, type ClusterStats } from '@/lib/api-client';
 
 /** The two cluster instance ports the compose profile fixes. */
@@ -89,21 +90,23 @@ export default function ClusterLabPage() {
   };
 
   return (
-    <Card className="p-5">
-      <CardTitle>Cluster lab</CardTitle>
-      <CardDescription>
-        Requires the `cluster` compose profile (two api instances behind nginx, sharing Redis
-        pub/sub). Each card polls its instance directly on its fixed port.
-      </CardDescription>
-      <div className="mt-4">
-        <Button onClick={() => void triggerFanOut()}>Trigger tenant fan-out</Button>
-        {status ? <p className="mt-2 text-xs text-white/50">{status}</p> : null}
-      </div>
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        {INSTANCE_PORTS.map((port) => (
-          <InstanceStatsCard key={port} port={port} stats={stats[port] ?? null} />
-        ))}
-      </div>
+    <Card>
+      <CardHeader accent>
+        <CardTitle>Cluster lab</CardTitle>
+        <CardDescription>
+          Requires the <Code>cluster</Code> compose profile (two api instances behind nginx, sharing
+          Redis pub/sub). Each card polls its instance directly on its fixed port.
+        </CardDescription>
+        <div className="mt-4">
+          <Button onClick={() => void triggerFanOut()}>Trigger tenant fan-out</Button>
+          {status ? <p className="mt-2 text-xs text-white/50">{status}</p> : null}
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {INSTANCE_PORTS.map((port) => (
+            <InstanceStatsCard key={port} port={port} stats={stats[port] ?? null} />
+          ))}
+        </div>
+      </CardHeader>
     </Card>
   );
 }

@@ -22,9 +22,14 @@ import { Providers } from './providers';
 
 import './globals.css';
 
-/** Next.js App Router page metadata: browser tab title and description. */
+/**
+ * Next.js App Router page metadata: browser tab title and description.
+ *
+ * The template wraps whatever title a route declares, so every tab is
+ * self-identifying while still carrying the app name.
+ */
 export const metadata: Metadata = {
-  title: 'nest-realtime-example',
+  title: { default: 'nest-realtime-example', template: '%s | nest-realtime-example' },
   description: 'Reference dashboard for @bymax-one/nest-realtime, built on the ./react hooks.',
 };
 

@@ -56,6 +56,11 @@ function post<T>(path: string, body?: unknown): Promise<T> {
   });
 }
 
+/** Issue a DELETE request. */
+function del<T>(path: string): Promise<T> {
+  return request<T>(path, { method: 'DELETE' });
+}
+
 /** Client-safe identity traits returned by the auth endpoints. */
 export interface SessionTraits {
   readonly userId: string;
@@ -146,6 +151,7 @@ export interface ConnectionMeta {
 export const connectionsApi = {
   list: (): Promise<{ instance: string; connections: readonly ConnectionMeta[] }> =>
     get('/connections'),
+  introspection: (): Promise<RealtimeWiringSnapshot> => get('/connections/introspection'),
   disconnect: (connectionId: string): Promise<{ disconnected: true }> =>
     post(`/connections/${encodeURIComponent(connectionId)}/disconnect`),
 };
@@ -217,6 +223,58 @@ export const presenceApi = {
   roster: (tenantId: string): Promise<{ tenantId: string; online: readonly string[] }> =>
     get(`/presence/${encodeURIComponent(tenantId)}`),
 };
+
+/** Offline-queue lab endpoints: enqueue for an absent user, peek, acknowledge. */
+export const offlineLabApi = {
+  emit: (userId: string, count: number): Promise<{ emitted: number }> =>
+    post('/labs/offline/emit', { userId, count }),
+  peek: (userId: string): Promise<{ userId: string; events: readonly OfflineQueuedView[] }> =>
+    get(`/labs/offline/peek?userId=${encodeURIComponent(userId)}`),
+  acknowledge: (upToId: string): Promise<{ acknowledged: true }> =>
+    post('/labs/offline/ack', { upToId }),
+};
+
+/** How many times one user's credentials were actually revalidated. */
+export interface RevalidationCount {
+  readonly userId: string;
+  readonly revalidations: number;
+}
+
+/** Acknowledgement returned by a revocation change. */
+export interface RevocationAck {
+  readonly userId: string;
+  readonly revoked: boolean;
+}
+
+/** Reauthentication lab endpoints: the revocation switch and the revalidation counters. */
+export const reauthLabApi = {
+  stats: (): Promise<{ revalidations: readonly RevalidationCount[] }> => get('/labs/reauth/stats'),
+  revoke: (userId: string): Promise<RevocationAck> =>
+    post(`/auth/revoke/${encodeURIComponent(userId)}`),
+  restore: (userId: string): Promise<RevocationAck> =>
+    del(`/auth/revoke/${encodeURIComponent(userId)}`),
+};
+
+/** The realtime wiring the library resolved at boot, as reported by the api. */
+export interface RealtimeWiringSnapshot {
+  readonly instanceId: string;
+  readonly transport: string;
+  readonly transportKind: string;
+  readonly sse: {
+    readonly endpoint: string;
+    readonly heartbeatMs: number;
+    readonly replayBufferSize: number;
+    readonly maxConnectionsPerUser: number;
+    readonly emitConnectionEvent: boolean;
+  } | null;
+  readonly websocket?: Record<string, unknown> | null;
+  readonly providers: {
+    readonly authenticator: string | null;
+    readonly hooks: string | null;
+    readonly pubsub: string | null;
+    readonly presence: string | null;
+  };
+}
 
 /** Resource-room membership endpoints backing the incident chat. */
 export const roomsApi = {

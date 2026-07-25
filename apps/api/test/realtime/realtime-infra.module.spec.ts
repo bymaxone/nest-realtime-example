@@ -59,14 +59,16 @@ describe('RealtimeInfraModule', () => {
    * Memory driver wiring.
    *
    * The default memory driver must leave both pub/sub tokens undefined so the
-   * library uses its InMemoryPubSub and the boot needs no live Redis.
+   * library uses its InMemoryPubSub and the boot needs no cross-instance bus.
+   * Presence is deliberately not on that gate: a single instance still wants a
+   * truthful roster across a user's own tabs.
    */
-  it('leaves the pub/sub and presence tokens undefined under the memory driver', async () => {
+  it('leaves the pub/sub tokens undefined under the memory driver', async () => {
     const moduleRef = await compile(buildTestConfig({ pubsubDriver: 'memory' }));
 
     expect(moduleRef.get(REALTIME_PUBSUB, { optional: true })).toBeUndefined();
     expect(moduleRef.get(REALTIME_PUBSUB_BUS, { optional: true })).toBeUndefined();
-    expect(moduleRef.get(REALTIME_PRESENCE, { optional: true })).toBeUndefined();
+    expect(moduleRef.get(REALTIME_PRESENCE, { optional: true })).toBeDefined();
 
     await moduleRef.close();
   });

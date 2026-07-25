@@ -5,11 +5,3 @@ packages:
 # to resolve TypeScript path aliases; its postinstall script is trusted and required.
 onlyBuiltDependencies:
   - unrs-resolver
-
-# The vendored @bymax-one/nest-realtime 0.1.0 tarball is built with esbuild, which
-# emits no decorator metadata, so the library's dynamic SSE controller cannot inject
-# its handler and every SSE request fails at runtime. This patch adds the explicit
-# @Inject the compiled output needs, matching how every other library provider is
-# wired. Remove it once an upstream build that ships decorator metadata is vendored.
-patchedDependencies:
-  '@bymax-one/nest-realtime@0.1.0': patches/@bymax-one__nest-realtime@0.1.0.patch

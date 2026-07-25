@@ -12,10 +12,18 @@
 import { useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input, Label } from '@/components/ui/input';
 import { ApiError, type AcceptedAck } from '@/lib/api-client';
 import { emitFormSchema, parseEmitPayload } from '@/lib/emit-schema';
+import { cn } from '@/lib/utils';
 
 /** Props for {@link EmitCard}. */
 export interface EmitCardProps {
@@ -37,6 +45,22 @@ export interface EmitCardProps {
 /** Feedback banner shown after a submit attempt succeeds or fails. */
 type Feedback = { readonly tone: 'success' | 'error'; readonly message: string };
 
+/**
+ * Derive a valid HTML `id` prefix from a card title.
+ *
+ * Titles are prose ("Emit to user"), and an `id` may not contain whitespace, so
+ * interpolating one directly produced ids that no selector could address.
+ *
+ * @param title - The card title.
+ * @returns A lowercase, hyphenated prefix safe to use in `id` and `htmlFor`.
+ */
+function fieldPrefix(title: string): string {
+  return title
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/gu, '-')
+    .replaceAll(/(^-|-$)/gu, '');
+}
+
 /** The optional target field, rendered only for scopes that have one (not broadcast). */
 function TargetField({
   title,
@@ -54,9 +78,9 @@ function TargetField({
   if (!targetLabel) return null;
   return (
     <div>
-      <Label htmlFor={`${title}-target`}>{targetLabel}</Label>
+      <Label htmlFor={`${fieldPrefix(title)}-target`}>{targetLabel}</Label>
       <Input
-        id={`${title}-target`}
+        id={`${fieldPrefix(title)}-target`}
         value={target}
         onChange={(e) => setTarget(e.target.value)}
         placeholder={targetPlaceholder}
@@ -78,9 +102,9 @@ function PayloadField({
 }) {
   return (
     <div>
-      <Label htmlFor={`${title}-data`}>Payload (JSON)</Label>
+      <Label htmlFor={`${fieldPrefix(title)}-data`}>Payload (JSON)</Label>
       <textarea
-        id={`${title}-data`}
+        id={`${fieldPrefix(title)}-data`}
         value={dataText}
         onChange={(e) => setDataText(e.target.value)}
         rows={3}
@@ -90,7 +114,14 @@ function PayloadField({
   );
 }
 
-/** The submit button plus the success/error feedback line below it. */
+/**
+ * The submit button plus the success/error feedback line below it.
+ *
+ * Lives in the card footer, which the form pins to the bottom of the stretched
+ * card, so the Emit buttons of a grid row line up even when one scope has one
+ * field fewer. The feedback line always occupies its height so a result never
+ * shifts the layout.
+ */
 function SubmitRow({
   isPending,
   feedback,
@@ -103,22 +134,21 @@ function SubmitRow({
       <Button type="submit" disabled={isPending}>
         Emit
       </Button>
-      {feedback ? (
-        <p
-          className={
-            feedback.tone === 'success'
-              ? 'text-xs text-(--color-success)'
-              : 'text-xs text-(--color-danger)'
-          }
-        >
-          {feedback.message}
-        </p>
-      ) : null}
+      <p
+        aria-live="polite"
+        className={cn(
+          'min-h-4 text-xs',
+          feedback?.tone === 'success' && 'text-(--color-success)',
+          feedback?.tone === 'error' && 'text-(--color-danger)',
+        )}
+      >
+        {feedback?.message ?? ''}
+      </p>
     </>
   );
 }
 
-/** The target/event/payload fields plus the submit button and feedback line. */
+/** The target, event-name and payload fields of one emit scope. */
 function EmitCardFields({
   title,
   targetLabel,
@@ -129,8 +159,6 @@ function EmitCardFields({
   setEvent,
   dataText,
   setDataText,
-  isPending,
-  feedback,
 }: {
   readonly title: string;
   readonly targetLabel: string | undefined;
@@ -141,8 +169,6 @@ function EmitCardFields({
   readonly setEvent: (value: string) => void;
   readonly dataText: string;
   readonly setDataText: (value: string) => void;
-  readonly isPending: boolean;
-  readonly feedback: Feedback | null;
 }) {
   return (
     <>
@@ -154,9 +180,9 @@ function EmitCardFields({
         setTarget={setTarget}
       />
       <div>
-        <Label htmlFor={`${title}-event`}>Event name</Label>
+        <Label htmlFor={`${fieldPrefix(title)}-event`}>Event name</Label>
         <Input
-          id={`${title}-event`}
+          id={`${fieldPrefix(title)}-event`}
           value={event}
           onChange={(e) => setEvent(e.target.value)}
           placeholder="incident.updated"
@@ -164,7 +190,6 @@ function EmitCardFields({
         />
       </div>
       <PayloadField title={title} dataText={dataText} setDataText={setDataText} />
-      <SubmitRow isPending={isPending} feedback={feedback} />
     </>
   );
 }
@@ -182,10 +207,7 @@ async function submitEmit(
   }
   try {
     await onSubmit(target, parsed.data.event, parseEmitPayload(parsed.data.dataText));
-    return {
-      tone: 'success',
-      message: 'Accepted (local echo, no server round trip needed to confirm)',
-    };
+    return { tone: 'success', message: 'Accepted by the api; watch the live feed for delivery.' };
   } catch (err) {
     return { tone: 'error', message: err instanceof ApiError ? err.message : 'Emit failed' };
   }
@@ -216,23 +238,31 @@ export function EmitCard({
   };
 
   return (
-    <Card className="p-5">
-      <CardTitle>{title}</CardTitle>
-      <CardDescription>{description}</CardDescription>
-      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
-        <EmitCardFields
-          title={title}
-          targetLabel={targetLabel}
-          targetPlaceholder={targetPlaceholder}
-          target={target}
-          setTarget={setTarget}
-          event={event}
-          setEvent={setEvent}
-          dataText={dataText}
-          setDataText={setDataText}
-          isPending={isPending}
-          feedback={feedback}
-        />
+    // The card stretches to its grid row; making it a column with a growing form
+    // is what keeps the field rows and the Emit buttons aligned across the row,
+    // whatever length each scope's description happens to be.
+    <Card className="flex flex-col">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="min-h-10">{description}</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+        <CardContent className="flex flex-col gap-3">
+          <EmitCardFields
+            title={title}
+            targetLabel={targetLabel}
+            targetPlaceholder={targetPlaceholder}
+            target={target}
+            setTarget={setTarget}
+            event={event}
+            setEvent={setEvent}
+            dataText={dataText}
+            setDataText={setDataText}
+          />
+        </CardContent>
+        <CardFooter className="mt-auto flex-col items-stretch gap-2">
+          <SubmitRow isPending={isPending} feedback={feedback} />
+        </CardFooter>
       </form>
     </Card>
   );

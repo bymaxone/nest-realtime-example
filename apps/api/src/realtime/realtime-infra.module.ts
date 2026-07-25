@@ -60,7 +60,7 @@ function createCountingBus(
     {
       provide: REALTIME_PRESENCE,
       useFactory: createPresenceStorage,
-      inject: [APP_CONFIG, REDIS_CLIENT],
+      inject: [REDIS_CLIENT, APP_CONFIG],
     },
   ],
   exports: [REALTIME_PUBSUB, REALTIME_PUBSUB_BUS, REALTIME_PRESENCE, ClusterStatsService],

@@ -14,8 +14,10 @@ import { useRealtimeContext } from '@bymax-one/nest-realtime/react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { EvictionTimeline } from '@/components/connections/eviction-timeline';
+import { WiringSnapshot } from '@/components/connections/wiring-snapshot';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Code } from '@/components/ui/code';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
   ApiError,
@@ -23,6 +25,7 @@ import {
   evictionLabApi,
   type ConnectionMeta,
   type EvictionTimelineEntry,
+  type RealtimeWiringSnapshot,
 } from '@/lib/api-client';
 import { useSession } from '@/lib/session-context';
 
@@ -34,6 +37,7 @@ interface ConnectionsRegistryState {
   readonly connections: readonly ConnectionMeta[];
   readonly instance: string | null;
   readonly timeline: readonly EvictionTimelineEntry[];
+  readonly wiring: RealtimeWiringSnapshot | null;
   readonly error: string | null;
   readonly disconnect: (connectionId: string) => void;
 }
@@ -64,8 +68,17 @@ function useConnectionsRegistry(): ConnectionsRegistryState {
   const { lastEvent } = useRealtimeContext();
   const [connections, setConnections] = useState<readonly ConnectionMeta[]>([]);
   const [instance, setInstance] = useState<string | null>(null);
+  const [wiring, setWiring] = useState<RealtimeWiringSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [timeline, loadTimeline] = useEvictionTimeline(traits?.userId);
+
+  useEffect(() => {
+    connectionsApi
+      .introspection()
+      .then(setWiring)
+      // Non-admin sessions cannot read the wiring; the card shows its own notice.
+      .catch(() => setWiring(null));
+  }, []);
 
   const loadConnections = useCallback(async (): Promise<void> => {
     try {
@@ -100,7 +113,7 @@ function useConnectionsRegistry(): ConnectionsRegistryState {
       );
   };
 
-  return { connections, instance, timeline, error, disconnect };
+  return { connections, instance, timeline, wiring, error, disconnect };
 }
 
 /** One connection row with an inline disconnect confirmation. */
@@ -168,28 +181,47 @@ function ConnectionsList({
 
 /** Connections registry, kill switch, and the FIFO-eviction visualizer. */
 export default function ConnectionsPage() {
-  const { connections, instance, timeline, error, disconnect } = useConnectionsRegistry();
+  const { connections, instance, timeline, wiring, error, disconnect } = useConnectionsRegistry();
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="p-5">
-        <CardTitle>Connections{instance ? ` on ${instance}` : ''}</CardTitle>
-        <CardDescription>
-          Open a second tab (or lower `REALTIME_MAX_CONNECTIONS_PER_USER`) to watch the oldest
-          connection evict as a new one is admitted.
-        </CardDescription>
-        {error ? <p className="mt-3 text-xs text-(--color-danger)">{error}</p> : null}
-        <div className="mt-4">
-          <ConnectionsList connections={connections} onDisconnect={disconnect} />
-        </div>
+      <Card>
+        <CardHeader accent>
+          <CardTitle>Connections{instance ? ` on ${instance}` : ''}</CardTitle>
+          <CardDescription>
+            Open a second tab (or lower <Code>REALTIME_MAX_CONNECTIONS_PER_USER</Code>) to watch the
+            oldest connection evict as a new one is admitted.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          {error ? <p className="text-xs text-(--color-danger)">{error}</p> : null}
+          <div>
+            <ConnectionsList connections={connections} onDisconnect={disconnect} />
+          </div>
+        </CardContent>
       </Card>
 
-      <Card className="p-5">
-        <CardTitle>Eviction timeline</CardTitle>
-        <CardDescription>Your own connections, oldest first.</CardDescription>
-        <div className="mt-4">
-          <EvictionTimeline timeline={timeline} />
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Eviction timeline</CardTitle>
+          <CardDescription>Your own connections, oldest first.</CardDescription>
+          <div className="mt-4">
+            <EvictionTimeline timeline={timeline} />
+          </div>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Resolved wiring</CardTitle>
+          <CardDescription>
+            What the library actually resolved from the options this app handed{' '}
+            <Code>forRootAsync</Code>, read back through its exported DI tokens.
+          </CardDescription>
+          <div className="mt-4">
+            <WiringSnapshot snapshot={wiring} />
+          </div>
+        </CardHeader>
       </Card>
     </div>
   );

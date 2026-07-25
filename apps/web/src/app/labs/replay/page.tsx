@@ -16,7 +16,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { ReplayDiffViewer } from '@/components/realtime/replay-diff-viewer';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Code } from '@/components/ui/code';
 import { Input, Label } from '@/components/ui/input';
 import { ApiError, replayLabApi, type ReplayTimelineView } from '@/lib/api-client';
 import { tagReplayRanges, type ReplayDiffRow } from '@/lib/replay-diff';
@@ -148,24 +149,30 @@ export default function ReplayLabPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="p-5">
-        <CardTitle>Replay lab</CardTitle>
-        <CardDescription>
-          Buffer size is configured small so the 11th event evicts the oldest; drop force-closes the
-          stream so the reconnect replays from `Last-Event-ID`.
-        </CardDescription>
-        <BurstControls {...lab} />
-        {lab.status ? <p className="mt-3 text-xs text-white/50">{lab.status}</p> : null}
+      <Card>
+        <CardHeader accent>
+          <CardTitle>Replay lab</CardTitle>
+          <CardDescription>
+            Buffer size is configured small so the 11th event evicts the oldest; drop force-closes
+            the stream so the reconnect replays from <Code>Last-Event-ID</Code>.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <BurstControls {...lab} />
+          {lab.status ? <p className="text-xs text-white/50">{lab.status}</p> : null}
+        </CardContent>
       </Card>
 
-      <Card className="p-5">
-        <CardTitle>Recovery diff</CardTitle>
-        <CardDescription>
-          Each emitted sequence tagged live / buffer replay / queue replay / gap.
-        </CardDescription>
-        <div className="mt-4">
-          <ReplayDiffViewer rows={lab.rows} />
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recovery diff</CardTitle>
+          <CardDescription>
+            Each emitted sequence tagged live / buffer replay / queue replay / gap.
+          </CardDescription>
+          <div className="mt-4">
+            <ReplayDiffViewer rows={lab.rows} />
+          </div>
+        </CardHeader>
       </Card>
     </div>
   );
