@@ -80,12 +80,21 @@ function useOfflineLab(): OfflineLabState {
   const report = (err: unknown, fallback: string): void =>
     setStatus(err instanceof ApiError ? err.message : fallback);
 
+  const isAdmin = traits?.roles.includes('admin') ?? false;
+
+  // The peek endpoint is admin-only, and this runs unprompted on mount and on
+  // every target change. Firing it for a session that cannot use it would raise
+  // an error banner contradicting the notice the page already shows.
   const peek = useCallback((): void => {
+    if (!isAdmin) {
+      setQueued([]);
+      return;
+    }
     offlineLabApi
       .peek(targetUserId)
       .then((result) => setQueued(result.events))
       .catch((err: unknown) => report(err, 'Failed to read the queue'));
-  }, [targetUserId]);
+  }, [targetUserId, isAdmin]);
 
   useEffect(() => peek(), [peek]);
 
@@ -123,7 +132,7 @@ function useOfflineLab(): OfflineLabState {
     queued,
     newestQueuedId: queued[queued.length - 1]?.id,
     status,
-    isAdmin: traits?.roles.includes('admin') ?? false,
+    isAdmin,
     enqueue,
     peek,
     drain,

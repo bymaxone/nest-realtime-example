@@ -72,13 +72,18 @@ function useConnectionsRegistry(): ConnectionsRegistryState {
   const [error, setError] = useState<string | null>(null);
   const [timeline, loadTimeline] = useEvictionTimeline(traits?.userId);
 
+  // Tied to the session rather than to mount alone: the first paint can happen
+  // before the session cookie has been exchanged for traits, and a read issued
+  // then is refused. Retrying once traits arrive keeps the card from staying
+  // empty for the rest of the page's life after a normal login.
   useEffect(() => {
+    if (!traits) return;
     connectionsApi
       .introspection()
       .then(setWiring)
       // Non-admin sessions cannot read the wiring; the card shows its own notice.
       .catch(() => setWiring(null));
-  }, []);
+  }, [traits]);
 
   const loadConnections = useCallback(async (): Promise<void> => {
     try {

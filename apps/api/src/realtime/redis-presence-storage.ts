@@ -167,7 +167,35 @@ export class RedisPresenceStorage implements IPresenceStorage {
     transaction.scard(this.userKey(userId));
     const results = await transaction.exec();
     throwOnTransactionError(results);
+    if (results === null) await this.recordConnection(userId, connectionId, tenantId);
     return this.liveCount(results, userId);
+  }
+
+  /**
+   * Write a connection into presence without a transaction.
+   *
+   * Reached when the `MULTI` was discarded and ran none of its queued writes.
+   * Letting that pass would drop the connection from presence entirely — the
+   * user would be absent from the roster while holding a live stream, and the
+   * ownership set would not list it either, so not even the startup reclaim
+   * would know about it. Every command is idempotent, so reissuing them reaches
+   * the state the transaction would have produced.
+   *
+   * @param userId - The connecting user.
+   * @param connectionId - The connection that came online.
+   * @param tenantId - The user's tenant, when the connection carries one.
+   */
+  private async recordConnection(
+    userId: string,
+    connectionId: string,
+    tenantId?: string,
+  ): Promise<void> {
+    await this.client.sadd(this.userKey(userId), connectionId);
+    await this.client.sadd(GLOBAL_ONLINE_KEY, userId);
+    await this.client.sadd(this.instanceKey(), `${userId}${OWNER_SEPARATOR}${connectionId}`);
+    if (tenantId === undefined) return;
+    await this.client.set(this.userTenantKey(userId), tenantId);
+    await this.client.sadd(this.tenantKey(tenantId), userId);
   }
 
   /**

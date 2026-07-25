@@ -14,7 +14,7 @@
 'use client';
 
 import { usePresence, useRealtimeContext } from '@bymax-one/nest-realtime/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Chip } from '@/components/ui/chip';
@@ -30,18 +30,25 @@ export default function PresencePage() {
   const { lastEvent } = useRealtimeContext();
   const [roster, setRoster] = useState<readonly string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // A presence transition can land while the mount read is still in flight, so
+  // each read is numbered and only the newest may write. Without it a slow early
+  // response could resolve last and restore a roster the transition superseded.
+  const latestRead = useRef(0);
 
   const load = useCallback((): void => {
     if (!traits) return;
+    const read = (latestRead.current += 1);
     presenceApi
       .roster(traits.tenantId)
       .then((result) => {
+        if (read !== latestRead.current) return;
         setRoster([...result.online].sort());
         setError(null);
       })
-      .catch((err: unknown) =>
-        setError(err instanceof ApiError ? err.message : 'Failed to load the roster'),
-      );
+      .catch((err: unknown) => {
+        if (read !== latestRead.current) return;
+        setError(err instanceof ApiError ? err.message : 'Failed to load the roster');
+      });
   }, [traits]);
 
   useEffect(() => load(), [load]);

@@ -162,17 +162,40 @@ describe('RedisPresenceStorage', () => {
   });
 
   /**
-   * Null transaction result on connect.
+   * Discarded connect transaction.
    *
-   * ioredis can resolve `multi().exec()` to `null`, which carries no trailing
-   * `scard`. The count must then be re-read from Redis rather than defaulted,
-   * because a wrong count would announce a transition that did not happen.
+   * A `MULTI` resolving to `null` ran none of its queued writes, which would drop
+   * the connection from presence entirely: the user would be missing from the
+   * roster while holding a live stream, and absent from the ownership set too, so
+   * the startup reclaim could not recover it either. The writes are idempotent and
+   * must be reissued, and the count then re-read so the arrival is still reported.
    */
-  it('re-reads the count when a connect transaction result is null', async () => {
+  it('still records the connection when the connect transaction is discarded', async () => {
     redis.nullNextTransaction();
 
-    expect(await presence.addConnection('ana@acme', 'c1', 'acme')).toBe(0);
-    await expect(presence.setOnline('ana@acme', 'c2', 'acme')).resolves.toBeUndefined();
+    expect(await presence.addConnection('ana@acme', 'c1', 'acme')).toBe(1);
+
+    expect(await presence.isOnline('ana@acme')).toBe(true);
+    expect(await presence.listOnlineByTenant('acme')).toEqual(['ana@acme']);
+    expect(await presence.countOnline()).toBe(1);
+    // The ownership entry is written too, so a reclaim can still release it.
+    expect(await presence.reclaimOwnConnections()).toBe(1);
+  });
+
+  /**
+   * Discarded connect transaction for a tenantless connection.
+   *
+   * The direct reissue must skip the tenant index exactly as the transaction
+   * would have, so a connection carrying no tenant is recorded without touching
+   * a tenant key it never belonged to.
+   */
+  it('records a tenantless connection when the connect transaction is discarded', async () => {
+    redis.nullNextTransaction();
+
+    expect(await presence.addConnection('ghost', 'c1')).toBe(1);
+
+    expect(await presence.isOnline('ghost')).toBe(true);
+    expect(await presence.countOnline()).toBe(1);
   });
 
   /**
