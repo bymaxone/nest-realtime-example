@@ -236,17 +236,42 @@ describe('RedisPresenceStorage', () => {
   });
 
   /**
-   * Null transaction result on disconnect.
+   * Discarded disconnect transaction.
    *
-   * The same fallback on the removal path: with no trailing `scard` the remaining
-   * count is re-read, so a still-connected user is not reported as departed.
+   * A `MULTI` resolving to `null` ran none of its removals, which would keep a
+   * closed stream in the user's set and pin them online until this instance
+   * restarts. The removals are idempotent and must be reissued before the count
+   * is read, so the remaining tally reflects the disconnect that just happened.
    */
-  it('re-reads the count when a disconnect transaction result is null', async () => {
+  it('still releases the connection when the disconnect transaction is discarded', async () => {
     await presence.setOnline('ana@acme', 'c1', 'acme');
     await presence.setOnline('ana@acme', 'c2', 'acme');
     redis.nullNextTransaction();
 
-    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(2);
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(1);
+
+    // c1 is gone while c2 keeps the user online, and the ownership set tracks it.
+    expect(await presence.isConnectionOwnedByUser('ana@acme', 'c1')).toBe(false);
+    expect(await presence.isConnectionOwnedByUser('ana@acme', 'c2')).toBe(true);
+    expect(await presence.reclaimOwnConnections()).toBe(1);
+  });
+
+  /**
+   * Discarded disconnect of a user's last connection.
+   *
+   * The reissued removal must also let the departure be recognised: once it lands,
+   * the count is zero and the index cleanup runs, so a discarded transaction does
+   * not leave the user in the roster.
+   */
+  it('recognises the departure when the last disconnect is discarded', async () => {
+    await presence.setOnline('ana@acme', 'c1', 'acme');
+    redis.nullNextTransaction();
+
+    expect(await presence.removeConnection('ana@acme', 'c1')).toBe(0);
+
+    expect(await presence.isOnline('ana@acme')).toBe(false);
+    expect(await presence.listOnlineByTenant('acme')).toEqual([]);
+    expect(await presence.countOnline()).toBe(0);
   });
 
   /**

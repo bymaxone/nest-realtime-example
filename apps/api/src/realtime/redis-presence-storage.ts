@@ -231,11 +231,30 @@ export class RedisPresenceStorage implements IPresenceStorage {
     transaction.scard(this.userKey(userId));
     const results = await transaction.exec();
     throwOnTransactionError(results);
+    // Reissued before the count is read, so the re-read reflects the removal.
+    if (results === null) await this.releaseConnection(userId, connectionId);
     const remaining = await this.liveCount(results, userId);
     if (remaining > 0) return remaining;
 
     await this.clearUserIndexes(userId);
     return 0;
+  }
+
+  /**
+   * Remove a connection from presence without a transaction.
+   *
+   * Reached when the `MULTI` was discarded and ran none of its queued removals.
+   * Letting that pass would keep a closed stream in the user's set, pinning them
+   * online until this instance restarts and reclaims it. Both commands are
+   * idempotent, so reissuing them reaches the state the transaction would have
+   * produced.
+   *
+   * @param userId - The disconnecting user.
+   * @param connectionId - The connection that went offline.
+   */
+  private async releaseConnection(userId: string, connectionId: string): Promise<void> {
+    await this.client.srem(this.userKey(userId), connectionId);
+    await this.client.srem(this.instanceKey(), `${userId}${OWNER_SEPARATOR}${connectionId}`);
   }
 
   /**
