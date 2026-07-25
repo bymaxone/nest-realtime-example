@@ -214,14 +214,19 @@ describe('RedisPresenceStorage', () => {
    *
    * The ownership set lives in a shared Redis an operator can poke at; a member
    * that is not a user/connection pair must be skipped rather than mis-parsed into
-   * a `setOffline` for the wrong key.
+   * a `setOffline` for the wrong key. It must also stay out of the count, which
+   * reports released connections in a startup log line, and it must still be
+   * dropped along with the rest of the set.
    */
   it('skips an ownership entry that is not a user and connection pair', async () => {
     await presence.setOnline('ana@acme', 'c1', 'acme');
     await redis.sadd('presence:instance:app-a', 'hand-edited-garbage');
 
-    expect(await presence.reclaimOwnConnections()).toBe(2);
+    expect(await presence.reclaimOwnConnections()).toBe(1);
 
     expect(await presence.isOnline('ana@acme')).toBe(false);
+    // The whole ownership set is cleared, garbage included, so a second boot
+    // finds nothing left to release.
+    expect(await presence.reclaimOwnConnections()).toBe(0);
   });
 });

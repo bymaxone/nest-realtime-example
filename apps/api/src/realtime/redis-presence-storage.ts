@@ -222,17 +222,23 @@ export class RedisPresenceStorage implements IPresenceStorage {
    * connection ids in the user sets, which would pin those users online forever;
    * this removes exactly the ones this instance owned, then clears its own set.
    *
+   * A member that is not a user/connection pair is dropped with the rest of the
+   * set but never counted: the return value drives a startup log line, so it has
+   * to mean "connections actually released", not "members seen".
+   *
    * @returns The number of stale connections released.
    */
   async reclaimOwnConnections(): Promise<number> {
     const owned = await this.client.smembers(this.instanceKey());
+    let released = 0;
     for (const member of owned) {
       const separator = member.indexOf(OWNER_SEPARATOR);
       if (separator === -1) continue;
       await this.setOffline(member.slice(0, separator), member.slice(separator + 1));
+      released += 1;
     }
     await this.client.del(this.instanceKey());
-    return owned.length;
+    return released;
   }
 
   /**
