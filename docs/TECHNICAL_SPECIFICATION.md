@@ -548,7 +548,7 @@ nginx rules (the honest part):
 The repository is **private today and will become public**. CI is written once, with public-only features gated, never deleted:
 
 - `ci.yml` (always on): install, typecheck, lint, unit (both apps, sequential steps), build, E2E job with a `redis:7` service container (cluster E2E behind a manual/`workflow_dispatch` trigger until runners prove stable).
-- `codeql.yml` and `scorecard.yml`: full workflows committed from day one, gated with a repository-visibility condition (`if: ${{ !github.event.repository.private }}`) so they activate automatically when the repo flips public. No secrets in code; demo values only.
+- `codeql.yml` and `scorecard.yml`: committed from day one and gated on repository visibility, so they activate automatically when the repo flips public. CodeQL calls the org's reusable analysis, which resolves visibility through the API and therefore also holds on `schedule`; Scorecard uses `if: ${{ !github.event.repository.private }}`. No secrets in code; demo values only.
 - Every phase merges through a PR with GitHub Copilot review requested and all findings addressed; CI green is a merge precondition from the very first PR.
 
 ## 20 · Out of Scope

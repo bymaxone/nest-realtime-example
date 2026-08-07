@@ -100,9 +100,12 @@ compose stack at a time (`docker compose down` between profile switches -
 ports 3001/3002/8080/6379 collide).
 
 **Expected-skip CI checks**: `codeql.yml` and `scorecard.yml` are committed
-from phase 00 but gated on `if: ${{ !github.event.repository.private }}`.
-While the repo is private they report **skipping** and count as pass, never
-as a failure. The cluster E2E job is behind `workflow_dispatch` until stable
+from phase 00 and are inert while the repo is private, but they gate
+differently. `codeql.yml` calls the org's reusable analysis, whose
+`codeql / Repository visibility` job **runs and passes** on every trigger while
+`codeql / Analyze (<language>)` skips; `scorecard.yml` gates on
+`if: ${{ !github.event.repository.private }}` and skips outright. A skipped job
+counts as pass, never as a failure. The cluster E2E job is behind `workflow_dispatch` until stable
 (a non-run is not a failure).
 
 ## Invariant greps
