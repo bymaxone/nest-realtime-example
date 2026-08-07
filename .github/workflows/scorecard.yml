@@ -11,6 +11,28 @@ on:
 permissions: read-all
 
 jobs:
+  visibility:
+    name: Repository visibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      public: ${{ steps.check.outputs.public }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          visibility=$(gh api "repos/$REPO" --jq .visibility)
+          echo "visibility: $visibility"
+          if [ "$visibility" = "public" ]; then
+            echo "public=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "public=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Scorecard is skipped on a $visibility repository."
+          fi
+
   analysis:
     name: Scorecard analysis
     runs-on: ubuntu-latest
@@ -18,8 +40,9 @@ jobs:
     # publishes results to the public scorecard.dev registry, which has no
     # meaning for a private repository. This workflow stays dormant while the
     # repository is private and activates automatically the moment it flips
-    # public, without any edit here.
-    if: ${{ !github.event.repository.private }}
+    # public, which the visibility job below detects on any trigger.
+    needs: visibility
+    if: needs.visibility.outputs.public == 'true'
     permissions:
       security-events: write
       id-token: write
@@ -33,7 +56,7 @@ jobs:
           persist-credentials: false
 
       - name: Run analysis
-        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
         with:
           results_file: results.sarif
           results_format: sarif
