@@ -19,10 +19,7 @@ jobs:
     # Declared on the calling job, which is the only place that reaches the
     # called workflow: a job that sets its own permissions replaces the
     # workflow-level set rather than intersecting with it, and a called
-    # workflow cannot be granted more than its caller holds. Leaving this
-    # block out and relying on a workflow-level `contents: read` is what
-    # made the first attempt fail to start: security-events: write, which
-    # uploading SARIF requires, was above the ceiling the job had inherited.
+    # workflow cannot be granted more than its caller holds.
     permissions:
       contents: read
       security-events: write
