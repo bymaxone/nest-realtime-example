@@ -39,7 +39,7 @@
     "@nestjs/testing": "^11.0.0",
     "@stryker-mutator/core": "^9",
     "@stryker-mutator/jest-runner": "^9",
-    "@swc/core": "^1.15.46",
+    "@swc/core": "^1.15.47",
     "@swc/jest": "^0.2.37",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
