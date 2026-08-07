@@ -1,39 +1,28 @@
+# CodeQL — thin caller of the org-wide reusable analysis (bymaxone/.github).
+#
+# The whole definition, including the public-repository gate that decides
+# whether scanning may run at all, lives in bymaxone/.github so the licensing
+# rule exists once rather than in every repository that copies it.
 name: CodeQL
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
   schedule:
     - cron: '17 3 * * 1'
 
-permissions:
-  contents: read
-
 jobs:
-  analyze:
-    name: analyze (javascript-typescript)
-    runs-on: ubuntu-latest
-    # CodeQL code scanning requires GitHub Advanced Security, which is billed
-    # per seat on private repositories but free on public ones. This workflow
-    # stays dormant while the repository is private and activates automatically
-    # the moment it flips public, without any edit here.
-    if: ${{ !github.event.repository.private }}
+  # Job id is the convention across the org: it prefixes the reported check,
+  # so every repo shows `codeql / Analyze (<language>)` under the same name.
+  codeql:
+    # Granted here, on the calling job, and not at the top of the file.
+    # Permissions can only be maintained or reduced down a reusable-workflow
+    # chain, so a top-level `contents: read` caps the ceiling and the called
+    # workflow asking for security-events: write — which uploading SARIF
+    # requires — fails the run before it starts.
     permissions:
-      actions: read
       contents: read
       security-events: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
-        with:
-          languages: javascript-typescript
-
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
-        with:
-          category: '/language:javascript-typescript'
+      actions: read
+    uses: bymaxone/.github/.github/workflows/codeql.yml@v1
