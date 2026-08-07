@@ -100,7 +100,7 @@ compose stack at a time (`docker compose down` between profile switches -
 ports 3001/3002/8080/6379 collide).
 
 **Expected-skip CI checks**: `codeql.yml` and `scorecard.yml` are committed
-from phase 00 and are inert while the repo is private, but they gate
+from phase 00 and produce no findings while the repo is private, but they gate
 differently. `codeql.yml` calls the org's reusable analysis, whose
 `codeql / Repository visibility` job **runs and passes** on every trigger while
 `codeql / Analyze (<language>)` skips; `scorecard.yml` gates on
