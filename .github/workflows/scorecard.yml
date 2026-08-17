@@ -11,6 +11,51 @@ on:
 permissions: read-all
 
 jobs:
+  visibility:
+    name: Repository visibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      public: ${{ steps.check.outputs.public }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # The assignment sits inside `if`, which `set -e` does not act on, so
+          # the retry works without disabling error checking for the rest of the
+          # step — a failed write to $GITHUB_OUTPUT must still fail the job.
+          visibility=""
+          for attempt in 1 2 3; do
+            if visibility=$(gh api "repos/$REPO" --jq .visibility 2>/dev/null); then
+              break
+            fi
+            visibility=""
+            if [ "$attempt" -lt 3 ]; then
+              sleep $(( attempt * 5 ))
+            fi
+          done
+
+          if [ -z "$visibility" ]; then
+            # Degraded rather than failed: a red workflow over a transient API
+            # error is noise, and the warning keeps it from being silent.
+            echo "::warning::Could not determine repository visibility after 3 attempts; treating it as non-public and skipping."
+            echo "public=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "visibility: $visibility"
+          if [ "$visibility" = "public" ]; then
+            echo "public=true" >> "$GITHUB_OUTPUT"
+          else
+            # Covers internal as well as private.
+            echo "public=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipped on a $visibility repository: uploading results needs a GitHub Code Security license, which is only free on public repositories."
+          fi
+
   analysis:
     name: Scorecard analysis
     runs-on: ubuntu-latest
@@ -18,8 +63,9 @@ jobs:
     # publishes results to the public scorecard.dev registry, which has no
     # meaning for a private repository. This workflow stays dormant while the
     # repository is private and activates automatically the moment it flips
-    # public, without any edit here.
-    if: ${{ !github.event.repository.private }}
+    # public, which the visibility job below detects on any trigger.
+    needs: visibility
+    if: ${{ needs.visibility.outputs.public == 'true' }}
     permissions:
       security-events: write
       id-token: write
@@ -28,12 +74,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Run analysis
-        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
         with:
           results_file: results.sarif
           results_format: sarif
@@ -47,6 +93,6 @@ jobs:
           retention-days: 5
 
       - name: Upload to code-scanning
-        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           sarif_file: results.sarif
