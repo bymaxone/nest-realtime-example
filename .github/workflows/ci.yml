@@ -32,15 +32,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           cache: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
 
@@ -103,15 +103,15 @@ jobs:
           --health-retries 5
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           cache: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
 
@@ -144,15 +144,15 @@ jobs:
           --health-retries 5
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           cache: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
 
@@ -177,15 +177,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           cache: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
 
@@ -203,3 +203,48 @@ jobs:
         run: pnpm run test:e2e:cluster:ws
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+
+  # Single check the org ruleset can require, in every repo, under one name.
+  #
+  # A required status check is matched by literal name, and this repo's jobs are
+  # named nothing like the next repo's — so there is no list of contexts that
+  # works org-wide. One aggregate per repo, always spelled `CI passed`, is what
+  # makes a single rule at the organisation level possible, and what makes every
+  # repository created from now on inherit the gate without being configured.
+  #
+  # `always()` is what makes this a gate rather than decoration: without it the
+  # job is skipped the moment a dependency fails, and a skipped check reports
+  # neutral — the pull request would look unblocked precisely when it is broken.
+  # `cancelled` is named explicitly for the same reason; a cancelled job is not
+  # a passing one, and a queue timeout produces exactly that.
+  #
+  # A skipped dependency is accepted on purpose: jobs here are conditional on the
+  # event, and failing on skip would break every push that legitimately runs a
+  # subset.
+  ci-pass:
+    name: CI passed
+    if: always()
+    needs: [ci, e2e, playwright, e2e-cluster]
+    runs-on: ubuntu-latest
+    # Once this is the required check, a hung runner holds every merge behind it
+    # for GitHub's default of six hours. The job is one comparison, so a short
+    # ceiling costs nothing and bounds that.
+    timeout-minutes: 5
+    steps:
+      # Printed on success as well as failure. Without it the check reports a bare
+      # red X and the reader has to open each dependency to find which one broke.
+      - name: Report the result of every dependency
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          {
+            echo "| Job | Result |"
+            echo "| --- | --- |"
+            echo "$NEEDS" | jq -r 'to_entries[] | "| \(.key) | \(.value.result) |"' | sort
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Named for what the condition does: `skipped` is deliberately not a failure
+      # here, so "did not succeed" would describe a stricter gate than this is.
+      - name: Fail when any dependency failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
